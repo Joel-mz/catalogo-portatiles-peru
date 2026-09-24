@@ -30,15 +30,6 @@
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .shop-shadow { box-shadow: 0 14px 36px rgba(25, 45, 91, .08); }
-        .shop-header-grid { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "brand" "search" "actions"; gap: 12px; padding: 16px; }
-        .shop-brand { grid-area: brand; }
-        .shop-search { grid-area: search; width: 100%; min-width: 0; }
-        .shop-header-actions { grid-area: actions; display: flex; min-width: 0; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; border-top: 1px solid #f1f5f9; padding-top: 12px; }
-        .shop-header-actions > a, .shop-header-actions > button { flex-shrink: 0; white-space: nowrap; }
-        @media (min-width: 1024px) {
-            .shop-header-grid { grid-template-columns: 230px minmax(260px, 1fr) 390px; grid-template-areas: "brand search actions"; align-items: center; gap: 12px; padding: 16px 28px; }
-            .shop-header-actions { justify-content: flex-end; gap: 10px; border-top: 0; padding-top: 0; }
-        }
     </style>
     @yield('head')
 </head>
@@ -58,26 +49,49 @@
     </div>
 
     <header class="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
-        <div class="shop-header-grid mx-auto max-w-[1440px]">
-            <div class="shop-brand flex w-fit items-center gap-3">
-                <a href="{{ auth()->check() ? route('dashboard') : route('login') }}" aria-label="{{ auth()->check() ? 'Abrir panel de administración' : 'Acceso de administrador' }}" title="{{ auth()->check() ? 'Abrir panel de administración' : 'Acceso de administrador' }}" class="focus-ring flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[{{ $primaryColor }}] to-[#713ee7] text-xl font-black italic text-white shadow-lg shadow-blue-900/20">{{ substr($storeName, 0, 1) }}</a>
-                <a href="{{ route('home') }}" aria-label="{{ $storeName }}, inicio" class="focus-ring leading-tight"><span class="block font-display text-base font-extrabold tracking-tight text-[#111c36] uppercase">{{ $storeName }}</span></a>
+        <div class="mx-auto max-w-[1440px] px-4 py-3 sm:px-7">
+            <!-- Top Row: Brand & Actions (Mobile) -->
+            <div class="flex items-center justify-between gap-4 lg:hidden">
+                <div class="flex items-center gap-3">
+                    <a href="{{ auth()->check() ? route('dashboard') : route('login') }}" class="focus-ring flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[{{ $primaryColor }}] to-[#713ee7] text-lg font-black italic text-white shadow-lg">{{ substr($storeName, 0, 1) }}</a>
+                    <a href="{{ route('home') }}" class="focus-ring leading-tight"><span class="block font-display text-sm font-extrabold tracking-tight text-[#111c36] uppercase">{{ $storeName }}</span></a>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" data-open-cart class="focus-ring relative inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700" aria-label="Abrir carrito">
+                        <i class="fa-solid fa-bag-shopping text-base"></i><span id="cart-count" class="flex h-5 min-w-5 items-center justify-center rounded-full bg-indigo-600 px-1 text-[10px] font-extrabold text-white">0</span>
+                    </button>
+                </div>
             </div>
 
-            <form action="{{ route('catalog') }}" method="GET" role="search" class="shop-search flex h-11 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 focus-within:border-[#536be2] focus-within:ring-4 focus-within:ring-indigo-100">
-                <label for="site-search" class="sr-only">Buscar productos</label>
-                <input id="site-search" type="search" name="q" value="{{ request('q') }}" placeholder="Busca productos, marcas y modelos..." class="min-w-0 flex-1 bg-transparent px-4 text-sm outline-none placeholder:text-slate-400">
-                <button type="submit" aria-label="Buscar" style="background-color: {{ $primaryColor }}" class="focus-ring flex w-12 items-center justify-center text-white"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></button>
-            </form>
+            <!-- Search Bar (Mobile & Desktop) & Desktop Layout -->
+            <div class="mt-3 flex flex-col gap-3 lg:mt-0 lg:flex-row lg:items-center lg:justify-between">
+                
+                <!-- Desktop Brand (Hidden on Mobile) -->
+                <div class="hidden lg:flex lg:w-[230px] lg:shrink-0 lg:items-center lg:gap-3">
+                    <a href="{{ auth()->check() ? route('dashboard') : route('login') }}" class="focus-ring flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[{{ $primaryColor }}] to-[#713ee7] text-xl font-black italic text-white shadow-lg">{{ substr($storeName, 0, 1) }}</a>
+                    <a href="{{ route('home') }}" class="focus-ring leading-tight"><span class="block font-display text-base font-extrabold tracking-tight text-[#111c36] uppercase">{{ $storeName }}</span></a>
+                </div>
 
-            <div class="shop-header-actions">
-                @auth
-                    <a href="{{ route('dashboard') }}" class="focus-ring flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-blue-700"><i class="fa-regular fa-user text-base"></i><span>Mi cuenta</span></a>
-                @endauth
-                <button type="button" data-open-cart class="focus-ring relative inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700" aria-label="Abrir carrito">
-                    <i class="fa-solid fa-bag-shopping text-base"></i><span class="hidden sm:inline">Carrito</span><span id="cart-count" class="flex h-5 min-w-5 items-center justify-center rounded-full bg-indigo-600 px-1 text-[10px] font-extrabold text-white">0</span>
-                </button>
-                <a href="https://wa.me/{{ $wpNum }}?text={{ urlencode('Hola, quisiera información sobre sus equipos.') }}" target="_blank" rel="noopener noreferrer" class="focus-ring inline-flex items-center gap-2 rounded-xl bg-[#25d366] px-4 py-2.5 text-xs font-bold text-white shadow-md shadow-emerald-600/15 hover:bg-[#1fb85a]"><i class="fa-brands fa-whatsapp text-base" aria-hidden="true"></i><span>Consultar</span></a>
+                <!-- Search Bar -->
+                <form action="{{ route('catalog') }}" method="GET" role="search" class="flex h-11 flex-1 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 focus-within:border-[#536be2] focus-within:ring-4 focus-within:ring-indigo-100 lg:max-w-2xl">
+                    <label for="site-search" class="sr-only">Buscar productos</label>
+                    <input id="site-search" type="search" name="q" value="{{ request('q') }}" placeholder="Busca productos, marcas y modelos..." class="min-w-0 flex-1 bg-transparent px-4 text-sm outline-none placeholder:text-slate-400">
+                    <button type="submit" aria-label="Buscar" style="background-color: {{ $primaryColor }}" class="focus-ring flex w-12 items-center justify-center text-white"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></button>
+                </form>
+
+                <!-- Actions (Desktop & Extra Mobile buttons) -->
+                <div class="flex items-center justify-between gap-2 lg:w-[390px] lg:shrink-0 lg:justify-end">
+                    @auth
+                        <a href="{{ route('dashboard') }}" class="focus-ring flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-blue-700 lg:flex"><i class="fa-regular fa-user text-base"></i><span class="hidden sm:inline">Mi cuenta</span></a>
+                    @endauth
+                    
+                    <!-- Desktop Cart (Hidden on Mobile since it's on Top Row) -->
+                    <button type="button" data-open-cart class="focus-ring relative hidden h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 lg:inline-flex" aria-label="Abrir carrito">
+                        <i class="fa-solid fa-bag-shopping text-base"></i><span>Carrito</span><span id="cart-count-desktop" class="flex h-5 min-w-5 items-center justify-center rounded-full bg-indigo-600 px-1 text-[10px] font-extrabold text-white">0</span>
+                    </button>
+
+                    <a href="https://wa.me/{{ $wpNum }}?text={{ urlencode('Hola, quisiera información sobre sus equipos.') }}" target="_blank" rel="noopener noreferrer" class="focus-ring inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#25d366] px-4 py-2.5 text-xs font-bold text-white shadow-md shadow-emerald-600/15 hover:bg-[#1fb85a] lg:w-auto"><i class="fa-brands fa-whatsapp text-base" aria-hidden="true"></i><span>Consultar</span></a>
+                </div>
             </div>
         </div>
         <nav aria-label="Navegación principal" class="border-t border-slate-100">
@@ -149,7 +163,7 @@
             const storageKey = 'mpc-shopping-cart';
             const dialog = document.getElementById('cart-dialog');
             const itemsContainer = document.getElementById('cart-items');
-            const countBadge = document.getElementById('cart-count');
+            const countBadges = document.querySelectorAll('#cart-count, #cart-count-desktop');
             const checkoutForm = document.getElementById('cart-checkout-form');
             const checkoutPanel = document.getElementById('cart-checkout');
             const emptyMessage = document.getElementById('cart-empty');
@@ -164,7 +178,7 @@
             const saveCart = () => localStorage.setItem(storageKey, JSON.stringify(cart));
             const renderCart = () => {
                 const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-                countBadge.textContent = itemCount;
+                countBadges.forEach(badge => badge.textContent = itemCount);
                 itemsContainer.innerHTML = cart.map((item) => `
                     <article class="flex gap-3 rounded-2xl border border-slate-200 p-3">
                         <div class="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-50">${item.image ? `<img src="${escapeHtml(item.image)}" alt="" class="h-full w-full object-contain">` : '<i class="fa-solid fa-laptop text-2xl text-indigo-400"></i>'}</div>

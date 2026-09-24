@@ -51,6 +51,7 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::get('imports', [ImportController::class, 'index'])->name('imports.index');
     Route::post('imports', [ImportController::class, 'store'])->name('imports.store');
     Route::get('imports/template', [ImportController::class, 'template'])->name('imports.template');
+    Route::get('imports/export', [ImportController::class, 'export'])->name('imports.export');
 
     Route::get('pdf', [PdfController::class, 'index'])->name('pdf.index');
     Route::post('pdf/generate', [PdfController::class, 'generate'])->name('pdf.generate');

@@ -13,7 +13,10 @@
                 <i class="fa-solid fa-file-pdf"></i> PDF Catálogo
             </a>
             <a href="{{ route('admin.imports.index') }}" class="px-3 py-2 bg-green-50 text-green-700 hover:bg-green-100 rounded-lg transition-colors text-xs font-bold border border-green-200 flex items-center gap-2">
-                <i class="fa-solid fa-file-excel"></i> Plantilla CSV
+                <i class="fa-solid fa-file-import"></i> Importar CSV
+            </a>
+            <a href="{{ route('admin.imports.export') }}" class="px-3 py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg transition-colors text-xs font-bold border border-blue-200 flex items-center gap-2">
+                <i class="fa-solid fa-file-export"></i> Exportar CSV
             </a>
             <button @click="openCreateModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center gap-2 text-sm font-bold">
                 <i class="fa-solid fa-plus"></i> Nuevo Producto
