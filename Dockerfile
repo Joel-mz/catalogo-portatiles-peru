@@ -38,6 +38,9 @@ RUN composer install --no-dev --optimize-autoloader
 # Instalar dependencias de Node.js y compilar el frontend (Vite/Tailwind)
 RUN npm install && npm run build
 
+# Crear archivo de base de datos SQLite vacío (ya que no se sube a GitHub)
+RUN touch /var/www/html/database/database.sqlite
+
 # Modificar Apache para que apunte a la carpeta "public" de Laravel
 RUN sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!/var/www/html/public!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
@@ -45,8 +48,8 @@ RUN sed -ri -e 's!/var/www/!/var/www/html/public!g' /etc/apache2/apache2.conf /e
 # Modificar Apache para que escuche en el puerto que Render asigne dinámicamente ($PORT)
 RUN sed -i 's/80/${PORT}/g' /etc/apache2/sites-available/000-default.conf /etc/apache2/ports.conf
 
-# Dar permisos a las carpetas que Laravel necesita modificar
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# Dar permisos a las carpetas que Laravel necesita modificar (incluyendo la base de datos)
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
 
 # Puerto por defecto (Render inyectará el suyo)
 ENV PORT=8000
