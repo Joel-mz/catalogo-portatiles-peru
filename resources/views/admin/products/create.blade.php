@@ -11,9 +11,17 @@
                 <input type="text" name="name" class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
             </div>
             
-            <div>
+            <div class="relative">
                 <label class="block text-sm font-medium text-slate-700">Código</label>
-                <input type="text" name="code" class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                <div class="mt-1 flex rounded-md shadow-sm">
+                    <input type="text" name="code" id="product_code" class="block w-full rounded-none rounded-l-md border-slate-300 focus:border-blue-500 focus:ring-blue-500" required>
+                    <button type="button" onclick="startScanner()" class="inline-flex items-center rounded-r-md border border-l-0 border-slate-300 bg-slate-50 px-3 text-sm text-slate-500 hover:bg-slate-100 focus:outline-none">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h4a1 1 0 010 2H5v3a1 1 0 01-2 0V4zm14-1a1 1 0 011 1v3a1 1 0 01-2 0V5h-3a1 1 0 010-2h4zM4 19a1 1 0 01-1-1v-3a1 1 0 012 0v3h3a1 1 0 010 2H5a1 1 0 01-1-1zm15 1a1 1 0 01-1-1h-3a1 1 0 010-2h4v-3a1 1 0 012 0v3a1 1 0 01-1 1h-1z"></path>
+                        </svg>
+                        Escanear
+                    </button>
+                </div>
             </div>
             
             <div>
@@ -104,3 +112,66 @@
     </form>
 </div>
 @endsection
+
+@push('scripts')
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<script>
+    let html5QrcodeScanner = null;
+
+    function startScanner() {
+        // Mostrar el modal
+        document.getElementById('scanner-modal').classList.remove('hidden');
+        
+        if (!html5QrcodeScanner) {
+            html5QrcodeScanner = new Html5QrcodeScanner(
+                "reader",
+                { fps: 10, qrbox: {width: 250, height: 150} },
+                false);
+            
+            html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+        }
+    }
+
+    function stopScanner() {
+        document.getElementById('scanner-modal').classList.add('hidden');
+        if (html5QrcodeScanner) {
+            html5QrcodeScanner.clear();
+            html5QrcodeScanner = null;
+        }
+    }
+
+    function onScanSuccess(decodedText, decodedResult) {
+        // Asignar el valor al input
+        document.getElementById('product_code').value = decodedText;
+        // Cerrar el modal
+        stopScanner();
+    }
+
+    function onScanFailure(error) {
+        // Errores o cuando no detecta un código (se llama repetidamente, usualmente se ignora)
+    }
+</script>
+
+<!-- Scanner Modal -->
+<div id="scanner-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" aria-hidden="true" onclick="stopScanner()"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="inline-block px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+            <div>
+                <div class="mt-3 text-center sm:mt-5">
+                    <h3 class="text-lg font-medium leading-6 text-gray-900" id="modal-title">Escanear Código de Barras</h3>
+                    <div class="mt-2">
+                        <div id="reader" width="600px"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-5 sm:mt-6">
+                <button type="button" onclick="stopScanner()" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm">
+                    Cerrar y Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+@endpush

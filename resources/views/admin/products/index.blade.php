@@ -465,6 +465,27 @@ function productManager() {
                     // Success callback
                     if (this.scannerTarget === 'code') {
                         this.product.code = decodedText;
+                        
+                        // Buscar en BD si el producto ya existe y precargar el nombre
+                        fetch(`/admin/products/search-by-code?code=${encodeURIComponent(decodedText)}`)
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.found && data.product) {
+                                    this.product.name = data.product.name;
+                                    // Opcional: Mostrar una alerta sutil
+                                    if(typeof Swal !== 'undefined') {
+                                        Swal.fire({
+                                            title: 'Producto encontrado',
+                                            text: 'Se ha precargado el nombre: ' + data.product.name,
+                                            icon: 'info',
+                                            timer: 2000,
+                                            showConfirmButton: false
+                                        });
+                                    }
+                                }
+                            })
+                            .catch(err => console.error("Error buscando código:", err));
+                            
                     } else if (this.scannerTarget === 'serial_number') {
                         this.product.serial_number = decodedText;
                     }

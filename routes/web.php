@@ -36,6 +36,7 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::resource('categories', CategoryController::class);
     Route::resource('brands', BrandController::class);
     Route::resource('models', DeviceModelController::class);
+    Route::get('products/search-by-code', [ProductController::class, 'searchByCode'])->name('products.searchByCode');
     Route::resource('products', ProductController::class);
     Route::resource('sliders', SliderController::class);
     Route::resource('clients', ClientController::class);

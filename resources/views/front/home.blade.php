@@ -92,8 +92,8 @@
                     $icon = str_contains($categoryName, 'laptop') ? 'fa-laptop' : (str_contains($categoryName, 'gaming') ? 'fa-gamepad' : (str_contains($categoryName, 'audio') || str_contains($categoryName, 'parlante') ? 'fa-headphones' : (str_contains($categoryName, 'accesorio') ? 'fa-keyboard' : 'fa-microchip')));
                     $categoryColors = ['from-blue-50 to-indigo-100', 'from-violet-50 to-purple-100', 'from-cyan-50 to-blue-100', 'from-fuchsia-50 to-violet-100'];
                 @endphp
-                <a href="{{ route('catalog', ['category' => $category->slug]) }}" class="focus-ring group flex min-h-[150px] flex-col justify-between overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br {{ $categoryColors[$loop->index % count($categoryColors)] }} p-4 transition hover:-translate-y-1 hover:shadow-lg sm:min-h-[180px] sm:p-5">
-                    <i class="fa-solid {{ $icon }} self-end text-4xl text-[#293ca0]/35 transition group-hover:scale-110 group-hover:text-indigo-600/70 sm:text-5xl" aria-hidden="true"></i>
+                <a href="{{ route('catalog', ['category' => $category->slug]) }}" class="focus-ring group flex min-h-[150px] flex-col items-center justify-center text-center overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br {{ $categoryColors[$loop->index % count($categoryColors)] }} p-4 transition hover:-translate-y-1 hover:shadow-lg sm:min-h-[180px] sm:p-5">
+                    <i class="fa-solid {{ $icon }} text-3xl mb-3 text-[#293ca0]/40 transition group-hover:scale-110 group-hover:text-indigo-600/70 sm:text-4xl" aria-hidden="true"></i>
                     <span><span class="block font-display text-base font-extrabold text-[#111c36] sm:text-lg">{{ $category->name }}</span><span class="mt-1 block text-[10px] font-semibold text-slate-500">Explorar productos <span aria-hidden="true">↗</span></span></span>
                 </a>
             @endforeach
@@ -138,7 +138,13 @@
             <div class="mb-5 flex items-end justify-between"><div><p class="text-[10px] font-bold uppercase tracking-[.18em] text-violet-600">Marcas disponibles</p><h2 id="brands-title" class="mt-1 font-display text-xl font-extrabold text-[#111c36] sm:text-2xl">Encuentra tus favoritas</h2></div><i class="fa-solid fa-award text-2xl text-indigo-400"></i></div>
             <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
                 @foreach($brands as $brand)
-                    <a href="{{ route('catalog', ['brand' => $brand->slug]) }}" class="focus-ring flex min-h-14 items-center justify-center rounded-xl border border-slate-100 bg-slate-50 px-3 text-center text-xs font-extrabold tracking-wide text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">{{ $brand->name }}</a>
+                    <a href="{{ route('catalog', ['brand' => $brand->slug]) }}" class="focus-ring group flex min-h-[60px] items-center justify-center rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-center transition hover:border-indigo-200 hover:bg-indigo-50 hover:shadow-sm">
+                        @if($brand->logo)
+                            <img src="{{ filter_var($brand->logo, FILTER_VALIDATE_URL) ? $brand->logo : asset('storage/' . $brand->logo) }}" alt="{{ $brand->name }}" class="max-h-8 max-w-[100px] object-contain opacity-70 grayscale transition group-hover:opacity-100 group-hover:grayscale-0" title="{{ $brand->name }}">
+                        @else
+                            <span class="text-xs font-extrabold tracking-wide text-slate-600 group-hover:text-indigo-700">{{ $brand->name }}</span>
+                        @endif
+                    </a>
                 @endforeach
             </div>
         </section>

@@ -540,9 +540,30 @@
         <header class="admin-topbar">
             <div class="flex items-center gap-4 flex-1">
                 <!-- Search -->
-                <div class="topbar-search hidden md:block">
-                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                    <input type="text" placeholder="Buscar en categorías, marcas, productos...">
+                <div class="topbar-search hidden md:block" x-data="globalScanner()">
+                    <div class="relative w-full">
+                        <i class="fa-solid fa-magnifying-glass search-icon z-10"></i>
+                        <input type="text" placeholder="Buscar en categorías, marcas, productos..." @keydown.enter="handleSearch($event.target.value)">
+                        <button type="button" @click="startScanner" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-500 hover:text-blue-700 p-1" title="Escanear Código">
+                            <i class="fa-solid fa-barcode text-lg"></i>
+                        </button>
+                    </div>
+
+                    <!-- Global Scanner Modal -->
+                    <div class="fixed inset-0 z-[200] bg-black/90 flex flex-col items-center justify-center" x-show="showScanner" x-cloak x-transition.opacity>
+                        <div class="w-full max-w-lg bg-white rounded-xl overflow-hidden shadow-2xl relative">
+                            <div class="px-4 py-3 bg-slate-800 text-white flex justify-between items-center">
+                                <h3 class="font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-barcode"></i> Buscador por Código de Barras</h3>
+                                <button type="button" @click="stopScanner()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                            </div>
+                            <div class="p-4 bg-black relative">
+                                <div id="global-reader" class="w-full overflow-hidden rounded-lg bg-black min-h-[300px]"></div>
+                            </div>
+                            <div class="px-4 py-3 bg-slate-100 text-center text-xs text-slate-600 font-medium">
+                                Apunta la cámara al código de barras o QR para buscar el producto.
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Page breadcrumb (mobile) -->
@@ -617,7 +638,96 @@
     </div>
 
     @stack('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
     <script>
+        function globalScanner() {
+            return {
+                showScanner: false,
+                html5QrcodeScanner: null,
+
+                startScanner() {
+                    this.showScanner = true;
+                    if (!this.html5QrcodeScanner) {
+                        this.html5QrcodeScanner = new Html5QrcodeScanner("global-reader", { 
+                            fps: 10, 
+                            qrbox: {width: 250, height: 150},
+                            supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
+                        }, false);
+                    }
+
+                    setTimeout(() => {
+                        this.html5QrcodeScanner.render((decodedText) => {
+                            this.stopScanner();
+                            this.lookupProduct(decodedText);
+                        }, (err) => {});
+                    }, 100);
+                },
+
+                stopScanner() {
+                    if (this.html5QrcodeScanner) {
+                        this.html5QrcodeScanner.clear().catch(e => console.error(e));
+                    }
+                    this.showScanner = false;
+                },
+
+                handleSearch(val) {
+                    if (val) this.lookupProduct(val);
+                },
+
+                async lookupProduct(code) {
+                    Swal.fire({
+                        title: 'Buscando...',
+                        text: 'Verificando código: ' + code,
+                        allowOutsideClick: false,
+                        didOpen: () => { Swal.showLoading(); }
+                    });
+
+                    try {
+                        const response = await fetch(`{{ route('admin.products.searchByCode') }}?code=${encodeURIComponent(code)}`);
+                        const data = await response.json();
+
+                        if (data.found && data.product) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Producto Encontrado',
+                                html: `
+                                    <div class="text-left mt-4 text-sm">
+                                        <p><strong>Nombre:</strong> ${data.product.name}</p>
+                                        <p><strong>Código:</strong> ${data.product.code}</p>
+                                        <p><strong>Precio:</strong> S/ ${parseFloat(data.product.price).toFixed(2)}</p>
+                                        <p><strong>Stock:</strong> ${data.product.stock} un.</p>
+                                    </div>
+                                `,
+                                confirmButtonText: 'Ver Catálogo',
+                                confirmButtonColor: '#2563eb',
+                                showCancelButton: true,
+                                cancelButtonText: 'Cerrar'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = "{{ route('admin.products.index') }}";
+                                }
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'No encontrado',
+                                text: 'No existe ningún producto con el código: ' + code,
+                                confirmButtonColor: '#2563eb'
+                            });
+                        }
+                    } catch (error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error de Conexión',
+                            text: 'No se pudo verificar el producto.',
+                            confirmButtonColor: '#2563eb'
+                        });
+                    }
+                }
+            }
+        }
+
         (() => {
             const toggle = document.querySelector('[data-notifications-toggle]');
             const menu = document.querySelector('[data-notifications-menu]');

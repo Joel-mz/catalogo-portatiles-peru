@@ -190,4 +190,27 @@ class ProductController extends Controller
             }
         }
     }
+
+    public function searchByCode(Request $request)
+    {
+        $code = $request->query('code');
+        
+        if (!$code) {
+            return response()->json(['error' => 'Código no proporcionado'], 400);
+        }
+
+        $product = Product::with(['category', 'brand'])->where('code', $code)->orWhere('sku', $code)->orWhere('serial_number', $code)->first();
+
+        if ($product) {
+            return response()->json([
+                'found' => true,
+                'product' => $product
+            ]);
+        }
+
+        return response()->json([
+            'found' => false,
+            'message' => 'No se encontró ningún producto con ese código.'
+        ]);
+    }
 }

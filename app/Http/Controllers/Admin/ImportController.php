@@ -28,9 +28,13 @@ class ImportController extends Controller
         
         $callback = function() use ($columns) {
             $file = fopen('php://output', 'w');
-            fputcsv($file, $columns);
+            // Añadir BOM (Byte Order Mark) para que Excel reconozca UTF-8
+            fputs($file, $bom = (chr(0xEF) . chr(0xBB) . chr(0xBF)));
+            
+            // Usar punto y coma (;) para que Excel en español lo divida en columnas automáticamente
+            fputcsv($file, $columns, ';');
             // Filas de ejemplo
-            fputcsv($file, ['PROD-001', 'Ejemplo Laptop', '1500.00', '10', '1', '1']);
+            fputcsv($file, ['PROD-001', 'Ejemplo Laptop Gamer', '1500.00', '10', '1', '1'], ';');
             fclose($file);
         };
         
@@ -52,7 +56,11 @@ class ImportController extends Controller
             $header = true;
             $count = 0;
             
-            while ($row = fgetcsv($handle, 1000, ',')) {
+            while (($line = fgets($handle)) !== false) {
+                // Detect delimiter dynamically for the first line or use default
+                $delimiter = strpos($line, ';') !== false ? ';' : ',';
+                $row = str_getcsv($line, $delimiter);
+                
                 if ($header) {
                     $header = false;
                     continue; // Saltar cabecera
