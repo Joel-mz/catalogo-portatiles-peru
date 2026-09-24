@@ -18,12 +18,32 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script>
-        tailwind = { config: { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], display: ['Outfit', 'sans-serif'] }, colors: { brand: { blue: '{{ $primaryColor }}', violet: '#673de6', navy: '#0b1730' } } } } };
+        tailwind = { 
+            darkMode: 'class',
+            config: { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], display: ['Outfit', 'sans-serif'] }, colors: { brand: { blue: '{{ $primaryColor }}', violet: '#673de6', navy: '#0b1730' } } } } } 
+        };
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
     <style>
         [x-cloak] { display: none !important; }
-        body { background: #f4f6fa; color: #172033; font-family: Inter, sans-serif; }
+        body { background: #f4f6fa; color: #172033; font-family: Inter, sans-serif; transition: background-color 0.3s, color 0.3s; }
+        html.dark body { background: #0b1120; color: #e2e8f0; }
+        html.dark .bg-white { background-color: #1e293b !important; border-color: #334155 !important; color: #f8fafc !important; }
+        html.dark .text-slate-800 { color: #f8fafc !important; }
+        html.dark .text-slate-700 { color: #f1f5f9 !important; }
+        html.dark .text-slate-600 { color: #cbd5e1 !important; }
+        html.dark .text-slate-500 { color: #94a3b8 !important; }
+        html.dark .border-slate-200, html.dark .border-slate-100 { border-color: #334155 !important; }
+        html.dark .bg-slate-50, html.dark .bg-slate-100 { background-color: #0f172a !important; }
+        html.dark .bg-white\/95 { background-color: rgba(30, 41, 59, 0.95) !important; }
+        html.dark header, html.dark footer { border-color: #334155 !important; }
         .focus-ring:focus-visible { outline: 3px solid #7654e8; outline-offset: 3px; }
         .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
         .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -81,6 +101,10 @@
 
                 <!-- Actions (Desktop & Extra Mobile buttons) -->
                 <div class="flex items-center justify-between gap-2 lg:w-[390px] lg:shrink-0 lg:justify-end">
+                    <button type="button" id="theme-toggle" class="focus-ring flex min-h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700" aria-label="Cambiar tema">
+                        <i class="fa-solid fa-moon dark:hidden"></i>
+                        <i class="fa-solid fa-sun hidden dark:inline"></i>
+                    </button>
                     @auth
                         <a href="{{ route('dashboard') }}" class="focus-ring flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-blue-700 lg:flex"><i class="fa-regular fa-user text-base"></i><span class="hidden sm:inline">Mi cuenta</span></a>
                     @endauth
@@ -260,6 +284,20 @@
                     submitButton.innerHTML = '<i class="fa-brands fa-whatsapp text-lg"></i>Confirmar y enviar por WhatsApp';
                 }
             });
+
+            // Theme Toggle
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            if (themeToggleBtn) {
+                themeToggleBtn.addEventListener('click', function() {
+                    if (document.documentElement.classList.contains('dark')) {
+                        document.documentElement.classList.remove('dark');
+                        localStorage.setItem('theme', 'light');
+                    } else {
+                        document.documentElement.classList.add('dark');
+                        localStorage.setItem('theme', 'dark');
+                    }
+                });
+            }
 
             renderCart();
         })();

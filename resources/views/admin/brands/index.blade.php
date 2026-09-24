@@ -90,7 +90,7 @@
                             <a href="{{ route('admin.brands.index', ['edit' => $brand->id]) }}" class="inline-flex items-center justify-center h-7 w-7 rounded bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-colors" title="Editar">
                                 <i class="fa-solid fa-pen text-xs"></i>
                             </a>
-                            <a href="#" class="inline-flex items-center justify-center h-7 w-7 rounded bg-slate-50 text-slate-400 hover:bg-slate-200 transition-colors" title="Ver">
+                            <a href="{{ route('catalog', ['brand' => $brand->slug]) }}" target="_blank" class="inline-flex items-center justify-center h-7 w-7 rounded bg-slate-50 text-slate-400 hover:bg-slate-200 transition-colors" title="Ver">
                                 <i class="fa-solid fa-eye text-xs"></i>
                             </a>
                             <form action="{{ route('admin.brands.destroy', $brand) }}" method="POST" class="inline-block" onsubmit="return confirm('¿Seguro que deseas eliminar esta marca?');">

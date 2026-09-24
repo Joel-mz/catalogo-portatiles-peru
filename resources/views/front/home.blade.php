@@ -140,7 +140,7 @@
                 @foreach($brands as $brand)
                     <a href="{{ route('catalog', ['brand' => $brand->slug]) }}" class="focus-ring group flex min-h-[60px] items-center justify-center rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-center transition hover:border-indigo-200 hover:bg-indigo-50 hover:shadow-sm">
                         @if($brand->logo)
-                            <img src="{{ filter_var($brand->logo, FILTER_VALIDATE_URL) ? $brand->logo : asset('storage/' . $brand->logo) }}" alt="{{ $brand->name }}" class="max-h-8 max-w-[100px] object-contain opacity-70 grayscale transition group-hover:opacity-100 group-hover:grayscale-0" title="{{ $brand->name }}">
+                            <img src="{{ filter_var($brand->logo, FILTER_VALIDATE_URL) ? $brand->logo : Storage::url($brand->logo) }}" alt="{{ $brand->name }}" class="max-h-8 max-w-[100px] object-contain opacity-70 grayscale transition group-hover:opacity-100 group-hover:grayscale-0" title="{{ $brand->name }}">
                         @else
                             <span class="text-xs font-extrabold tracking-wide text-slate-600 group-hover:text-indigo-700">{{ $brand->name }}</span>
                         @endif
