@@ -56,5 +56,5 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 ENV PORT=8000
 EXPOSE ${PORT}
 
-# Ejecutar migraciones y luego iniciar Apache; los seeders se ejecutan manualmente una sola vez.
-CMD su -s /bin/sh www-data -c "php artisan migrate --force" && apache2-foreground
+# Ejecutar migraciones y luego iniciar Apache
+CMD su -s /bin/sh www-data -c "php artisan migrate --force && php artisan db:seed --force" && apache2-foreground
