@@ -244,15 +244,20 @@
                 </div>
                 
                 <!-- Preview thumbs -->
-                <div class="mt-3 grid grid-cols-4 gap-2" x-show="imagePreviews.length > 0" x-cloak>
+                <div class="mt-3 flex gap-2 overflow-x-auto pb-2" x-show="imagePreviews.length > 0" x-cloak>
                     <template x-for="(src, index) in imagePreviews" :key="index">
-                        <div class="relative aspect-square rounded-lg border border-slate-200 overflow-hidden bg-white">
-                            <img :src="src" class="w-full h-full object-contain">
-                            <div class="absolute inset-x-0 bottom-0 bg-black/50 text-white text-[8px] text-center py-0.5" x-text="index === 0 ? 'Principal' : ''" x-show="index === 0"></div>
-                            <!-- Para que el controlador reciba image_types='file' paralelo a cada archivo -->
+                        <div class="relative w-16 h-16 shrink-0 rounded-lg border border-slate-200 overflow-hidden bg-white group">
+                            <img :src="src" class="w-full h-full object-contain p-1">
+                            <div class="absolute top-1 left-1 bg-indigo-600 text-white text-[8px] px-1.5 py-0.5 rounded-full font-bold" x-show="index === 0">Principal</div>
+                            <button type="button" @click.prevent="removeImage(index)" class="absolute top-1 right-1 w-4 h-4 bg-white/80 hover:bg-white text-slate-500 hover:text-red-500 rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                                <i class="fa-solid fa-xmark text-[8px]"></i>
+                            </button>
                             <input type="hidden" name="image_types[]" value="file">
                         </div>
                     </template>
+                    <button type="button" @click="$refs.fileInput.click()" x-show="imagePreviews.length > 0 && imagePreviews.length < 5" class="w-16 h-16 shrink-0 rounded-lg border border-dashed border-slate-300 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-slate-50 hover:border-indigo-300 transition-colors">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
                 </div>
             </section>
 
@@ -311,44 +316,61 @@
             </section>
 
             <!-- 7. Resumen Visual -->
-            <section class="bg-gradient-to-br from-[#101c3b] to-[#20366b] rounded-2xl shadow-lg p-1">
-                <div class="bg-white rounded-xl p-4 h-full flex flex-col">
-                    <h3 class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3 text-center">Vista Previa</h3>
-                    <div class="flex-1 flex flex-col items-center justify-center text-center">
-                        <div class="w-32 h-24 mb-3 flex items-center justify-center">
-                            <template x-if="imagePreviews.length > 0">
-                                <img :src="imagePreviews[0]" class="max-h-full object-contain">
-                            </template>
-                            <template x-if="imagePreviews.length === 0">
-                                <i class="fa-solid fa-laptop text-4xl text-slate-200"></i>
-                            </template>
-                        </div>
-                        
-                        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wide" x-text="brandName || 'MARCA'"></div>
-                        <div class="text-xs font-bold text-slate-800 leading-tight mt-1 line-clamp-2" x-text="name || 'Nombre del producto'"></div>
-                        
-                        <div class="flex gap-1 justify-center mt-2">
-                            <span x-show="isActive" class="px-1.5 py-0.5 rounded text-[8px] font-bold bg-green-100 text-green-700">ACTIVO</span>
-                            <span x-show="isNew" class="px-1.5 py-0.5 rounded text-[8px] font-bold bg-blue-100 text-blue-700">NUEVO</span>
-                            <span x-show="isOffer" class="px-1.5 py-0.5 rounded text-[8px] font-bold bg-red-100 text-red-700">OFERTA</span>
-                        </div>
-                        
-                        <div class="mt-3 font-display text-lg font-black text-indigo-700">
-                            S/ <span x-text="offerPrice ? offerPrice : (price ? price : '0.00')"></span>
-                        </div>
+            <section class="bg-[#fcfcfa] rounded-2xl shadow-sm border border-slate-100 p-5 relative overflow-hidden">
+                <h3 class="text-sm font-extrabold text-slate-800 mb-4 flex items-center gap-2">
+                    <span class="flex items-center justify-center w-5 h-5 rounded-full bg-indigo-600 text-white text-[10px]">7</span> Resumen del Producto
+                </h3>
+                
+                <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-50 flex flex-col items-center text-center">
+                    <div class="w-40 h-32 mb-3 flex items-center justify-center">
+                        <template x-if="imagePreviews.length > 0">
+                            <img :src="imagePreviews[0]" class="max-h-full object-contain">
+                        </template>
+                        <template x-if="imagePreviews.length === 0">
+                            <i class="fa-solid fa-laptop text-5xl text-slate-200"></i>
+                        </template>
+                    </div>
+                    
+                    <div class="text-sm font-bold text-slate-800 leading-tight mt-1 line-clamp-2" x-text="name || 'Nombre del producto'"></div>
+                    <div class="text-[10px] text-slate-500 mt-1" x-text="getSpecsSummary()"></div>
+                    
+                    <div class="flex gap-2 justify-center mt-3">
+                        <span x-show="isActive" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-200 text-green-800">Activo</span>
+                        <span x-show="isNew" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700">Nuevo</span>
+                    </div>
+                    
+                    <div class="mt-4 font-display text-xl font-black text-indigo-700">
+                        S/ <span x-text="offerPrice ? offerPrice : (price ? price : '0.00')"></span>
                     </div>
                 </div>
+
+                <button type="button" class="mt-3 w-full py-2.5 bg-indigo-700 hover:bg-indigo-800 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors shadow-lg shadow-indigo-200/50">
+                    <i class="fa-solid fa-eye"></i> Vista previa en catálogo
+                </button>
+            </section>
+
+            <!-- Consejos -->
+            <section class="bg-slate-50/80 rounded-2xl border border-slate-100 p-5">
+                <h3 class="text-xs font-bold text-indigo-600 mb-3 flex items-center gap-2">
+                    <i class="fa-regular fa-lightbulb text-sm"></i> Consejos
+                </h3>
+                <ul class="text-[10px] text-slate-600 space-y-2">
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-500"></i> Completa la información principal del producto.</li>
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-500"></i> Agrega al menos una imagen principal.</li>
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-500"></i> Las especificaciones técnicas mejoran la búsqueda.</li>
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-500"></i> Revisa que el precio y stock sean correctos.</li>
+                </ul>
             </section>
 
         </div>
     </div>
 
-    <!-- Barra de acciones inferior flotante -->
-    <div class="fixed bottom-0 left-0 right-0 lg:left-64 z-40 bg-white border-t border-slate-200 p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] flex justify-between items-center px-6 lg:px-10">
-        <a href="{{ route('admin.products.index') }}" class="px-5 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
+    <!-- Actions (Desktop under left col, Mobile bottom) -->
+    <div class="mt-8 flex flex-col-reverse sm:flex-row justify-between items-center gap-4">
+        <a href="{{ route('admin.products.index') }}" class="w-full sm:w-auto px-6 py-3 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors text-center">
             Cancelar
         </a>
-        <button type="submit" class="px-6 py-2.5 text-sm font-bold text-white bg-indigo-600 rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-colors flex items-center gap-2">
+        <button type="submit" class="w-full sm:w-auto px-8 py-3 text-sm font-bold text-white bg-[#3e06cf] rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-800 transition-colors flex items-center justify-center gap-2">
             <i class="fa-solid fa-save"></i> Guardar Producto
         </button>
     </div>
@@ -390,18 +412,25 @@
             removeSpec(index) {
                 this.specs.splice(index, 1);
             },
+            getSpecsSummary() {
+                // Toma hasta las 3 primeras especificaciones para el resumen
+                return this.specs.filter(s => s.value).slice(0, 3).map(s => s.value).join(' | ');
+            },
             handleFileSelect(event) {
-                this.imagePreviews = [];
-                const files = event.target.files;
-                if (files.length > 0) {
-                    for (let i = 0; i < Math.min(files.length, 5); i++) {
+                const newFiles = Array.from(event.target.files);
+                if (newFiles.length > 0) {
+                    let toAdd = Math.min(newFiles.length, 5 - this.imagePreviews.length);
+                    for (let i = 0; i < toAdd; i++) {
                         const reader = new FileReader();
                         reader.onload = (e) => {
                             this.imagePreviews.push(e.target.result);
                         };
-                        reader.readAsDataURL(files[i]);
+                        reader.readAsDataURL(newFiles[i]);
                     }
                 }
+            },
+            removeImage(index) {
+                this.imagePreviews.splice(index, 1);
             }
         }))
     });
