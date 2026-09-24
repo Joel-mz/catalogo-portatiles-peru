@@ -18,9 +18,9 @@
             <a href="{{ route('admin.imports.export') }}" class="px-3 py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg transition-colors text-xs font-bold border border-blue-200 flex items-center gap-2">
                 <i class="fa-solid fa-file-export"></i> Exportar CSV
             </a>
-            <button @click="openCreateModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center gap-2 text-sm font-bold">
+            <a href="{{ route('admin.products.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center gap-2 text-sm font-bold">
                 <i class="fa-solid fa-plus"></i> Nuevo Producto
-            </button>
+            </a>
         </div>
     </div>
 
@@ -99,9 +99,9 @@
                             @endif
                         </td>
                         <td class="text-right space-x-1">
-                            <button @click="openEditModal({{ json_encode($product) }})" class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors border border-transparent hover:border-blue-200" title="Editar">
+                            <a href="{{ route('admin.products.edit', $product) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors border border-transparent hover:border-blue-200" title="Editar">
                                 <i class="fa-solid fa-pen-to-square text-sm"></i>
-                            </button>
+                            </a>
                             <form action="{{ route('admin.products.destroy', $product) }}" method="POST" class="inline-block" onsubmit="return confirm('¿Seguro que deseas eliminar este producto?');">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-red-600 hover:bg-red-50 transition-colors border border-transparent hover:border-red-200" title="Eliminar">
