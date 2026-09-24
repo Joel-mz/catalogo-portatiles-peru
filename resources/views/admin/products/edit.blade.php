@@ -239,33 +239,74 @@
         <div class="lg:col-span-4 space-y-6">
             
             <!-- 5. Imágenes -->
-            <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 relative overflow-hidden">
+            <!-- 5. Imágenes -->
+            <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 relative overflow-hidden" x-data="imageUploadManager()">
                 <div class="absolute top-0 left-0 w-1 h-full bg-fuchsia-500"></div>
                 <h3 class="text-sm font-extrabold text-slate-800 mb-4 flex items-center gap-2">
-                    <span class="flex items-center justify-center w-5 h-5 rounded-full bg-fuchsia-100 text-fuchsia-700 text-[10px]">5</span> Imágenes
+                    <span class="flex items-center justify-center w-5 h-5 rounded-full bg-fuchsia-100 text-fuchsia-700 text-[10px]">5</span> Imágenes del Producto
                 </h3>
                 
-                <div class="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center bg-slate-50 relative hover:bg-slate-100 hover:border-indigo-300 transition-colors cursor-pointer"
-                     @click="$refs.fileInput.click()">
+                <div class="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center bg-slate-50 relative hover:bg-slate-100 hover:border-indigo-300 transition-colors">
                     <i class="fa-solid fa-cloud-arrow-up text-3xl text-indigo-400 mb-2"></i>
-                    <p class="text-xs font-bold text-indigo-600">Haz clic para subir NUEVAS imágenes</p>
-                    <p class="text-[10px] text-slate-500 mt-1">Si subes imágenes nuevas, se reemplazarán las actuales.</p>
+                    <p class="text-xs font-bold text-indigo-600 mb-2">Reemplazar imágenes actuales (Máx 7)</p>
+                    <p class="text-[9px] text-slate-500 mb-2">Al añadir nuevas imágenes, las anteriores se eliminarán.</p>
                     
-                    <input type="file" name="image_files[]" multiple accept="image/*" class="hidden" x-ref="fileInput" @change="handleFileSelect">
+                    <div class="flex flex-col sm:flex-row justify-center items-center gap-2">
+                        <button type="button" @click="addFileInput()" class="px-4 py-2 bg-white border border-slate-300 text-slate-700 text-[10px] font-bold rounded-lg shadow-sm hover:bg-slate-50 transition-colors flex items-center gap-1">
+                            <i class="fa-solid fa-folder-open text-indigo-500"></i> Subir desde PC
+                        </button>
+                        <span class="text-[10px] text-slate-400 font-bold hidden sm:inline">o</span>
+                        <div class="flex items-center gap-1 bg-white border border-slate-300 rounded-lg p-1 shadow-sm w-full sm:w-auto">
+                            <input type="url" x-model="tempUrl" placeholder="Pegar URL de imagen" class="text-[10px] border-none focus:ring-0 w-full sm:w-40 h-7 bg-transparent" @keydown.enter.prevent="addUrlInput()">
+                            <button type="button" @click="addUrlInput()" class="px-3 py-1.5 bg-indigo-50 text-indigo-700 text-[10px] font-bold rounded hover:bg-indigo-100 transition-colors">
+                                Añadir URL
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                
-                <!-- Preview thumbs -->
-                <div class="mt-3 grid grid-cols-4 gap-2" x-show="imagePreviews.length > 0" x-cloak>
-                    <template x-for="(src, index) in imagePreviews" :key="index">
-                        <div class="relative aspect-square rounded-lg border border-slate-200 overflow-hidden bg-white">
-                            <img :src="src" class="w-full h-full object-contain">
-                            <div class="absolute inset-x-0 bottom-0 bg-black/50 text-white text-[8px] text-center py-0.5" x-text="index === 0 ? 'Principal' : ''" x-show="index === 0"></div>
-                            
-                            <template x-if="imagesModified">
-                                <input type="hidden" name="image_types[]" value="file">
-                            </template>
+
+                <!-- Contenedor oculto para inputs de archivo -->
+                <div class="hidden">
+                    <template x-for="(img, index) in images" :key="img.id">
+                        <div x-show="img.type === 'file'">
+                            <input type="file" :id="'file_input_' + img.id" :name="'image_files['+index+']'" accept="image/*" @change="handleFileChange($event, img)">
                         </div>
                     </template>
+                </div>
+
+                <!-- Inputs ocultos para tipos y URLs -->
+                <template x-for="(img, index) in images" :key="'types-'+img.id">
+                    <div>
+                        <input type="hidden" :name="'image_types['+index+']'" :value="img.type">
+                        <template x-if="img.type === 'url'">
+                            <input type="hidden" :name="'image_urls['+index+']'" :value="img.url">
+                        </template>
+                    </div>
+                </template>
+                
+                <!-- Preview thumbs -->
+                <div class="mt-3 flex gap-2 overflow-x-auto pb-2" x-show="images.length > 0 || currentImages.length > 0" x-cloak>
+                    <!-- Current Images -->
+                    <template x-for="(img, index) in currentImages" :key="'curr-'+img.id">
+                        <div class="relative w-16 h-16 shrink-0 rounded-lg border border-slate-200 overflow-hidden bg-white group" x-show="images.length === 0">
+                            <img :src="img.url" class="w-full h-full object-contain p-1">
+                            <div class="absolute top-1 left-1 bg-slate-500 text-white text-[8px] px-1.5 py-0.5 rounded-full font-bold" x-show="index === 0">Actual</div>
+                        </div>
+                    </template>
+                    <!-- New Images Previews -->
+                    <template x-for="(img, index) in images" :key="img.id">
+                        <div class="relative w-16 h-16 shrink-0 rounded-lg border border-indigo-200 overflow-hidden bg-white group" x-show="img.preview">
+                            <img :src="img.preview" class="w-full h-full object-contain p-1">
+                            <div class="absolute top-1 left-1 bg-indigo-600 text-white text-[8px] px-1.5 py-0.5 rounded-full font-bold" x-show="index === 0">Principal</div>
+                            <div class="absolute bottom-1 right-1 bg-black/50 text-white text-[7px] px-1 py-0.5 rounded" x-text="img.type === 'url' ? 'URL' : 'PC'"></div>
+                            <button type="button" @click.prevent="removeImage(index)" class="absolute top-1 right-1 w-4 h-4 bg-white/80 hover:bg-white text-slate-500 hover:text-red-500 rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                                <i class="fa-solid fa-xmark text-[8px]"></i>
+                            </button>
+                        </div>
+                    </template>
+                    <button type="button" @click="addFileInput()" x-show="images.length > 0 && images.length < 7" class="w-16 h-16 shrink-0 rounded-lg border border-dashed border-slate-300 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-slate-50 hover:border-indigo-300 transition-colors">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
                 </div>
             </section>
 
@@ -324,45 +365,65 @@
             </section>
 
             <!-- 7. Resumen Visual -->
-            <section class="bg-gradient-to-br from-[#101c3b] to-[#20366b] rounded-2xl shadow-lg p-1">
-                <div class="bg-white rounded-xl p-4 h-full flex flex-col">
-                    <h3 class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3 text-center">Vista Previa</h3>
-                    <div class="flex-1 flex flex-col items-center justify-center text-center">
-                        <div class="w-32 h-24 mb-3 flex items-center justify-center">
-                            <template x-if="imagePreviews.length > 0">
-                                <img :src="imagePreviews[0]" class="max-h-full object-contain">
-                            </template>
-                            <template x-if="imagePreviews.length === 0">
-                                <i class="fa-solid fa-laptop text-4xl text-slate-200"></i>
-                            </template>
-                        </div>
-                        
-                        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wide" x-text="brandName || 'MARCA'"></div>
-                        <div class="text-xs font-bold text-slate-800 leading-tight mt-1 line-clamp-2" x-text="name || 'Nombre del producto'"></div>
-                        
-                        <div class="flex gap-1 justify-center mt-2">
-                            <span x-show="isActive" class="px-1.5 py-0.5 rounded text-[8px] font-bold bg-green-100 text-green-700">ACTIVO</span>
-                            <span x-show="isNew" class="px-1.5 py-0.5 rounded text-[8px] font-bold bg-blue-100 text-blue-700">NUEVO</span>
-                            <span x-show="isOffer" class="px-1.5 py-0.5 rounded text-[8px] font-bold bg-red-100 text-red-700">OFERTA</span>
-                        </div>
-                        
-                        <div class="mt-3 font-display text-lg font-black text-indigo-700">
-                            S/ <span x-text="offerPrice ? offerPrice : (price ? price : '0.00')"></span>
-                        </div>
+            <section class="bg-[#fcfcfa] rounded-2xl shadow-sm border border-slate-100 p-5 relative overflow-hidden">
+                <h3 class="text-sm font-extrabold text-slate-800 mb-4 flex items-center gap-2">
+                    <span class="flex items-center justify-center w-5 h-5 rounded-full bg-indigo-600 text-white text-[10px]">7</span> Resumen del Producto
+                </h3>
+                
+                <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-50 flex flex-col items-center text-center">
+                    <div class="w-40 h-32 mb-3 flex items-center justify-center">
+                        <template x-if="window.globalImages && window.globalImages.length > 0 && window.globalImages[0].preview">
+                            <img :src="window.globalImages[0].preview" class="max-h-full object-contain">
+                        </template>
+                        <template x-if="!(window.globalImages && window.globalImages.length > 0 && window.globalImages[0].preview) && window.globalCurrentImages && window.globalCurrentImages.length > 0">
+                            <img :src="window.globalCurrentImages[0].url" class="max-h-full object-contain">
+                        </template>
+                        <template x-if="!(window.globalImages && window.globalImages.length > 0 && window.globalImages[0].preview) && (!window.globalCurrentImages || window.globalCurrentImages.length === 0)">
+                            <i class="fa-solid fa-laptop text-5xl text-slate-200"></i>
+                        </template>
+                    </div>
+                    
+                    <div class="text-sm font-bold text-slate-800 leading-tight mt-1 line-clamp-2" x-text="name || 'Nombre del producto'"></div>
+                    <div class="text-[10px] text-slate-500 mt-1" x-text="getSpecsSummary()"></div>
+                    
+                    <div class="flex gap-2 justify-center mt-3">
+                        <span x-show="isActive" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-200 text-green-800">Activo</span>
+                        <span x-show="isNew" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700">Nuevo</span>
+                    </div>
+                    
+                    <div class="mt-4 font-display text-xl font-black text-indigo-700">
+                        S/ <span x-text="offerPrice ? offerPrice : (price ? price : '0.00')"></span>
                     </div>
                 </div>
+
+                <button type="button" class="mt-3 w-full py-2.5 bg-indigo-700 hover:bg-indigo-800 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors shadow-lg shadow-indigo-200/50">
+                    <i class="fa-solid fa-eye"></i> Vista previa en catálogo
+                </button>
+            </section>
+
+            <!-- Consejos -->
+            <section class="bg-slate-50/80 rounded-2xl border border-slate-100 p-5">
+                <h3 class="text-xs font-bold text-indigo-600 mb-3 flex items-center gap-2">
+                    <i class="fa-regular fa-lightbulb text-sm"></i> Consejos
+                </h3>
+                <ul class="text-[10px] text-slate-600 space-y-2">
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-500"></i> Completa la información principal del producto.</li>
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-500"></i> Revisa que las nuevas imágenes tengan buena resolución.</li>
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-500"></i> Las especificaciones técnicas mejoran la búsqueda.</li>
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-500"></i> Verifica siempre el precio actual y en oferta.</li>
+                </ul>
             </section>
 
         </div>
     </div>
 
-    <!-- Barra de acciones inferior flotante -->
-    <div class="fixed bottom-0 left-0 right-0 lg:left-64 z-40 bg-white border-t border-slate-200 p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] flex justify-between items-center px-6 lg:px-10">
-        <a href="{{ route('admin.products.index') }}" class="px-5 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
+    <!-- Actions (Desktop under left col, Mobile bottom) -->
+    <div class="mt-8 flex flex-col-reverse sm:flex-row justify-between items-center gap-4">
+        <a href="{{ route('admin.products.index') }}" class="w-full sm:w-auto px-6 py-3 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors text-center">
             Cancelar
         </a>
-        <button type="submit" class="px-6 py-2.5 text-sm font-bold text-white bg-indigo-600 rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-colors flex items-center gap-2">
-            <i class="fa-solid fa-save"></i> Guardar Producto
+        <button type="submit" class="w-full sm:w-auto px-8 py-3 text-sm font-bold text-white bg-[#3e06cf] rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-800 transition-colors flex items-center justify-center gap-2">
+            <i class="fa-solid fa-save"></i> Guardar Cambios
         </button>
     </div>
 </form>
@@ -383,8 +444,6 @@
             isNew: {{ $product->is_new ? 'true' : 'false' }},
             isOffer: {{ $product->is_offer ? 'true' : 'false' }},
             isFeatured: {{ $product->is_featured ? 'true' : 'false' }},
-            imagePreviews: @json($existingImages),
-            imagesModified: false,
             specs: @json($formattedSpecs),
 
             updateBrandName(e) {
@@ -399,21 +458,73 @@
             removeSpec(index) {
                 this.specs.splice(index, 1);
             },
-            handleFileSelect(event) {
-                this.imagesModified = true;
-                this.imagePreviews = [];
-                const files = event.target.files;
-                if (files.length > 0) {
-                    for (let i = 0; i < Math.min(files.length, 5); i++) {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            this.imagePreviews.push(e.target.result);
-                        };
-                        reader.readAsDataURL(files[i]);
-                    }
-                }
+            getSpecsSummary() {
+                return this.specs.filter(s => s.value).slice(0, 3).map(s => s.value).join(' | ');
             }
-        }))
+        }));
+
+        Alpine.data('imageUploadManager', () => ({
+            images: [],
+            tempUrl: '',
+            currentImages: @json(array_map(function($img) {
+                return [
+                    'id' => $img['id'],
+                    'url' => filter_var($img['image_path'], FILTER_VALIDATE_URL) ? $img['image_path'] : asset('storage/' . $img['image_path'])
+                ];
+            }, clone $existingImages)),
+            
+            init() {
+                window.globalImages = this.images;
+                window.globalCurrentImages = this.currentImages;
+                this.$watch('images', val => window.globalImages = val);
+            },
+            addUrlInput() {
+                if (!this.tempUrl) return;
+                if (this.images.length >= 7) {
+                    alert('Máximo 7 imágenes permitidas');
+                    return;
+                }
+                this.images.push({
+                    id: Date.now() + Math.random().toString(36).substring(7),
+                    type: 'url',
+                    url: this.tempUrl,
+                    preview: this.tempUrl
+                });
+                this.tempUrl = '';
+            },
+            addFileInput() {
+                if (this.images.length >= 7) {
+                    alert('Máximo 7 imágenes permitidas');
+                    return;
+                }
+                const newId = Date.now() + Math.random().toString(36).substring(7);
+                this.images.push({
+                    id: newId,
+                    type: 'file',
+                    url: '',
+                    preview: ''
+                });
+                this.$nextTick(() => {
+                    const input = document.getElementById('file_input_' + newId);
+                    if (input) input.click();
+                });
+            },
+            handleFileChange(event, img) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        img.preview = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    this.images = this.images.filter(i => i.id !== img.id);
+                }
+            },
+            removeImage(index) {
+                this.images.splice(index, 1);
+            }
+        }));
     });
 
     // Scanner

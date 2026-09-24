@@ -228,34 +228,62 @@
         <div class="lg:col-span-4 space-y-6">
             
             <!-- 5. Imágenes -->
-            <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 relative overflow-hidden">
+            <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 relative overflow-hidden" x-data="imageUploadManager()">
                 <div class="absolute top-0 left-0 w-1 h-full bg-fuchsia-500"></div>
                 <h3 class="text-sm font-extrabold text-slate-800 mb-4 flex items-center gap-2">
-                    <span class="flex items-center justify-center w-5 h-5 rounded-full bg-fuchsia-100 text-fuchsia-700 text-[10px]">5</span> Imágenes
+                    <span class="flex items-center justify-center w-5 h-5 rounded-full bg-fuchsia-100 text-fuchsia-700 text-[10px]">5</span> Imágenes del Producto
                 </h3>
                 
-                <div class="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center bg-slate-50 relative hover:bg-slate-100 hover:border-indigo-300 transition-colors cursor-pointer"
-                     @click="$refs.fileInput.click()">
+                <div class="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center bg-slate-50 relative hover:bg-slate-100 hover:border-indigo-300 transition-colors">
                     <i class="fa-solid fa-cloud-arrow-up text-3xl text-indigo-400 mb-2"></i>
-                    <p class="text-xs font-bold text-indigo-600">Haz clic para subir imágenes</p>
-                    <p class="text-[10px] text-slate-500 mt-1">Formatos: JPG, PNG, WEBP</p>
+                    <p class="text-xs font-bold text-indigo-600 mb-2">Añadir imágenes (Máx 7)</p>
                     
-                    <input type="file" name="image_files[]" multiple accept="image/*" class="hidden" x-ref="fileInput" @change="handleFileSelect">
+                    <div class="flex flex-col sm:flex-row justify-center items-center gap-2 mt-2">
+                        <button type="button" @click="addFileInput()" class="px-4 py-2 bg-white border border-slate-300 text-slate-700 text-[10px] font-bold rounded-lg shadow-sm hover:bg-slate-50 transition-colors flex items-center gap-1">
+                            <i class="fa-solid fa-folder-open text-indigo-500"></i> Subir desde PC
+                        </button>
+                        <span class="text-[10px] text-slate-400 font-bold hidden sm:inline">o</span>
+                        <div class="flex items-center gap-1 bg-white border border-slate-300 rounded-lg p-1 shadow-sm w-full sm:w-auto">
+                            <input type="url" x-model="tempUrl" placeholder="Pegar URL de imagen" class="text-[10px] border-none focus:ring-0 w-full sm:w-40 h-7 bg-transparent" @keydown.enter.prevent="addUrlInput()">
+                            <button type="button" @click="addUrlInput()" class="px-3 py-1.5 bg-indigo-50 text-indigo-700 text-[10px] font-bold rounded hover:bg-indigo-100 transition-colors">
+                                Añadir URL
+                            </button>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Contenedor oculto para inputs de archivo -->
+                <div class="hidden">
+                    <template x-for="(img, index) in images" :key="img.id">
+                        <div x-show="img.type === 'file'">
+                            <input type="file" :id="'file_input_' + img.id" :name="'image_files['+index+']'" accept="image/*" @change="handleFileChange($event, img)">
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Inputs ocultos para tipos y URLs -->
+                <template x-for="(img, index) in images" :key="'types-'+img.id">
+                    <div>
+                        <input type="hidden" :name="'image_types['+index+']'" :value="img.type">
+                        <template x-if="img.type === 'url'">
+                            <input type="hidden" :name="'image_urls['+index+']'" :value="img.url">
+                        </template>
+                    </div>
+                </template>
                 
                 <!-- Preview thumbs -->
-                <div class="mt-3 flex gap-2 overflow-x-auto pb-2" x-show="imagePreviews.length > 0" x-cloak>
-                    <template x-for="(src, index) in imagePreviews" :key="index">
-                        <div class="relative w-16 h-16 shrink-0 rounded-lg border border-slate-200 overflow-hidden bg-white group">
-                            <img :src="src" class="w-full h-full object-contain p-1">
+                <div class="mt-3 flex gap-2 overflow-x-auto pb-2" x-show="images.length > 0" x-cloak>
+                    <template x-for="(img, index) in images" :key="img.id">
+                        <div class="relative w-16 h-16 shrink-0 rounded-lg border border-slate-200 overflow-hidden bg-white group" x-show="img.preview">
+                            <img :src="img.preview" class="w-full h-full object-contain p-1">
                             <div class="absolute top-1 left-1 bg-indigo-600 text-white text-[8px] px-1.5 py-0.5 rounded-full font-bold" x-show="index === 0">Principal</div>
+                            <div class="absolute bottom-1 right-1 bg-black/50 text-white text-[7px] px-1 py-0.5 rounded" x-text="img.type === 'url' ? 'URL' : 'PC'"></div>
                             <button type="button" @click.prevent="removeImage(index)" class="absolute top-1 right-1 w-4 h-4 bg-white/80 hover:bg-white text-slate-500 hover:text-red-500 rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
                                 <i class="fa-solid fa-xmark text-[8px]"></i>
                             </button>
-                            <input type="hidden" name="image_types[]" value="file">
                         </div>
                     </template>
-                    <button type="button" @click="$refs.fileInput.click()" x-show="imagePreviews.length > 0 && imagePreviews.length < 5" class="w-16 h-16 shrink-0 rounded-lg border border-dashed border-slate-300 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-slate-50 hover:border-indigo-300 transition-colors">
+                    <button type="button" @click="addFileInput()" x-show="images.length < 7" class="w-16 h-16 shrink-0 rounded-lg border border-dashed border-slate-300 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-slate-50 hover:border-indigo-300 transition-colors">
                         <i class="fa-solid fa-plus"></i>
                     </button>
                 </div>
@@ -323,10 +351,10 @@
                 
                 <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-50 flex flex-col items-center text-center">
                     <div class="w-40 h-32 mb-3 flex items-center justify-center">
-                        <template x-if="imagePreviews.length > 0">
-                            <img :src="imagePreviews[0]" class="max-h-full object-contain">
+                        <template x-if="window.globalImages && window.globalImages.length > 0 && window.globalImages[0].preview">
+                            <img :src="window.globalImages[0].preview" class="max-h-full object-contain">
                         </template>
-                        <template x-if="imagePreviews.length === 0">
+                        <template x-if="!(window.globalImages && window.globalImages.length > 0 && window.globalImages[0].preview)">
                             <i class="fa-solid fa-laptop text-5xl text-slate-200"></i>
                         </template>
                     </div>
@@ -392,7 +420,6 @@
             isNew: false,
             isOffer: false,
             isFeatured: false,
-            imagePreviews: [],
             specs: [
                 { key: 'Procesador', value: '' },
                 { key: 'Memoria RAM', value: '' },
@@ -413,26 +440,68 @@
                 this.specs.splice(index, 1);
             },
             getSpecsSummary() {
-                // Toma hasta las 3 primeras especificaciones para el resumen
                 return this.specs.filter(s => s.value).slice(0, 3).map(s => s.value).join(' | ');
+            }
+        }));
+
+        Alpine.data('imageUploadManager', () => ({
+            images: [],
+            tempUrl: '',
+            
+            init() {
+                // Compartir images globalmente para el resumen visual
+                window.globalImages = this.images;
+                this.$watch('images', val => window.globalImages = val);
             },
-            handleFileSelect(event) {
-                const newFiles = Array.from(event.target.files);
-                if (newFiles.length > 0) {
-                    let toAdd = Math.min(newFiles.length, 5 - this.imagePreviews.length);
-                    for (let i = 0; i < toAdd; i++) {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            this.imagePreviews.push(e.target.result);
-                        };
-                        reader.readAsDataURL(newFiles[i]);
-                    }
+            addUrlInput() {
+                if (!this.tempUrl) return;
+                if (this.images.length >= 7) {
+                    alert('Máximo 7 imágenes permitidas');
+                    return;
+                }
+                this.images.push({
+                    id: Date.now() + Math.random().toString(36).substring(7),
+                    type: 'url',
+                    url: this.tempUrl,
+                    preview: this.tempUrl
+                });
+                this.tempUrl = '';
+            },
+            addFileInput() {
+                if (this.images.length >= 7) {
+                    alert('Máximo 7 imágenes permitidas');
+                    return;
+                }
+                const newId = Date.now() + Math.random().toString(36).substring(7);
+                this.images.push({
+                    id: newId,
+                    type: 'file',
+                    url: '',
+                    preview: ''
+                });
+                // Hacer clic en el input recién creado después de que Alpine renderice
+                this.$nextTick(() => {
+                    const input = document.getElementById('file_input_' + newId);
+                    if (input) input.click();
+                });
+            },
+            handleFileChange(event, img) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        img.preview = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    // Si canceló la selección, quitamos el slot
+                    this.images = this.images.filter(i => i.id !== img.id);
                 }
             },
             removeImage(index) {
-                this.imagePreviews.splice(index, 1);
+                this.images.splice(index, 1);
             }
-        }))
+        }));
     });
 
     // Scanner
