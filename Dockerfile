@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libfreetype6-dev \
     libzip-dev \
+    libsqlite3-dev \
     zip \
     unzip \
     git \
@@ -18,7 +19,7 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Instalar extensiones de PHP requeridas por Laravel
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo_mysql gd zip
+    && docker-php-ext-install pdo_mysql pdo_sqlite gd zip
 
 # Habilitar el módulo rewrite de Apache (necesario para las URLs amigables de Laravel)
 RUN a2enmod rewrite
@@ -55,5 +56,5 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 ENV PORT=8000
 EXPOSE ${PORT}
 
-# Iniciar migraciones y Apache
-CMD su -s /bin/sh www-data -c "php artisan migrate --force && php artisan db:seed --force" && apache2-foreground
+# Ejecutar migraciones y luego iniciar Apache; los seeders se ejecutan manualmente una sola vez.
+CMD su -s /bin/sh www-data -c "php artisan migrate --force" && apache2-foreground

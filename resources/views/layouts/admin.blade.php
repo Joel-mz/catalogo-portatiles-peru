@@ -409,10 +409,18 @@
         <!-- Logo -->
         <div class="sidebar-logo">
             <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5">
-                <div class="w-9 h-9 rounded-xl flex items-center justify-center font-display font-black text-white text-base italic flex-shrink-0"
-                     style="background: linear-gradient(135deg, #2563eb, #7c3aed);">M</div>
+                @php
+                    $logo = \App\Models\Setting::where('key', 'store_logo')->value('value');
+                    $storeName = \App\Models\Setting::where('key', 'store_name')->value('value') ?? 'PORTÁTILES PERÚ';
+                @endphp
+                @if($logo)
+                    <img src="{{ Storage::url($logo) }}" alt="Logo" class="h-9 w-9 rounded-xl object-contain bg-white p-1">
+                @else
+                    <div class="w-9 h-9 rounded-xl flex items-center justify-center font-display font-black text-white text-base italic flex-shrink-0"
+                         style="background: linear-gradient(135deg, #2563eb, #7c3aed);">{{ substr($storeName, 0, 1) }}</div>
+                @endif
                 <div class="leading-tight">
-                    <div class="font-display font-black text-white text-sm tracking-wide">MPC <span class="text-blue-400">ANTIGRAVITY</span></div>
+                    <div class="font-display font-black text-white text-sm tracking-wide line-clamp-1">{{ $storeName }}</div>
                     <div class="text-[9px] text-slate-500 tracking-widest font-mono">Panel de Administración</div>
                 </div>
             </a>
@@ -573,15 +581,31 @@
                 <div class="w-px h-8 bg-slate-200 mx-1"></div>
 
                 <!-- User -->
-                <div class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-50 transition-all cursor-pointer border border-transparent hover:border-slate-200">
-                    <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
-                        {{ strtoupper(substr(Auth::user()->name ?? 'A', 0, 1)) }}
+                <div class="relative" x-data="{ open: false }">
+                    <div @click="open = !open" @click.away="open = false" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-50 transition-all cursor-pointer border border-transparent hover:border-slate-200 select-none">
+                        <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
+                            {{ strtoupper(substr(Auth::user()->name ?? 'A', 0, 1)) }}
+                        </div>
+                        <div class="hidden md:flex flex-col text-left">
+                            <span class="text-sm font-bold text-slate-800 leading-none">{{ Auth::user()->name ?? 'Administrador' }}</span>
+                            <span class="text-[10px] text-slate-400 mt-0.5">Administrador</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 hidden md:block" :class="{'rotate-180': open}"></i>
                     </div>
-                    <div class="hidden md:flex flex-col text-left">
-                        <span class="text-sm font-bold text-slate-800 leading-none">{{ Auth::user()->name ?? 'Administrador' }}</span>
-                        <span class="text-[10px] text-slate-400 mt-0.5">Administrador</span>
+
+                    <!-- Dropdown -->
+                    <div x-show="open" x-transition x-cloak class="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-lg z-50 py-2">
+                        <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-blue-600">
+                            <i class="fa-regular fa-user mr-2"></i> Mi Perfil
+                        </a>
+                        <div class="border-t border-slate-100 my-1"></div>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                <i class="fa-solid fa-right-from-bracket mr-2"></i> Cerrar Sesión
+                            </button>
+                        </form>
                     </div>
-                    <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 hidden md:block"></i>
                 </div>
             </div>
         </header>

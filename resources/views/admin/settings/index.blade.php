@@ -13,7 +13,7 @@
     @endif
 
     <div class="soft-card p-6">
-        <form action="{{ route('admin.settings.update') }}" method="POST">
+        <form action="{{ route('admin.settings.update') }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
             
@@ -23,8 +23,17 @@
                     <h3 class="text-lg font-medium text-slate-900 mb-4">Información de la Tienda</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
+                            <label class="block text-sm font-medium text-slate-700">Logo de la Empresa (Opcional)</label>
+                            <input type="file" name="store_logo" accept="image/*" class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                            @if(isset($settings['store_logo']))
+                                <div class="mt-2">
+                                    <img src="{{ Storage::url($settings['store_logo']) }}" alt="Logo" class="h-12 object-contain bg-slate-100 rounded p-1">
+                                </div>
+                            @endif
+                        </div>
+                        <div>
                             <label class="block text-sm font-medium text-slate-700">Nombre de la Tienda</label>
-                            <input type="text" name="store_name" value="{{ $settings['store_name'] ?? 'PORTÁTILES PERÚ' }}" class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <input type="text" name="store_name" value="{{ $settings['store_name'] ?? 'PORTÁTILES PERÚ' }}" class="mt-1 form-input w-full">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-slate-700">Teléfono (WhatsApp)</label>

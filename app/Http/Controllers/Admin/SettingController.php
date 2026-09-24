@@ -16,7 +16,12 @@ class SettingController extends Controller
 
     public function update(Request $request)
     {
-        $data = $request->except(['_token', '_method']);
+        $data = $request->except(['_token', '_method', 'store_logo']);
+
+        if ($request->hasFile('store_logo')) {
+            $logoPath = $request->file('store_logo')->store('settings', 'public');
+            Setting::updateOrCreate(['key' => 'store_logo'], ['value' => $logoPath, 'type' => 'string']);
+        }
 
         foreach ($data as $key => $value) {
             Setting::updateOrCreate(
