@@ -49,8 +49,11 @@ RUN sed -ri -e 's!/var/www/!/var/www/html/public!g' /etc/apache2/apache2.conf /e
 # Modificar Apache para que escuche en el puerto que Render asigne dinámicamente ($PORT)
 RUN sed -i 's/80/${PORT}/g' /etc/apache2/sites-available/000-default.conf /etc/apache2/ports.conf
 
-# Dar permisos a las carpetas que Laravel necesita modificar (incluyendo la base de datos)
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
+# Crear enlace simbólico para el storage
+RUN php artisan storage:link
+
+# Dar permisos a las carpetas que Laravel necesita modificar (incluyendo la base de datos y public/storage)
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database /var/www/html/public
 
 # Puerto por defecto (Render inyectará el suyo)
 ENV PORT=8000

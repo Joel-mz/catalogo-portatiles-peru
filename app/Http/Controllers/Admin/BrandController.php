@@ -38,11 +38,15 @@ class BrandController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'status' => 'boolean'
+            'logo' => 'nullable|image|max:2048',
         ]);
 
         $validated['slug'] = Str::slug($validated['name']);
         $validated['status'] = $request->has('status');
+
+        if ($request->hasFile('logo')) {
+            $validated['logo'] = $request->file('logo')->store('brands', 'public');
+        }
 
         Brand::create($validated);
 
@@ -58,10 +62,18 @@ class BrandController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'logo' => 'nullable|image|max:2048',
         ]);
 
         $validated['slug'] = Str::slug($validated['name']);
         $validated['status'] = $request->has('status');
+
+        if ($request->hasFile('logo')) {
+            if ($brand->logo) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($brand->logo);
+            }
+            $validated['logo'] = $request->file('logo')->store('brands', 'public');
+        }
 
         $brand->update($validated);
 
