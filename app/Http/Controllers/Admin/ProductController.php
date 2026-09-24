@@ -24,6 +24,15 @@ class ProductController extends Controller
         return view('admin.products.index', compact('products', 'categories', 'brands', 'models'));
     }
 
+    public function create()
+    {
+        $categories = Category::where('status', true)->get();
+        $brands = Brand::where('status', true)->get();
+        $models = DeviceModel::where('status', true)->get();
+
+        return view('admin.products.create', compact('categories', 'brands', 'models'));
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -71,6 +80,15 @@ class ProductController extends Controller
         $this->processImages($request, $product);
 
         return redirect()->route('admin.products.index')->with('success', 'Producto creado exitosamente.');
+    }
+
+    public function edit(Product $product)
+    {
+        $categories = Category::where('status', true)->get();
+        $brands = Brand::where('status', true)->get();
+        $models = DeviceModel::where('status', true)->get();
+
+        return view('admin.products.edit', compact('product', 'categories', 'brands', 'models'));
     }
 
     public function update(Request $request, Product $product)
