@@ -24,6 +24,26 @@
       class="pb-24">
     @csrf
 
+    @if ($errors->any())
+    <div class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200">
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <i class="fa-solid fa-circle-exclamation text-red-500 mt-0.5"></i>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-bold text-red-800">Se encontraron errores en el formulario:</h3>
+                <div class="mt-2 text-xs text-red-700">
+                    <ul class="list-disc pl-5 space-y-1">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         <!-- Left Column -->
@@ -48,7 +68,7 @@
                     
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">Categoría <span class="text-red-500">*</span></label>
-                        <select name="category_id" x-model="categoryName" @change="updateCategoryName($event)" class="w-full px-3 py-2 bg-slate-50 border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" required>
+                        <select name="category_id" x-model="categoryId" @change="updateCategoryName($event)" class="w-full px-3 py-2 bg-slate-50 border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" required>
                             <option value="">Selecciona una categoría</option>
                             @foreach($categories as $cat)
                                 <option value="{{ $cat->id }}" data-name="{{ $cat->name }}">{{ $cat->name }}</option>
@@ -58,7 +78,7 @@
 
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">Marca <span class="text-red-500">*</span></label>
-                        <select name="brand_id" x-model="brandName" @change="updateBrandName($event)" class="w-full px-3 py-2 bg-slate-50 border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" required>
+                        <select name="brand_id" x-model="brandId" @change="updateBrandName($event)" class="w-full px-3 py-2 bg-slate-50 border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" required>
                             <option value="">Selecciona una marca</option>
                             @foreach($brands as $brand)
                                 <option value="{{ $brand->id }}" data-name="{{ $brand->name }}">{{ $brand->name }}</option>
@@ -412,8 +432,10 @@
     document.addEventListener('alpine:init', () => {
         Alpine.data('productForm', () => ({
             name: '',
-            brandName: '',
+            categoryId: '',
+            brandId: '',
             categoryName: '',
+            brandName: '',
             price: '',
             offerPrice: '',
             isActive: true,

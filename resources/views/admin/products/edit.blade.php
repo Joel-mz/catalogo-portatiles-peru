@@ -44,6 +44,26 @@
     @csrf
     @method('PUT')
 
+    @if ($errors->any())
+    <div class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200">
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <i class="fa-solid fa-circle-exclamation text-red-500 mt-0.5"></i>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-bold text-red-800">Se encontraron errores en el formulario:</h3>
+                <div class="mt-2 text-xs text-red-700">
+                    <ul class="list-disc pl-5 space-y-1">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         <!-- Left Column -->
@@ -68,7 +88,7 @@
                     
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">Categoría <span class="text-red-500">*</span></label>
-                        <select name="category_id" @change="updateCategoryName($event)" class="w-full px-3 py-2 bg-slate-50 border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" required>
+                        <select name="category_id" x-model="categoryId" @change="updateCategoryName($event)" class="w-full px-3 py-2 bg-slate-50 border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" required>
                             @foreach($categories as $cat)
                                 <option value="{{ $cat->id }}" data-name="{{ $cat->name }}" {{ old('category_id', $product->category_id) == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
                             @endforeach
@@ -77,7 +97,7 @@
 
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">Marca <span class="text-red-500">*</span></label>
-                        <select name="brand_id" @change="updateBrandName($event)" class="w-full px-3 py-2 bg-slate-50 border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" required>
+                        <select name="brand_id" x-model="brandId" @change="updateBrandName($event)" class="w-full px-3 py-2 bg-slate-50 border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" required>
                             @foreach($brands as $brand)
                                 <option value="{{ $brand->id }}" data-name="{{ $brand->name }}" {{ old('brand_id', $product->brand_id) == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
                             @endforeach
@@ -436,6 +456,8 @@
     document.addEventListener('alpine:init', () => {
         Alpine.data('productForm', () => ({
             name: `{!! addslashes($product->name) !!}`,
+            categoryId: `{{ $product->category_id }}`,
+            brandId: `{{ $product->brand_id }}`,
             brandName: `{!! $product->brand ? addslashes($product->brand->name) : '' !!}`,
             categoryName: `{!! $product->category ? addslashes($product->category->name) : '' !!}`,
             price: `{{ $product->price }}`,
