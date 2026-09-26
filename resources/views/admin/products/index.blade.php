@@ -9,6 +9,12 @@
             <p class="text-xs text-slate-500 mt-1">Gestiona inventario, especificaciones y precios.</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
+            <button type="button" x-show="selectedProducts.length > 0" @click="deleteSelected()" x-cloak class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm flex items-center gap-2 text-sm font-bold border border-red-700">
+                <i class="fa-solid fa-trash"></i> Eliminar (<span x-text="selectedProducts.length"></span>)
+            </button>
+            <button type="button" @click="openQrModal()" class="px-3 py-2 bg-purple-50 text-purple-700 hover:bg-purple-100 rounded-lg transition-colors text-xs font-bold border border-purple-200 flex items-center gap-2">
+                <i class="fa-solid fa-qrcode"></i> Imprimir QRs
+            </button>
             <a href="{{ route('admin.pdf.index') }}" class="px-3 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors text-xs font-bold border border-red-100 flex items-center gap-2">
                 <i class="fa-solid fa-file-pdf"></i> PDF Catálogo
             </a>
@@ -52,6 +58,9 @@
             <table class="admin-table">
                 <thead>
                     <tr>
+                        <th class="w-12 text-center">
+                            <input type="checkbox" x-model="selectAll" @change="toggleAll" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer">
+                        </th>
                         <th class="w-16">Img</th>
                         <th>Producto / SKU</th>
                         <th>Categoría</th>
@@ -64,6 +73,9 @@
                 <tbody>
                     @forelse($products as $product)
                     <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="text-center">
+                            <input type="checkbox" value="{{ $product->id }}" x-model="selectedProducts" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer">
+                        </td>
                         <td>
                             <div class="w-12 h-12 bg-white rounded-lg border border-slate-200 p-1 flex items-center justify-center overflow-hidden">
                                 @php $mainImg = $product->images->firstWhere('is_main', true) ?? $product->images->first(); @endphp
@@ -112,7 +124,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="py-12 text-center text-slate-400">
+                        <td colspan="8" class="py-12 text-center text-slate-400">
                             <i class="fa-solid fa-box-open text-4xl block mb-3 text-slate-200"></i>
                             <p class="text-sm font-medium">No hay productos registrados en el catálogo.</p>
                         </td>
@@ -343,6 +355,55 @@
             </div>
         </div>
     </div>
+
+    <!-- ==================== QR MODAL ==================== -->
+    <div class="relative z-[100]" aria-labelledby="modal-title" role="dialog" aria-modal="true" x-show="showQrModal" x-cloak>
+        <div class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm transition-opacity" x-show="showQrModal" x-transition.opacity @click="closeQrModal()"></div>
+
+        <div class="fixed inset-0 z-10 overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0 pointer-events-none">
+                <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-md pointer-events-auto"
+                     x-show="showQrModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+                    
+                    <form action="{{ route('admin.products.qrcodes') }}" method="GET" target="_blank">
+                        <!-- Modal Header -->
+                        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                            <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-qrcode text-purple-500"></i> Imprimir Códigos QR</h3>
+                            <button type="button" @click="closeQrModal()" class="w-8 h-8 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-600 flex items-center justify-center transition-colors">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+
+                        <!-- Modal Body -->
+                        <div class="px-6 py-6 space-y-4">
+                            <p class="text-xs text-slate-500">
+                                Genera un archivo listo para imprimir con los códigos QR de tus productos. Estos códigos se pueden pegar en tus productos físicos y ser escaneados con el buscador del sistema.
+                            </p>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Filtrar por Categoría</label>
+                                <select name="category_id" class="w-full rounded-lg border-slate-200 text-sm focus:border-purple-500 focus:ring-purple-500">
+                                    <option value="">Todas las Categorías</option>
+                                    @foreach($categories as $c)
+                                        <option value="{{ $c->id }}">{{ $c->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Modal Footer -->
+                        <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
+                            <button type="button" @click="closeQrModal()" class="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-sm font-bold shadow-sm">
+                                Cancelar
+                            </button>
+                            <button type="submit" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-bold shadow-md shadow-purple-500/20 flex items-center gap-2">
+                                <i class="fa-solid fa-print"></i> Generar QRs
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Scanner Modal Overlay -->
     <div class="fixed inset-0 z-[200] bg-black/90 flex flex-col items-center justify-center" x-show="showScanner" x-cloak x-transition.opacity>
         <div class="w-full max-w-lg bg-white rounded-xl overflow-hidden shadow-2xl relative">
@@ -378,6 +439,7 @@
 function productManager() {
     return {
         showModal: false,
+        showQrModal: false,
         showScanner: false,
         scannerTarget: null, // 'code' or 'serial_number'
         html5QrcodeScanner: null,
@@ -392,6 +454,49 @@ function productManager() {
         },
         specs: [],
         images: [],
+        
+        selectedProducts: [],
+        selectAll: false,
+
+        toggleAll() {
+            if (this.selectAll) {
+                const checkboxes = document.querySelectorAll('tbody input[type="checkbox"]');
+                this.selectedProducts = Array.from(checkboxes).map(cb => cb.value);
+            } else {
+                this.selectedProducts = [];
+            }
+        },
+
+        deleteSelected() {
+            if(confirm(`¿Estás seguro de que deseas eliminar ${this.selectedProducts.length} producto(s) permanentemente?`)) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '{{ route('admin.products.bulk_delete') }}';
+                
+                const csrf = document.createElement('input');
+                csrf.type = 'hidden';
+                csrf.name = '_token';
+                csrf.value = '{{ csrf_token() }}';
+                form.appendChild(csrf);
+
+                const method = document.createElement('input');
+                method.type = 'hidden';
+                method.name = '_method';
+                method.value = 'DELETE';
+                form.appendChild(method);
+
+                this.selectedProducts.forEach(id => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'ids[]';
+                    input.value = id;
+                    form.appendChild(input);
+                });
+
+                document.body.appendChild(form);
+                form.submit();
+            }
+        },
 
         openCreateModal() {
             this.isEditing = false;
@@ -430,6 +535,14 @@ function productManager() {
 
         closeModal() {
             this.showModal = false;
+        },
+
+        openQrModal() {
+            this.showQrModal = true;
+        },
+
+        closeQrModal() {
+            this.showQrModal = false;
         },
 
         addSpec() {

@@ -488,12 +488,12 @@
         Alpine.data('imageUploadManager', () => ({
             images: [],
             tempUrl: '',
-            currentImages: @json(array_map(function($img) {
+            currentImages: @json($product->images->map(function($img) {
                 return [
-                    'id' => $img['id'],
-                    'url' => filter_var($img['image_path'], FILTER_VALIDATE_URL) ? $img['image_path'] : asset('storage/' . $img['image_path'])
+                    'id' => $img->id,
+                    'url' => filter_var($img->image_path, FILTER_VALIDATE_URL) ? $img->image_path : asset('storage/' . $img->image_path)
                 ];
-            }, clone $existingImages)),
+            })->toArray()),
             
             init() {
                 window.globalImages = this.images;

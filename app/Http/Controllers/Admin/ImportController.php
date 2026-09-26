@@ -17,65 +17,91 @@ class ImportController extends Controller
     public function template()
     {
         $headers = [
-            'Content-type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename=plantilla_productos.csv',
+            'Content-type' => 'application/vnd.ms-excel',
+            'Content-Disposition' => 'attachment; filename=plantilla_productos.xls',
             'Pragma' => 'no-cache',
             'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
             'Expires' => '0'
         ];
         
-        $columns = ['code', 'name', 'price', 'stock', 'category_id', 'brand_id'];
+        $html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+        <head><meta charset="utf-8"></head>
+        <body>
+            <table border="1" cellpadding="5" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th style="background-color: #4F46E5; color: #ffffff; font-weight: bold; width: 150px; text-align: center;">code</th>
+                        <th style="background-color: #4F46E5; color: #ffffff; font-weight: bold; width: 300px; text-align: center;">name</th>
+                        <th style="background-color: #4F46E5; color: #ffffff; font-weight: bold; width: 100px; text-align: center;">price</th>
+                        <th style="background-color: #4F46E5; color: #ffffff; font-weight: bold; width: 100px; text-align: center;">stock</th>
+                        <th style="background-color: #4F46E5; color: #ffffff; font-weight: bold; width: 120px; text-align: center;">category_id</th>
+                        <th style="background-color: #4F46E5; color: #ffffff; font-weight: bold; width: 120px; text-align: center;">brand_id</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="text-align: center; border: 1px solid #d1d5db;">PROD-001</td>
+                        <td style="border: 1px solid #d1d5db;">Ejemplo Laptop Gamer RTX 4060</td>
+                        <td style="text-align: right; border: 1px solid #d1d5db;">3500.00</td>
+                        <td style="text-align: center; border: 1px solid #d1d5db;">10</td>
+                        <td style="text-align: center; border: 1px solid #d1d5db;">1</td>
+                        <td style="text-align: center; border: 1px solid #d1d5db;">1</td>
+                    </tr>
+                </tbody>
+            </table>
+        </body>
+        </html>';
         
-        $callback = function() use ($columns) {
-            $file = fopen('php://output', 'w');
-            // Añadir BOM (Byte Order Mark) para que Excel reconozca UTF-8
-            fputs($file, $bom = (chr(0xEF) . chr(0xBB) . chr(0xBF)));
-            
-            // Usar punto y coma (;) para que Excel en español lo divida en columnas automáticamente
-            fputcsv($file, $columns, ';');
-            // Filas de ejemplo
-            fputcsv($file, ['PROD-001', 'Ejemplo Laptop Gamer', '1500.00', '10', '1', '1'], ';');
-            fclose($file);
-        };
-        
-        return response()->stream($callback, 200, $headers);
+        return response($html, 200, $headers);
     }
 
     public function export()
     {
         $headers = [
-            'Content-type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename=productos_exportados.csv',
+            'Content-type' => 'application/vnd.ms-excel',
+            'Content-Disposition' => 'attachment; filename=productos_exportados.xls',
             'Pragma' => 'no-cache',
             'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
             'Expires' => '0'
         ];
         
-        $columns = ['code', 'sku', 'serial_number', 'name', 'price', 'stock', 'category_id', 'brand_id', 'description'];
-        
-        $callback = function() use ($columns) {
-            $file = fopen('php://output', 'w');
-            fputs($file, $bom = (chr(0xEF) . chr(0xBB) . chr(0xBF))); // UTF-8 BOM
+        $callback = function() {
+            echo '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+            <head><meta charset="utf-8"></head>
+            <body>
+                <table border="1" cellpadding="5" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th style="background-color: #10B981; color: #ffffff; font-weight: bold;">code</th>
+                            <th style="background-color: #10B981; color: #ffffff; font-weight: bold;">sku</th>
+                            <th style="background-color: #10B981; color: #ffffff; font-weight: bold;">serial_number</th>
+                            <th style="background-color: #10B981; color: #ffffff; font-weight: bold;">name</th>
+                            <th style="background-color: #10B981; color: #ffffff; font-weight: bold;">price</th>
+                            <th style="background-color: #10B981; color: #ffffff; font-weight: bold;">stock</th>
+                            <th style="background-color: #10B981; color: #ffffff; font-weight: bold;">category_id</th>
+                            <th style="background-color: #10B981; color: #ffffff; font-weight: bold;">brand_id</th>
+                            <th style="background-color: #10B981; color: #ffffff; font-weight: bold;">description</th>
+                        </tr>
+                    </thead>
+                    <tbody>';
             
-            fputcsv($file, $columns, ';');
-            
-            Product::chunk(100, function($products) use ($file) {
+            Product::chunk(100, function($products) {
                 foreach ($products as $p) {
-                    fputcsv($file, [
-                        $p->code,
-                        $p->sku,
-                        $p->serial_number,
-                        $p->name,
-                        $p->price,
-                        $p->stock,
-                        $p->category_id,
-                        $p->brand_id,
-                        $p->description
-                    ], ';');
+                    echo '<tr>';
+                    echo '<td>' . htmlspecialchars($p->code) . '</td>';
+                    echo '<td>' . htmlspecialchars($p->sku ?? '') . '</td>';
+                    echo '<td>' . htmlspecialchars($p->serial_number ?? '') . '</td>';
+                    echo '<td>' . htmlspecialchars($p->name) . '</td>';
+                    echo '<td>' . htmlspecialchars($p->price) . '</td>';
+                    echo '<td>' . htmlspecialchars($p->stock) . '</td>';
+                    echo '<td>' . htmlspecialchars($p->category_id) . '</td>';
+                    echo '<td>' . htmlspecialchars($p->brand_id) . '</td>';
+                    echo '<td>' . htmlspecialchars($p->description ?? '') . '</td>';
+                    echo '</tr>';
                 }
             });
             
-            fclose($file);
+            echo '</tbody></table></body></html>';
         };
         
         return response()->stream($callback, 200, $headers);
@@ -84,41 +110,27 @@ class ImportController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:csv,txt,xlsx,xls|max:5120'
-        ], [
-            'file.mimes' => 'El archivo debe ser un CSV válido.'
+            'products' => 'required|string'
         ]);
 
         try {
-            $file = $request->file('file');
-            $handle = fopen($file->getRealPath(), 'r');
-            
-            $header = true;
+            $products = json_decode($request->input('products'), true);
             $count = 0;
             
-            while (($line = fgets($handle)) !== false) {
-                $delimiter = strpos($line, ';') !== false ? ';' : ',';
-                $row = str_getcsv($line, $delimiter);
-                
-                if ($header) {
-                    $header = false;
-                    continue; 
-                }
-                
-                // Formato exportado/importado: code, sku, serial_number, name, price, stock, category_id, brand_id, description
-                if (count($row) >= 8) {
+            foreach ($products as $row) {
+                // Ensure required fields exist
+                if (!empty($row['code']) && !empty($row['name'])) {
                     Product::updateOrCreate(
-                        ['code' => trim($row[0])],
+                        ['code' => trim($row['code'])],
                         [
-                            'sku' => trim($row[1] ?? ''),
-                            'serial_number' => trim($row[2] ?? ''),
-                            'name' => trim($row[3]),
-                            'slug' => Str::slug(trim($row[3])) . '-' . Str::random(4),
-                            'price' => floatval($row[4]),
-                            'stock' => intval($row[5]),
-                            'category_id' => intval($row[6] ?? 1),
-                            'brand_id' => intval($row[7] ?? 1),
-                            'description' => isset($row[8]) ? trim($row[8]) : null,
+                            'name' => trim($row['name']),
+                            'slug' => Str::slug(trim($row['name'])) . '-' . Str::random(4),
+                            'price' => isset($row['price']) ? floatval($row['price']) : 0,
+                            'min_price' => isset($row['price']) ? floatval($row['price']) * 0.8 : 0,
+                            'stock' => isset($row['stock']) ? intval($row['stock']) : 0,
+                            'category_id' => isset($row['category_id']) ? intval($row['category_id']) : 1,
+                            'brand_id' => isset($row['brand_id']) ? intval($row['brand_id']) : 1,
+                            'state' => 'Nuevo',
                             'status' => true
                         ]
                     );
@@ -126,11 +138,9 @@ class ImportController extends Controller
                 }
             }
             
-            fclose($handle);
-            
-            return redirect()->back()->with('success', "Se procesaron exitosamente $count productos desde el CSV. (Se usó como copia de seguridad / actualización).");
+            return redirect()->back()->with('success', "Se importaron/actualizaron exitosamente $count productos desde el archivo.");
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Error al importar CSV: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error al importar los datos: ' . $e->getMessage());
         }
     }
 }

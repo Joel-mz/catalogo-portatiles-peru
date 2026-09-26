@@ -13,8 +13,8 @@ class Product extends Model
 
     protected $fillable = [
         'code', 'sku', 'control_type', 'serial_number', 'name', 'slug', 'category_id', 'subcategory_id', 'brand_id', 'device_model_id',
-        'description', 'technical_specs', 'price', 'offer_price', 'warranty', 'stock',
-        'status', 'is_featured', 'is_new', 'is_offer',
+        'description', 'technical_specs', 'price', 'min_price', 'offer_price', 'warranty', 'stock',
+        'status', 'state', 'is_featured', 'is_new', 'is_offer',
     ];
 
     protected $casts = [

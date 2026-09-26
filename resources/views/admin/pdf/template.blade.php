@@ -13,37 +13,36 @@
             padding: 10px;
         }
         .header { 
-            text-align: center; 
+            text-align: left; 
             margin-bottom: 30px; 
-            background: #1e293b;
+            background: #dc2626; /* red-600 */
             color: #fff;
-            padding: 20px;
-            border-radius: 8px;
+            padding: 20px 30px;
         }
         .header h1 { 
             color: #fff; 
             margin: 0 0 5px 0; 
-            font-size: 26px; 
+            font-size: 24px; 
             text-transform: uppercase;
+            font-weight: 900;
+            letter-spacing: 1px;
         }
         .header p { 
-            margin: 0 0 10px 0; 
-            color: #94a3b8; 
-            font-size: 13px;
+            margin: 0; 
+            color: #fee2e2; /* red-100 */
+            font-size: 12px;
         }
         .header-contact {
-            background: #2563eb;
+            float: right;
+            margin-top: -30px;
             color: white;
-            padding: 5px 15px;
-            border-radius: 15px;
             font-weight: bold;
-            display: inline-block;
         }
         table.product-card {
             width: 100%;
             border: 1px solid #e2e8f0;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             page-break-inside: avoid;
         }
         table.product-card td {
@@ -62,11 +61,12 @@
         }
         .td-content {
             background: #ffffff;
+            position: relative;
         }
         .product-title { 
-            font-size: 18px; 
+            font-size: 16px; 
             font-weight: bold; 
-            color: #0f172a; 
+            color: #1e293b; 
             margin: 0 0 5px 0; 
         }
         .product-meta {
@@ -84,28 +84,24 @@
             font-weight: bold;
         }
         .pricing-box {
-            background: #f0f9ff;
-            border: 1px solid #bae6fd;
-            padding: 8px 12px;
             margin-bottom: 10px;
-            border-radius: 6px;
             display: inline-block;
         }
         .product-price { 
             font-size: 18px; 
-            color: #0284c7; 
-            font-weight: bold; 
+            color: #dc2626; /* red-600 */
+            font-weight: 900; 
             margin: 0;
         }
         .product-offer { 
             font-size: 11px; 
-            color: #ef4444; 
+            color: #94a3b8; /* slate-400 */
             text-decoration: line-through;
-            margin-left: 8px;
+            margin-right: 8px;
         }
         .product-specs { 
             font-size: 11px; 
-            color: #475569; 
+            color: #64748b; 
             line-height: 1.4;
         }
         .product-specs ul {
@@ -113,13 +109,15 @@
             padding-left: 15px; 
         }
         .badge-offer {
-            background: #ef4444;
-            color: white;
-            font-size: 9px;
-            padding: 2px 4px;
-            border-radius: 3px;
+            background: #facc15; /* yellow-400 */
+            color: #713f12; /* yellow-900 */
+            font-size: 10px;
+            padding: 3px 6px;
+            border-radius: 0 0 0 4px;
             font-weight: bold;
-            vertical-align: super;
+            position: absolute;
+            top: 0;
+            right: 0;
         }
         .footer { 
             position: fixed; 
@@ -136,7 +134,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>{{ $settings['store_name'] ?? 'PORTÁTILES PERÚ' }}</h1>
+        <h1>{{ $options['custom_title'] ?? ($settings['store_name'] ?? 'PORTÁTILES PERÚ') }}</h1>
         <p>Catálogo Oficial de Productos - {{ date('d/m/Y') }}</p>
         <div class="header-contact">WhatsApp: {{ $settings['whatsapp_number'] ?? 'No especificado' }}</div>
     </div>
@@ -180,15 +178,20 @@
                     &nbsp; | &nbsp; P/N: {{ $product->code }}
                 </div>
                 
+                @if($options['show_price'])
                 <div class="pricing-box">
                     <p class="product-price">
-                        S/ {{ number_format($product->price, 2) }}
                         @if($product->is_offer)
-                            <span class="product-offer">Normal: S/ {{ number_format($product->offer_price, 2) }}</span>
+                            <span class="product-offer">S/ {{ number_format($product->price, 2) }}</span>
+                            S/ {{ number_format($product->offer_price, 2) }}
+                        @else
+                            S/ {{ number_format($product->price, 2) }}
                         @endif
                     </p>
                 </div>
+                @endif
                 
+                @if($options['show_specs'])
                 <div class="product-specs">
                     @if(is_array($product->technical_specs) && count($product->technical_specs) > 0)
                         <ul>
@@ -200,11 +203,42 @@
                         <p style="margin:0;">{{ $product->description ?: 'Sin descripción detallada.' }}</p>
                     @endif
                 </div>
+                @endif
             </td>
         </tr>
     </table>
     @endforeach
     
+    @if(!empty($options['bank_accounts']) || !empty($options['yape_plin']) || !empty($options['store_address']))
+    <div style="page-break-inside: avoid; border: 2px dashed #cbd5e1; padding: 20px; border-radius: 8px; margin-top: 30px; background: #f8fafc;">
+        <h3 style="margin-top: 0; color: #1e293b; text-align: center; text-transform: uppercase; font-size: 14px;">Información de Pagos y Contacto</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                @if(!empty($options['bank_accounts']))
+                <td style="width: 33%; vertical-align: top; padding: 10px; border-right: 1px solid #e2e8f0;">
+                    <strong style="color: #2563eb; display: block; margin-bottom: 5px;">Cuentas Bancarias</strong>
+                    {!! nl2br(e($options['bank_accounts'])) !!}
+                </td>
+                @endif
+                
+                @if(!empty($options['yape_plin']))
+                <td style="width: 33%; vertical-align: top; padding: 10px; border-right: 1px solid #e2e8f0;">
+                    <strong style="color: #10b981; display: block; margin-bottom: 5px;">Yape / Plin</strong>
+                    {!! nl2br(e($options['yape_plin'])) !!}
+                </td>
+                @endif
+                
+                @if(!empty($options['store_address']))
+                <td style="width: 33%; vertical-align: top; padding: 10px;">
+                    <strong style="color: #ef4444; display: block; margin-bottom: 5px;">Nuestra Tienda</strong>
+                    {{ $options['store_address'] }}
+                </td>
+                @endif
+            </tr>
+        </table>
+    </div>
+    @endif
+
     <div class="footer">
         Generado el {{ date('d/m/Y H:i:s') }} - Catálogo exclusivo de {{ $settings['store_name'] ?? 'PORTÁTILES PERÚ' }}
     </div>

@@ -1,27 +1,28 @@
 @extends('layouts.admin')
-@section('header_title', 'Registro de Producto')
+@section('header_title', 'Registrar Producto')
 @section('content')
 
 <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div class="flex items-center gap-3">
-        <div class="h-10 w-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">
-            <i class="fa-solid fa-box-open"></i>
+        <div class="h-10 w-10 bg-indigo-600 rounded-lg flex items-center justify-center text-white shadow-sm">
+            <i class="fa-solid fa-cube text-xl"></i>
         </div>
         <div>
-            <h2 class="text-xl font-extrabold text-slate-800">Registro de Producto</h2>
+            <h2 class="text-xl font-bold text-slate-800">Registrar Producto</h2>
             <p class="text-xs text-slate-500">Completa la información para registrar un nuevo producto en el catálogo.</p>
         </div>
     </div>
-    <div class="text-sm font-medium text-slate-500 flex items-center gap-2">
-        <a href="{{ route('admin.products.index') }}" class="hover:text-indigo-600"><i class="fa-solid fa-home text-xs"></i> Productos</a>
-        <i class="fa-solid fa-chevron-right text-[10px]"></i>
-        <span class="text-indigo-700">Registrar Producto</span>
+    <div class="text-[11px] font-medium text-slate-500 flex items-center gap-2">
+        <a href="{{ route('dashboard') }}" class="hover:text-indigo-600"><i class="fa-solid fa-home"></i></a>
+        <i class="fa-solid fa-chevron-right text-[8px]"></i>
+        <a href="{{ route('admin.products.index') }}" class="hover:text-indigo-600">Productos</a>
+        <i class="fa-solid fa-chevron-right text-[8px]"></i>
+        <span class="text-indigo-600">Registrar Producto</span>
     </div>
 </div>
 
-<form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data" 
-      x-data="productForm()" 
-      class="pb-24">
+<div x-data="productForm()">
+<form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data" class="pb-24">
     @csrf
 
     @if ($errors->any())
@@ -50,448 +51,593 @@
         <div class="lg:col-span-8 space-y-6">
             
             <!-- 1. Información Principal -->
-            <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-1 h-full bg-indigo-500"></div>
-                <h3 class="text-base font-extrabold text-slate-800 mb-5 flex items-center gap-2">
-                    <span class="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 text-xs">1</span> 
+            <section class="bg-[#FCFCF9] rounded-2xl shadow-sm border border-slate-100 p-6">
+                <h3 class="text-sm font-bold text-slate-800 mb-5 flex items-center gap-3">
+                    <span class="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-600 text-white text-xs">1</span> 
                     Información Principal
                 </h3>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div class="md:col-span-2">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div class="md:col-span-1">
                         <label class="block text-xs font-bold text-slate-700 mb-1">Nombre del Producto <span class="text-red-500">*</span></label>
                         <div class="relative">
-                            <i class="fa-solid fa-laptop absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                            <input type="text" name="name" x-model="name" class="w-full pl-9 pr-4 py-2 bg-slate-50 border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" placeholder="Ej. Laptop Lenovo IdeaPad Slim 3" required>
+                            <i class="fa-solid fa-tag absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
+                            <input type="text" name="name" x-model="name" class="w-full pl-8 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-black focus:border-black transition-colors" placeholder="Ej. Laptop Lenovo IdeaPad Slim 3" required>
                         </div>
                     </div>
                     
-                    <div>
+                    <div class="md:col-span-1">
                         <label class="block text-xs font-bold text-slate-700 mb-1">Categoría <span class="text-red-500">*</span></label>
-                        <select name="category_id" x-model="categoryId" @change="updateCategoryName($event)" class="w-full px-3 py-2 bg-slate-50 border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" required>
-                            <option value="">Selecciona una categoría</option>
-                            @foreach($categories as $cat)
-                                <option value="{{ $cat->id }}" data-name="{{ $cat->name }}">{{ $cat->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Marca <span class="text-red-500">*</span></label>
-                        <select name="brand_id" x-model="brandId" @change="updateBrandName($event)" class="w-full px-3 py-2 bg-slate-50 border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" required>
-                            <option value="">Selecciona una marca</option>
-                            @foreach($brands as $brand)
-                                <option value="{{ $brand->id }}" data-name="{{ $brand->name }}">{{ $brand->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Modelo (Opcional)</label>
-                        <div class="relative">
-                            <i class="fa-regular fa-id-card absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                            <select name="device_model_id" class="w-full pl-9 pr-4 py-2 bg-slate-50 border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
-                                <option value="">Ninguno...</option>
-                                @foreach($models as $model)
-                                    <option value="{{ $model->id }}">{{ $model->name }}</option>
-                                @endforeach
-                            </select>
+                        <div class="flex gap-2">
+                            <div class="relative flex-1">
+                                <i class="fa-regular fa-folder absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
+                                <select name="category_id" x-model="categoryId" @change="updateCategoryName($event)" class="w-full pl-8 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-black focus:border-black transition-colors appearance-none" required>
+                                    <option value="">Selecciona una categoría</option>
+                                    @foreach($categories as $cat)
+                                        <option value="{{ $cat->id }}" data-name="{{ $cat->name }}">{{ $cat->name }}</option>
+                                    @endforeach
+                                </select>
+                                <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-[9px] pointer-events-none"></i>
+                            </div>
+                            <button type="button" @click="openQuickAddModal('category_id', 'Categoría')" class="w-9 h-[34px] shrink-0 flex items-center justify-center bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-600 hover:text-white transition-colors" title="Agregar nueva categoría">
+                                <i class="fa-solid fa-plus text-xs"></i>
+                            </button>
                         </div>
                     </div>
 
-                    <div class="md:col-span-2">
+                    <div class="md:col-span-1">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Subcategoría <span class="text-red-500">*</span></label>
+                        <div class="flex gap-2">
+                            <div class="relative flex-1">
+                                <i class="fa-solid fa-sitemap absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
+                                <select name="subcategory_id" class="w-full pl-8 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-black focus:border-black transition-colors appearance-none" required>
+                                    <option value="">Selecciona una subcategoría</option>
+                                    @foreach($subcategories as $subcat)
+                                        <option value="{{ $subcat->id }}">{{ $subcat->name }}</option>
+                                    @endforeach
+                                </select>
+                                <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-[9px] pointer-events-none"></i>
+                            </div>
+                            <button type="button" @click="openQuickAddModal('subcategory_id', 'Subcategoría')" class="w-9 h-[34px] shrink-0 flex items-center justify-center bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-600 hover:text-white transition-colors" title="Agregar nueva subcategoría">
+                                <i class="fa-solid fa-plus text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-1">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Marca <span class="text-red-500">*</span></label>
+                        <div class="flex gap-2">
+                            <div class="relative flex-1">
+                                <i class="fa-solid fa-shield-halved absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
+                                <select name="brand_id" x-model="brandId" @change="updateBrandName($event)" class="w-full pl-8 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-black focus:border-black transition-colors appearance-none" required>
+                                    <option value="">Selecciona una marca</option>
+                                    @foreach($brands as $brand)
+                                        <option value="{{ $brand->id }}" data-name="{{ $brand->name }}">{{ $brand->name }}</option>
+                                    @endforeach
+                                </select>
+                                <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-[9px] pointer-events-none"></i>
+                            </div>
+                            <button type="button" @click="openQuickAddModal('brand_id', 'Marca')" class="w-9 h-[34px] shrink-0 flex items-center justify-center bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-600 hover:text-white transition-colors" title="Agregar nueva marca">
+                                <i class="fa-solid fa-plus text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="md:col-span-1">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Modelo <span class="text-red-500">*</span></label>
+                        <div class="flex gap-2">
+                            <div class="relative flex-1">
+                                <i class="fa-solid fa-microchip absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
+                                <select name="device_model_id" class="w-full pl-8 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-black focus:border-black transition-colors appearance-none">
+                                    <option value="">Selecciona un modelo</option>
+                                    @foreach($models as $model)
+                                        <option value="{{ $model->id }}">{{ $model->name }}</option>
+                                    @endforeach
+                                </select>
+                                <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-[9px] pointer-events-none"></i>
+                            </div>
+                            <button type="button" @click="openQuickAddModal('device_model_id', 'Modelo')" class="w-9 h-[34px] shrink-0 flex items-center justify-center bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-600 hover:text-white transition-colors" title="Agregar nuevo modelo">
+                                <i class="fa-solid fa-plus text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-1">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Producto <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <i class="fa-solid fa-laptop absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
+                            <select name="control_type" class="w-full pl-8 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-black focus:border-black transition-colors appearance-none" required>
+                                <option value="Serie">Por Serie</option>
+                                <option value="Cantidad">Por Cantidad</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-[9px] pointer-events-none"></i>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-3">
                         <label class="block text-xs font-bold text-slate-700 mb-1">Descripción corta <span class="text-red-500">*</span></label>
-                        <textarea name="description" rows="2" class="w-full px-3 py-2 bg-slate-50 border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" placeholder="Breve descripción del producto..."></textarea>
+                        <div class="relative">
+                            <textarea name="description" x-model="description" rows="3" maxlength="200" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-black focus:border-black transition-colors resize-none" placeholder="Ej. Breve descripción del producto (máx. 200 caracteres)." required></textarea>
+                            <div class="absolute bottom-2 left-2">
+                                <button type="button" @click="openAiModal('description')" class="px-2 py-1 bg-purple-100 text-purple-700 text-[9px] font-bold rounded hover:bg-purple-200 transition-colors flex items-center gap-1">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Llenar con IA
+                                </button>
+                            </div>
+                            <div class="absolute bottom-2 right-3 text-[9px] text-slate-400" x-text="(description ? description.length : 0) + '/200'"></div>
+                        </div>
                     </div>
                 </div>
             </section>
 
             <!-- 2. Identificación del Producto -->
-            <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
-                <h3 class="text-base font-extrabold text-slate-800 mb-5 flex items-center gap-2">
-                    <span class="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-700 text-xs">2</span> 
+            <section class="bg-[#FCFCF9] rounded-2xl shadow-sm border border-slate-100 p-6">
+                <h3 class="text-sm font-bold text-slate-800 mb-5 flex items-center gap-3">
+                    <span class="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-600 text-white text-xs">2</span> 
                     Identificación del Producto
                 </h3>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Código Oficial (P/N) <span class="text-red-500">*</span></label>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Código / SKU <span class="text-red-500">*</span></label>
                         <div class="relative flex">
-                            <span class="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-slate-200 bg-slate-100 text-slate-500 sm:text-sm">
-                                <i class="fa-solid fa-barcode"></i>
-                            </span>
-                            <input type="text" name="code" id="product_code" class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-xl bg-slate-50 border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Ej. 82XQ00NSLM" required>
-                            
-                            <!-- Scanner btn -->
-                            <button type="button" onclick="startScanner()" class="absolute right-2 top-1/2 -translate-y-1/2 text-indigo-600 hover:text-indigo-800" title="Escanear">
-                                <i class="fa-solid fa-camera"></i>
-                            </button>
+                            <i class="fa-solid fa-barcode absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
+                            <input type="text" name="code" value="{{ 'SKU-' . strtoupper(Str::random(6)) }}" class="w-full pl-8 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-black focus:border-black transition-colors" placeholder="Ej. SKU-000123" required>
                         </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Tipo de Control <span class="text-red-500">*</span></label>
-                        <select name="control_type" class="w-full px-3 py-2 bg-slate-50 border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
-                            <option value="quantity">Solo por Cantidad</option>
-                            <option value="serial">Por Número de Serie (Unitario)</option>
-                            <option value="lot">Por Lote</option>
-                        </select>
+                        <p class="text-[9px] text-slate-400 mt-1">Se genera automáticamente o escríbelo</p>
                     </div>
 
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">Número de Serie (Opcional)</label>
                         <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                                <i class="fa-solid fa-hashtag"></i>
-                            </span>
-                            <input type="text" name="serial_number" class="w-full pl-9 pr-3 py-2 bg-slate-50 border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Ej. PF5WQYD7">
+                            <i class="fa-solid fa-hard-drive absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
+                            <input type="text" name="serial_number" class="w-full pl-8 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-black focus:border-black transition-colors" placeholder="Ej. PF5WQYD7">
                         </div>
-                    </div>
-
-                    <div class="md:col-span-3">
-                        <label class="block text-xs font-bold text-slate-700 mb-1">SKU Interno</label>
-                        <div class="relative bg-amber-50 border border-amber-200 rounded-xl px-4 py-2 flex items-center text-amber-800 text-xs">
-                            <i class="fa-solid fa-lock mr-2"></i> Se generará automáticamente al guardar si se deja en blanco.
-                            <input type="text" name="sku" class="ml-4 bg-white border border-amber-200 rounded py-1 px-2 text-xs w-48 hidden">
-                        </div>
+                        <p class="text-[9px] text-slate-400 mt-1">Solo para laptops, impresoras, monitores, celulares u otros equipos.</p>
                     </div>
                 </div>
             </section>
 
             <!-- 3. Precios e Inventario -->
-            <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-1 h-full bg-emerald-500"></div>
-                <h3 class="text-base font-extrabold text-slate-800 mb-5 flex items-center gap-2">
-                    <span class="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 text-xs">3</span> 
+            <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                <h3 class="text-sm font-bold text-slate-800 mb-5 flex items-center gap-3">
+                    <span class="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-600 text-white text-xs">3</span> 
                     Precios e Inventario
                 </h3>
 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Precio Venta <span class="text-red-500">*</span></label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500 font-bold">S/</span>
-                            <input type="number" step="0.01" name="price" x-model="price" class="w-full pl-9 pr-3 py-2 bg-slate-50 border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Precio de Venta <span class="text-red-500">*</span></label>
+                        <div class="relative flex items-center">
+                            <span class="absolute left-3 text-slate-500 text-xs font-bold">S/</span>
+                            <input type="number" step="0.01" name="price" x-model="price" class="w-full pl-8 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-black focus:border-black transition-colors" placeholder="2,499.00" required>
                         </div>
                     </div>
                     
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Precio Oferta</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-red-500 font-bold">%</span>
-                            <input type="number" step="0.01" name="offer_price" x-model="offerPrice" class="w-full pl-9 pr-3 py-2 bg-slate-50 border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Precio Mínimo <span class="text-red-500">*</span></label>
+                        <div class="relative flex items-center">
+                            <span class="absolute left-3 text-slate-500 text-xs font-bold">S/</span>
+                            <input type="number" step="0.01" name="min_price" class="w-full pl-8 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-black focus:border-black transition-colors" placeholder="2,299.00" required>
                         </div>
                     </div>
 
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">Stock Actual <span class="text-red-500">*</span></label>
                         <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400"><i class="fa-solid fa-boxes-stacked"></i></span>
-                            <input type="number" name="stock" value="0" class="w-full pl-9 pr-3 py-2 bg-slate-50 border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                            <i class="fa-solid fa-box absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
+                            <input type="number" name="stock" value="10" class="w-full pl-8 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-black focus:border-black transition-colors" required>
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Garantía</label>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Estado <span class="text-red-500">*</span></label>
                         <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400"><i class="fa-solid fa-shield-halved"></i></span>
-                            <input type="text" name="warranty" value="1 año" class="w-full pl-9 pr-3 py-2 bg-slate-50 border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <i class="fa-solid fa-check-circle absolute left-3 top-1/2 -translate-y-1/2 text-green-500 text-[10px]"></i>
+                            <select name="state" class="w-full pl-8 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-black focus:border-black transition-colors appearance-none" required>
+                                <option value="disponible">Activo</option>
+                                <option value="agotado">Agotado</option>
+                                <option value="proximamente">Próximamente</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-[9px] pointer-events-none"></i>
                         </div>
                     </div>
                 </div>
             </section>
 
             <!-- 4. Especificaciones Técnicas -->
-            <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-1 h-full bg-violet-500"></div>
-                <h3 class="text-base font-extrabold text-slate-800 mb-5 flex items-center gap-2">
-                    <span class="flex items-center justify-center w-6 h-6 rounded-full bg-violet-100 text-violet-700 text-xs">4</span> 
+            <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                <h3 class="text-sm font-bold text-slate-800 mb-5 flex items-center gap-3">
+                    <span class="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-600 text-white text-xs">4</span> 
                     Especificaciones Técnicas
                 </h3>
-
-                <div class="flex gap-6 flex-col md:flex-row">
-                    <div class="flex-1 space-y-3">
-                        <template x-for="(spec, index) in specs" :key="index">
-                            <div class="flex items-center gap-2">
-                                <div class="relative w-1/3">
-                                    <span class="absolute inset-y-0 left-0 flex items-center pl-2 text-slate-400 text-[10px]"><i class="fa-solid fa-grip-vertical"></i></span>
-                                    <input type="text" :name="'spec_keys['+index+']'" x-model="spec.key" placeholder="Característica" class="w-full pl-6 pr-2 py-2 bg-slate-50 border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500">
-                                </div>
-                                <div class="relative flex-1">
-                                    <input type="text" :name="'spec_values['+index+']'" x-model="spec.value" placeholder="Valor" class="w-full px-3 py-2 bg-slate-50 border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500">
-                                </div>
-                                <button type="button" @click="removeSpec(index)" class="w-8 h-8 flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                                    <i class="fa-solid fa-trash-can text-sm"></i>
-                                </button>
-                            </div>
-                        </template>
-                        
-                        <button type="button" @click="addSpec()" class="mt-2 inline-flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-2 bg-indigo-50 text-indigo-700 rounded-xl text-xs font-bold hover:bg-indigo-100 transition-colors">
-                            <i class="fa-solid fa-plus"></i> Agregar especificación
-                        </button>
-                    </div>
-
-                    <div class="w-full md:w-64 shrink-0 bg-blue-50/50 rounded-xl border border-blue-100 p-4">
-                        <h4 class="text-xs font-bold text-blue-800 mb-2 flex items-center gap-2"><i class="fa-regular fa-lightbulb"></i> Ejemplos</h4>
-                        <ul class="text-[10px] text-slate-600 space-y-1.5 list-disc pl-3">
-                            <li><strong class="text-slate-700">Laptops:</strong> Procesador, RAM, SSD, Pantalla, Gráficos</li>
-                            <li><strong class="text-slate-700">Impresoras:</strong> Tecnología, Velocidad, Conectividad</li>
-                            <li><strong class="text-slate-700">Monitores:</strong> Tamaño, Resolución, Panel</li>
-                        </ul>
-                    </div>
-                </div>
-            </section>
-        </div>
-
-        <!-- Right Column -->
-        <div class="lg:col-span-4 space-y-6">
-            
-            <!-- 5. Imágenes -->
-            <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 relative overflow-hidden" x-data="imageUploadManager()">
-                <div class="absolute top-0 left-0 w-1 h-full bg-fuchsia-500"></div>
-                <h3 class="text-sm font-extrabold text-slate-800 mb-4 flex items-center gap-2">
-                    <span class="flex items-center justify-center w-5 h-5 rounded-full bg-fuchsia-100 text-fuchsia-700 text-[10px]">5</span> Imágenes del Producto
-                </h3>
                 
-                <div class="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center bg-slate-50 relative hover:bg-slate-100 hover:border-indigo-300 transition-colors">
-                    <i class="fa-solid fa-cloud-arrow-up text-3xl text-indigo-400 mb-2"></i>
-                    <p class="text-xs font-bold text-indigo-600 mb-2">Añadir imágenes (Máx 7)</p>
-                    
-                    <div class="flex flex-col sm:flex-row justify-center items-center gap-2 mt-2">
-                        <button type="button" @click="addFileInput()" class="px-4 py-2 bg-white border border-slate-300 text-slate-700 text-[10px] font-bold rounded-lg shadow-sm hover:bg-slate-50 transition-colors flex items-center gap-1">
-                            <i class="fa-solid fa-folder-open text-indigo-500"></i> Subir desde PC
-                        </button>
-                        <span class="text-[10px] text-slate-400 font-bold hidden sm:inline">o</span>
-                        <div class="flex items-center gap-1 bg-white border border-slate-300 rounded-lg p-1 shadow-sm w-full sm:w-auto">
-                            <input type="url" x-model="tempUrl" placeholder="Pegar URL de imagen" class="text-[10px] border-none focus:ring-0 w-full sm:w-40 h-7 bg-transparent" @keydown.enter.prevent="addUrlInput()">
-                            <button type="button" @click="addUrlInput()" class="px-3 py-1.5 bg-indigo-50 text-indigo-700 text-[10px] font-bold rounded hover:bg-indigo-100 transition-colors">
-                                Añadir URL
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                    <div class="md:col-span-7">
+                        <div class="grid grid-cols-12 gap-2 mb-2 px-2">
+                            <div class="col-span-5 text-[10px] font-bold text-slate-700">Característica</div>
+                            <div class="col-span-6 text-[10px] font-bold text-slate-700">Valor</div>
+                            <div class="col-span-1"></div>
+                        </div>
+                        
+                        <div class="space-y-2 mb-4">
+                            <template x-for="(spec, index) in specs" :key="index">
+                                <div class="grid grid-cols-12 gap-2 items-center group">
+                                    <div class="col-span-5 relative">
+                                        <i class="fa-solid fa-grip-vertical absolute left-2 top-1/2 -translate-y-1/2 text-slate-300 text-[9px] cursor-move"></i>
+                                        <select x-model="spec.name" :name="'specs['+index+'][name]'" class="w-full pl-6 pr-2 py-1.5 bg-white border border-slate-200 rounded-lg text-[11px] focus:ring-1 focus:ring-black focus:border-black appearance-none">
+                                            <option value="">Seleccionar...</option>
+                                            <option value="Procesador">Procesador</option>
+                                            <option value="Memoria RAM">Memoria RAM</option>
+                                            <option value="Almacenamiento">Almacenamiento</option>
+                                            <option value="Pantalla">Pantalla</option>
+                                            <option value="Sistema Operativo">Sistema Operativo</option>
+                                            <option value="Gráficos">Gráficos</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-span-6">
+                                        <input type="text" x-model="spec.value" :name="'specs['+index+'][value]'" class="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-[11px] focus:ring-1 focus:ring-black focus:border-black" placeholder="Ej. Ryzen 5 7520U">
+                                    </div>
+                                    <div class="col-span-1 text-center">
+                                        <button type="button" @click="removeSpec(index)" class="text-red-400 hover:text-red-600 p-1">
+                                            <i class="fa-solid fa-trash text-[11px]"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                        
+                        <div class="flex gap-2">
+                            <button type="button" @click="addSpec()" class="px-3 py-1.5 bg-indigo-600 text-white text-[11px] font-bold rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-1.5">
+                                <i class="fa-solid fa-plus text-[10px]"></i> Agregar especificación
+                            </button>
+                            <button type="button" @click="openAiModal('specs')" class="px-3 py-1.5 bg-purple-600 text-white text-[11px] font-bold rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-1.5 shadow-sm shadow-purple-600/30">
+                                <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i> Llenar con IA
                             </button>
                         </div>
                     </div>
+                    
+                    <div class="md:col-span-5">
+                        <div class="bg-indigo-50/50 rounded-xl p-4 border border-indigo-100">
+                            <h4 class="text-[11px] font-bold text-indigo-800 flex items-center gap-2 mb-3">
+                                <i class="fa-regular fa-lightbulb text-indigo-500 text-sm"></i> Ejemplos de especificaciones
+                            </h4>
+                            <ul class="text-[10px] text-slate-600 space-y-1.5">
+                                <li><span class="font-bold text-slate-700">Procesador:</span> Intel Core, AMD Ryzen, etc.</li>
+                                <li><span class="font-bold text-slate-700">Memoria RAM:</span> 8GB, 16GB, 32GB, etc.</li>
+                                <li><span class="font-bold text-slate-700">Almacenamiento:</span> SSD, HDD, M.2, etc.</li>
+                                <li><span class="font-bold text-slate-700">Pantalla:</span> HD, FHD, QHD, etc.</li>
+                                <li><span class="font-bold text-slate-700">Sistema Operativo:</span> Windows, Linux, etc.</li>
+                                <li><span class="font-bold text-slate-700">Gráficos:</span> Integrados / Dedicados, etc.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+        </div>
+
+        <!-- Right Column -->
+        <div class="lg:col-span-4 space-y-6" x-data="imageUploadManager()">
+            
+            <!-- 5. Imágenes del Producto -->
+            <section class="bg-[#FCFCF9] rounded-2xl shadow-sm border border-slate-100 p-5">
+                <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-3">
+                    <span class="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-600 text-white text-xs">5</span> Imágenes del Producto
+                </h3>
+                
+                <div class="border-2 border-dashed border-indigo-200 rounded-xl p-6 text-center bg-indigo-50/30 relative hover:bg-indigo-50 hover:border-indigo-300 transition-colors cursor-pointer mb-3" 
+                     @click="addFileInput()"
+                     @dragover.prevent="dragOver = true"
+                     @dragleave.prevent="dragOver = false"
+                     @drop.prevent="handleDrop($event)"
+                     :class="dragOver ? 'bg-indigo-100 border-indigo-400' : ''">
+                    <i class="fa-solid fa-cloud-arrow-up text-3xl text-indigo-500 mb-2"></i>
+                    <p class="text-[11px] font-bold text-indigo-700 mb-1">Arrastra y suelta las imágenes aquí</p>
+                    <p class="text-[9px] text-slate-500">o haz clic para seleccionar</p>
+                    <p class="text-[8px] text-slate-400 mt-2">Formatos: JPG, PNG (Máx. 8 imágenes)</p>
                 </div>
 
-                <!-- Contenedor oculto para inputs de archivo -->
-                <div class="hidden">
-                    <template x-for="(img, index) in images" :key="img.id">
-                        <div x-show="img.type === 'file'">
-                            <input type="file" :id="'file_input_' + img.id" :name="'image_files['+index+']'" accept="image/*" @change="handleFileChange($event, img)">
-                        </div>
+                <!-- URL Input for Images -->
+                <div class="flex gap-2 mb-3">
+                    <input type="url" x-model="imageUrl" placeholder="Pegar URL de la imagen..." class="flex-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-black focus:border-black">
+                    <button type="button" @click="addImageFromUrl()" class="px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-[10px] font-bold hover:bg-indigo-700 transition-colors flex items-center gap-1 shrink-0">
+                        <i class="fa-solid fa-link"></i> Agregar
+                    </button>
+                </div>
+
+                <!-- Hidden inputs container -->
+                <div id="hidden-inputs-container" class="hidden">
+                    <template x-for="img in images" :key="img.id">
+                        <input type="file" :name="'images_files['+img.id+']'" :id="'file_input_'+img.id" accept="image/*" @change="handleFileChange($event, img)">
                     </template>
                 </div>
 
-                <!-- Inputs ocultos para tipos y URLs -->
-                <template x-for="(img, index) in images" :key="'types-'+img.id">
-                    <div>
-                        <input type="hidden" :name="'image_types['+index+']'" :value="img.type">
-                        <template x-if="img.type === 'url'">
-                            <input type="hidden" :name="'image_urls['+index+']'" :value="img.url">
-                        </template>
-                    </div>
-                </template>
-                
-                <!-- Preview thumbs -->
-                <div class="mt-3 flex gap-2 overflow-x-auto pb-2" x-show="images.length > 0" x-cloak>
+                <!-- Preview Area -->
+                <div class="grid grid-cols-4 gap-2">
                     <template x-for="(img, index) in images" :key="img.id">
-                        <div class="relative w-16 h-16 shrink-0 rounded-lg border border-slate-200 overflow-hidden bg-white group" x-show="img.preview">
-                            <img :src="img.preview" class="w-full h-full object-contain p-1">
-                            <div class="absolute top-1 left-1 bg-indigo-600 text-white text-[8px] px-1.5 py-0.5 rounded-full font-bold" x-show="index === 0">Principal</div>
-                            <div class="absolute bottom-1 right-1 bg-black/50 text-white text-[7px] px-1 py-0.5 rounded" x-text="img.type === 'url' ? 'URL' : 'PC'"></div>
-                            <button type="button" @click.prevent="removeImage(index)" class="absolute top-1 right-1 w-4 h-4 bg-white/80 hover:bg-white text-slate-500 hover:text-red-500 rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div class="relative aspect-square rounded-lg border border-slate-200 bg-white overflow-hidden group">
+                            <span x-show="index === 0" class="absolute top-0 left-0 bg-indigo-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-br-lg z-10">Principal</span>
+                            <img :src="img.preview" class="w-full h-full object-cover">
+                            <button type="button" @click.stop="removeImage(img.id)" class="absolute top-1 right-1 w-4 h-4 bg-white rounded-full flex items-center justify-center text-red-500 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
                                 <i class="fa-solid fa-xmark text-[8px]"></i>
                             </button>
                         </div>
                     </template>
-                    <button type="button" @click="addFileInput()" x-show="images.length < 7" class="w-16 h-16 shrink-0 rounded-lg border border-dashed border-slate-300 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-slate-50 hover:border-indigo-300 transition-colors">
-                        <i class="fa-solid fa-plus"></i>
+                    <button type="button" @click="addFileInput()" x-show="images.length < 8" class="aspect-square rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-center text-indigo-500 hover:bg-slate-100 transition-colors">
+                        <i class="fa-solid fa-plus text-lg"></i>
                     </button>
                 </div>
             </section>
 
-            <!-- 6. Opciones -->
-            <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-1 h-full bg-amber-500"></div>
-                <h3 class="text-sm font-extrabold text-slate-800 mb-4 flex items-center gap-2">
-                    <span class="flex items-center justify-center w-5 h-5 rounded-full bg-amber-100 text-amber-700 text-[10px]">6</span> Configuración
+            <!-- 6. Garantía -->
+            <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
+                <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-3">
+                    <span class="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-600 text-white text-xs">6</span> Garantía
+                </h3>
+                <div class="relative">
+                    <i class="fa-solid fa-shield-halved absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
+                    <select name="warranty" class="w-full pl-8 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-black focus:border-black appearance-none" required>
+                        <option value="6 meses">6 meses</option>
+                        <option value="1 año">1 año</option>
+                        <option value="2 años">2 años</option>
+                        <option value="3 años">3 años</option>
+                        <option value="Sin garantía">Sin garantía</option>
+                    </select>
+                    <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-[9px] pointer-events-none"></i>
+                </div>
+            </section>
+
+            <!-- 7. Opciones de Visualización -->
+            <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
+                <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-3">
+                    <span class="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-600 text-white text-xs">7</span> Opciones de Visualización
                 </h3>
                 
                 <div class="space-y-4">
-                    <label class="flex items-center justify-between cursor-pointer group">
-                        <div class="flex items-center gap-2 text-sm text-slate-700 group-hover:text-indigo-700 transition-colors">
-                            <i class="fa-solid fa-eye text-indigo-400"></i> Producto Activo
-                        </div>
+                    <label class="flex items-center gap-3 cursor-pointer">
                         <div class="relative">
-                            <input type="checkbox" name="status" value="1" class="sr-only" x-model="isActive">
-                            <div class="block w-10 h-6 rounded-full transition-colors" :class="isActive ? 'bg-indigo-500' : 'bg-slate-200'"></div>
-                            <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform" :class="isActive ? 'transform translate-x-4' : ''"></div>
+                            <input type="checkbox" name="status" value="1" class="sr-only peer" x-model="isActive">
+                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                        </div>
+                        <div class="flex items-center gap-2 text-[11px] font-bold text-slate-700">
+                            <i class="fa-solid fa-eye text-indigo-500"></i> Producto activo
                         </div>
                     </label>
 
-                    <label class="flex items-center justify-between cursor-pointer group">
-                        <div class="flex items-center gap-2 text-sm text-slate-700 group-hover:text-indigo-700 transition-colors">
-                            <i class="fa-solid fa-certificate text-emerald-400"></i> Etiqueta "Nuevo"
-                        </div>
+                    <label class="flex items-center gap-3 cursor-pointer">
                         <div class="relative">
-                            <input type="checkbox" name="is_new" value="1" class="sr-only" x-model="isNew">
-                            <div class="block w-10 h-6 rounded-full transition-colors" :class="isNew ? 'bg-emerald-500' : 'bg-slate-200'"></div>
-                            <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform" :class="isNew ? 'transform translate-x-4' : ''"></div>
+                            <input type="checkbox" name="is_new" value="1" class="sr-only peer" x-model="isNew">
+                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                        </div>
+                        <div class="flex items-center gap-2 text-[11px] font-bold text-slate-700">
+                            <i class="fa-solid fa-certificate text-slate-400 peer-checked:text-indigo-500"></i> Producto nuevo
                         </div>
                     </label>
 
-                    <label class="flex items-center justify-between cursor-pointer group">
-                        <div class="flex items-center gap-2 text-sm text-slate-700 group-hover:text-indigo-700 transition-colors">
-                            <i class="fa-solid fa-tag text-red-400"></i> Oferta Especial
-                        </div>
+                    <label class="flex items-center gap-3 cursor-pointer">
                         <div class="relative">
-                            <input type="checkbox" name="is_offer" value="1" class="sr-only" x-model="isOffer">
-                            <div class="block w-10 h-6 rounded-full transition-colors" :class="isOffer ? 'bg-red-500' : 'bg-slate-200'"></div>
-                            <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform" :class="isOffer ? 'transform translate-x-4' : ''"></div>
+                            <input type="checkbox" name="is_offer" value="1" class="sr-only peer" x-model="isOffer">
+                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                        </div>
+                        <div class="flex items-center gap-2 text-[11px] font-bold text-slate-700">
+                            <i class="fa-solid fa-tag text-slate-400 peer-checked:text-indigo-500"></i> Oferta especial
                         </div>
                     </label>
 
-                    <label class="flex items-center justify-between cursor-pointer group">
-                        <div class="flex items-center gap-2 text-sm text-slate-700 group-hover:text-indigo-700 transition-colors">
-                            <i class="fa-solid fa-star text-amber-400"></i> Destacar en Inicio
-                        </div>
+                    <label class="flex items-center gap-3 cursor-pointer">
                         <div class="relative">
-                            <input type="checkbox" name="is_featured" value="1" class="sr-only" x-model="isFeatured">
-                            <div class="block w-10 h-6 rounded-full transition-colors" :class="isFeatured ? 'bg-amber-500' : 'bg-slate-200'"></div>
-                            <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform" :class="isFeatured ? 'transform translate-x-4' : ''"></div>
+                            <input type="checkbox" name="is_featured" value="1" class="sr-only peer" x-model="isFeatured">
+                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                        </div>
+                        <div class="flex items-center gap-2 text-[11px] font-bold text-slate-700">
+                            <i class="fa-regular fa-star text-slate-400 peer-checked:text-indigo-500"></i> Destacar en Inicio
                         </div>
                     </label>
                 </div>
             </section>
 
-            <!-- 7. Resumen Visual -->
-            <section class="bg-[#fcfcfa] rounded-2xl shadow-sm border border-slate-100 p-5 relative overflow-hidden">
-                <h3 class="text-sm font-extrabold text-slate-800 mb-4 flex items-center gap-2">
-                    <span class="flex items-center justify-center w-5 h-5 rounded-full bg-indigo-600 text-white text-[10px]">7</span> Resumen del Producto
+            <!-- 8. Resumen del Producto -->
+            <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
+                <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-3">
+                    <span class="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-600 text-white text-xs">8</span> Resumen del Producto
                 </h3>
                 
-                <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-50 flex flex-col items-center text-center">
-                    <div class="w-40 h-32 mb-3 flex items-center justify-center">
-                        <template x-if="window.globalImages && window.globalImages.length > 0 && window.globalImages[0].preview">
-                            <img :src="window.globalImages[0].preview" class="max-h-full object-contain">
+                <div class="flex gap-4">
+                    <div class="w-20 h-20 bg-slate-50 rounded-lg border border-slate-100 flex items-center justify-center overflow-hidden shrink-0">
+                        <template x-if="window.globalImages && window.globalImages.length > 0">
+                            <img :src="window.globalImages[0].preview" class="w-full h-full object-cover">
                         </template>
-                        <template x-if="!(window.globalImages && window.globalImages.length > 0 && window.globalImages[0].preview)">
-                            <i class="fa-solid fa-laptop text-5xl text-slate-200"></i>
+                        <template x-if="!window.globalImages || window.globalImages.length === 0">
+                            <i class="fa-solid fa-laptop text-slate-300 text-2xl"></i>
                         </template>
                     </div>
-                    
-                    <div class="text-sm font-bold text-slate-800 leading-tight mt-1 line-clamp-2" x-text="name || 'Nombre del producto'"></div>
-                    <div class="text-[10px] text-slate-500 mt-1" x-text="getSpecsSummary()"></div>
-                    
-                    <div class="flex gap-2 justify-center mt-3">
-                        <span x-show="isActive" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-200 text-green-800">Activo</span>
-                        <span x-show="isNew" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700">Nuevo</span>
-                    </div>
-                    
-                    <div class="mt-4 font-display text-xl font-black text-indigo-700">
-                        S/ <span x-text="offerPrice ? offerPrice : (price ? price : '0.00')"></span>
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-800 line-clamp-2 leading-tight" x-text="name || 'Nombre del Producto'"></h4>
+                        <p class="text-[9px] text-slate-500 mt-1 line-clamp-1" x-text="specs[0]?.value ? specs[0].value + ' | ' + (specs[1]?.value || '') + ' | ' + (specs[2]?.value || '') : 'Especificaciones'"></p>
+                        <div class="flex gap-1.5 mt-2">
+                            <span x-show="isActive" class="px-1.5 py-0.5 rounded text-[8px] font-bold bg-green-100 text-green-700">Activo</span>
+                            <span x-show="isNew" class="px-1.5 py-0.5 rounded text-[8px] font-bold bg-indigo-100 text-indigo-700">Nuevo</span>
+                        </div>
+                        <p class="text-sm font-black text-indigo-600 mt-2" x-text="price ? 'S/ ' + price : 'S/ 0.00'"></p>
                     </div>
                 </div>
-
-                <button type="button" class="mt-3 w-full py-2.5 bg-indigo-700 hover:bg-indigo-800 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors shadow-lg shadow-indigo-200/50">
-                    <i class="fa-solid fa-eye"></i> Vista previa en catálogo
-                </button>
-            </section>
-
-            <!-- Consejos -->
-            <section class="bg-slate-50/80 rounded-2xl border border-slate-100 p-5">
-                <h3 class="text-xs font-bold text-indigo-600 mb-3 flex items-center gap-2">
-                    <i class="fa-regular fa-lightbulb text-sm"></i> Consejos
-                </h3>
-                <ul class="text-[10px] text-slate-600 space-y-2">
-                    <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-500"></i> Completa la información principal del producto.</li>
-                    <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-500"></i> Agrega al menos una imagen principal.</li>
-                    <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-500"></i> Las especificaciones técnicas mejoran la búsqueda.</li>
-                    <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-500"></i> Revisa que el precio y stock sean correctos.</li>
-                </ul>
             </section>
 
         </div>
     </div>
-
-    <!-- Actions (Desktop under left col, Mobile bottom) -->
-    <div class="mt-8 flex flex-col-reverse sm:flex-row justify-between items-center gap-4">
-        <a href="{{ route('admin.products.index') }}" class="w-full sm:w-auto px-6 py-3 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors text-center">
-            Cancelar
+    
+    <!-- Action Buttons -->
+    <div class="mt-6 flex items-center justify-end gap-3">
+        <a href="{{ route('admin.products.index') }}" class="px-5 py-2.5 bg-white border border-slate-200 text-slate-600 text-sm font-bold rounded-xl hover:bg-slate-50 transition-colors flex items-center gap-2">
+            <i class="fa-solid fa-xmark"></i> Cancelar
         </a>
-        <button type="submit" class="w-full sm:w-auto px-8 py-3 text-sm font-bold text-white bg-[#3e06cf] rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-800 transition-colors flex items-center justify-center gap-2">
-            <i class="fa-solid fa-save"></i> Guardar Producto
+        <button type="submit" class="px-6 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-600/30 flex items-center gap-2">
+            <i class="fa-solid fa-floppy-disk"></i> Guardar Producto
         </button>
     </div>
 </form>
 
-@endsection
+<!-- AI Modal -->
+<div x-show="aiModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm" style="display: none;">
+    <div @click.away="aiModalOpen = false" class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+        <h3 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-wand-magic-sparkles text-purple-600"></i> Generar con Inteligencia Artificial
+        </h3>
+        <p class="text-xs text-slate-500 mb-4">Describe qué información deseas generar y la IA lo completará por ti.</p>
+        <textarea x-model="aiPrompt" rows="4" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-1 focus:ring-purple-500 focus:border-purple-500 mb-4" placeholder="Ej. Genera las especificaciones técnicas para una laptop HP Envy x360..."></textarea>
+        <div class="flex justify-end gap-2">
+            <button type="button" @click="aiModalOpen = false" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg font-bold">Cancelar</button>
+            <button type="button" @click="processAiGeneration()" class="px-4 py-2 text-sm bg-purple-600 text-white rounded-lg font-bold hover:bg-purple-700 flex items-center gap-2">
+                <i class="fa-solid fa-bolt" x-show="!isAiLoading"></i>
+                <i class="fa-solid fa-spinner fa-spin" x-show="isAiLoading"></i>
+                <span x-text="isAiLoading ? 'Generando...' : 'Generar'"></span>
+            </button>
+        </div>
+    </div>
+</div>
 
-@push('scripts')
-<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<!-- Quick Add Modal -->
+<div x-show="quickAddModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm" style="display: none;">
+    <div @click.away="quickAddModalOpen = false" class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+        <h3 class="text-lg font-bold text-slate-800 mb-2" x-text="'Agregar nueva ' + quickAddTypeLabel"></h3>
+        <div class="mb-4">
+            <label class="block text-xs font-bold text-slate-700 mb-1">Nombre <span class="text-red-500">*</span></label>
+            <input type="text" x-model="quickAddValue" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Ej. Nuevo nombre..." @keydown.enter="processQuickAdd()">
+        </div>
+        <div class="flex justify-end gap-2">
+            <button type="button" @click="quickAddModalOpen = false" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg font-bold">Cancelar</button>
+            <button type="button" @click="processQuickAdd()" class="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 flex items-center gap-2">
+                <i class="fa-solid fa-spinner fa-spin" x-show="isQuickAddLoading"></i>
+                <span x-text="isQuickAddLoading ? 'Guardando...' : 'Guardar'"></span>
+            </button>
+        </div>
+    </div>
+</div>
+</div>
+
 <script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('productForm', () => ({
             name: '',
+            price: '',
+            description: '',
             categoryId: '',
             brandId: '',
             categoryName: '',
             brandName: '',
-            price: '',
-            offerPrice: '',
             isActive: true,
             isNew: false,
             isOffer: false,
             isFeatured: false,
             specs: [
-                { key: 'Procesador', value: '' },
-                { key: 'Memoria RAM', value: '' },
-                { key: 'Almacenamiento', value: '' },
-                { key: 'Pantalla', value: '' }
+                { name: 'Procesador', value: '' },
+                { name: 'Memoria RAM', value: '' },
+                { name: 'Almacenamiento', value: '' },
+                { name: 'Pantalla', value: '' },
+                { name: 'Sistema Operativo', value: '' }
             ],
-
-            updateBrandName(e) {
-                this.brandName = e.target.options[e.target.selectedIndex].dataset.name || '';
+            
+            // AI Modal state
+            aiModalOpen: false,
+            aiTargetField: '',
+            aiPrompt: '',
+            isAiLoading: false,
+            
+            // Quick Add Modal state
+            quickAddModalOpen: false,
+            quickAddType: '',
+            quickAddTypeLabel: '',
+            quickAddValue: '',
+            isQuickAddLoading: false,
+            
+            openAiModal(target) {
+                this.aiTargetField = target;
+                this.aiPrompt = '';
+                this.aiModalOpen = true;
             },
+            
+            processAiGeneration() {
+                if (!this.aiPrompt.trim()) return;
+                this.isAiLoading = true;
+                
+                // Simulate AI API call
+                setTimeout(() => {
+                    if (this.aiTargetField === 'description') {
+                        this.description = "Generado por IA: " + this.aiPrompt + " - Una potente laptop diseñada para brindar el mejor rendimiento en tareas exigentes, ideal para profesionales y gamers.";
+                    } else if (this.aiTargetField === 'specs') {
+                        this.specs = [
+                            { name: 'Procesador', value: 'Intel Core i7 13700H (Simulado)' },
+                            { name: 'Memoria RAM', value: '16GB DDR5 4800MHz' },
+                            { name: 'Almacenamiento', value: '1TB SSD NVMe M.2' },
+                            { name: 'Pantalla', value: '15.6" FHD 144Hz IPS' },
+                            { name: 'Gráficos', value: 'NVIDIA RTX 4060 8GB' }
+                        ];
+                    }
+                    this.isAiLoading = false;
+                    this.aiModalOpen = false;
+                    // Note: Here you would normally fetch from your Laravel backend API
+                }, 1500);
+            },
+            
+            openQuickAddModal(type, label) {
+                this.quickAddType = type;
+                this.quickAddTypeLabel = label;
+                this.quickAddValue = '';
+                this.quickAddModalOpen = true;
+            },
+            
+            processQuickAdd() {
+                if (!this.quickAddValue.trim()) return;
+                this.isQuickAddLoading = true;
+                
+                // Simulate saving via AJAX to backend
+                setTimeout(() => {
+                    const selectEl = document.querySelector(`select[name="${this.quickAddType}"]`);
+                    if (selectEl) {
+                        const option = document.createElement('option');
+                        option.value = "new_" + Date.now(); // Dummy ID for visual feedback
+                        option.text = this.quickAddValue;
+                        option.selected = true;
+                        selectEl.add(option);
+                        
+                        // Update model if bound
+                        if (this.quickAddType === 'category_id') this.categoryId = option.value;
+                        if (this.quickAddType === 'brand_id') this.brandId = option.value;
+                    }
+                    
+                    this.isQuickAddLoading = false;
+                    this.quickAddModalOpen = false;
+                    // Note: Here you would normally POST to your backend route
+                }, 800);
+            },
+
             updateCategoryName(e) {
                 this.categoryName = e.target.options[e.target.selectedIndex].dataset.name || '';
             },
+            updateBrandName(e) {
+                this.brandName = e.target.options[e.target.selectedIndex].dataset.name || '';
+            },
             addSpec() {
-                this.specs.push({ key: '', value: '' });
+                this.specs.push({ name: '', value: '' });
             },
             removeSpec(index) {
                 this.specs.splice(index, 1);
-            },
-            getSpecsSummary() {
-                return this.specs.filter(s => s.value).slice(0, 3).map(s => s.value).join(' | ');
             }
         }));
 
         Alpine.data('imageUploadManager', () => ({
             images: [],
-            tempUrl: '',
+            dragOver: false,
+            imageUrl: '',
             
             init() {
-                // Compartir images globalmente para el resumen visual
                 window.globalImages = this.images;
                 this.$watch('images', val => window.globalImages = val);
             },
-            addUrlInput() {
-                if (!this.tempUrl) return;
-                if (this.images.length >= 7) {
-                    alert('Máximo 7 imágenes permitidas');
-                    return;
-                }
-                this.images.push({
-                    id: Date.now() + Math.random().toString(36).substring(7),
-                    type: 'url',
-                    url: this.tempUrl,
-                    preview: this.tempUrl
-                });
-                this.tempUrl = '';
-            },
+            
             addFileInput() {
-                if (this.images.length >= 7) {
-                    alert('Máximo 7 imágenes permitidas');
+                if (this.images.length >= 8) {
+                    alert('Máximo 8 imágenes permitidas');
                     return;
                 }
                 const newId = Date.now() + Math.random().toString(36).substring(7);
@@ -501,14 +647,83 @@
                     url: '',
                     preview: ''
                 });
-                // Hacer clic en el input recién creado después de que Alpine renderice
+                
                 this.$nextTick(() => {
                     const input = document.getElementById('file_input_' + newId);
                     if (input) input.click();
                 });
             },
+            addImageFromUrl() {
+                if (!this.imageUrl) return;
+                if (this.images.length >= 8) {
+                    alert('Máximo 8 imágenes permitidas');
+                    return;
+                }
+                
+                const newId = Date.now() + Math.random().toString(36).substring(7);
+                this.images.push({
+                    id: newId,
+                    type: 'url',
+                    url: this.imageUrl,
+                    preview: this.imageUrl
+                });
+                
+                // Add a hidden input to submit the URL
+                this.$nextTick(() => {
+                    const container = document.getElementById('hidden-inputs-container');
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'images_urls[' + newId + ']';
+                    input.id = 'url_input_' + newId;
+                    input.value = this.imageUrl;
+                    container.appendChild(input);
+                    this.imageUrl = '';
+                });
+            },
+            removeImage(id) {
+                this.images = this.images.filter(img => img.id !== id);
+                let input = document.getElementById('file_input_' + id);
+                if (input) input.remove();
+                let urlInput = document.getElementById('url_input_' + id);
+                if (urlInput) urlInput.remove();
+            },
             handleFileChange(event, img) {
                 const file = event.target.files[0];
+                this.processFile(file, img);
+            },
+            handleDrop(event) {
+                this.dragOver = false;
+                const files = event.dataTransfer.files;
+                if (!files.length) return;
+                
+                for (let i = 0; i < files.length; i++) {
+                    if (this.images.length >= 8) {
+                        alert('Máximo 8 imágenes permitidas');
+                        break;
+                    }
+                    if (!files[i].type.startsWith('image/')) continue;
+                    
+                    const newId = Date.now() + Math.random().toString(36).substring(7);
+                    const newImg = {
+                        id: newId,
+                        type: 'file',
+                        url: '',
+                        preview: ''
+                    };
+                    this.images.push(newImg);
+                    
+                    this.$nextTick(() => {
+                        const dt = new DataTransfer();
+                        dt.items.add(files[i]);
+                        const input = document.getElementById('file_input_' + newId);
+                        if (input) {
+                            input.files = dt.files;
+                            this.processFile(files[i], newImg);
+                        }
+                    });
+                }
+            },
+            processFile(file, img) {
                 if (file) {
                     const reader = new FileReader();
                     reader.onload = (e) => {
@@ -516,54 +731,11 @@
                     };
                     reader.readAsDataURL(file);
                 } else {
-                    // Si canceló la selección, quitamos el slot
                     this.images = this.images.filter(i => i.id !== img.id);
                 }
-            },
-            removeImage(index) {
-                this.images.splice(index, 1);
             }
         }));
     });
-
-    // Scanner
-    let html5QrcodeScanner = null;
-    function startScanner() {
-        document.getElementById('scanner-modal').classList.remove('hidden');
-        if (!html5QrcodeScanner) {
-            html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 150} }, false);
-            html5QrcodeScanner.render(onScanSuccess, () => {});
-        }
-    }
-    function stopScanner() {
-        document.getElementById('scanner-modal').classList.add('hidden');
-        if (html5QrcodeScanner) {
-            html5QrcodeScanner.clear();
-            html5QrcodeScanner = null;
-        }
-    }
-    function onScanSuccess(decodedText) {
-        document.getElementById('product_code').value = decodedText;
-        stopScanner();
-    }
 </script>
 
-<!-- Scanner Modal -->
-<div id="scanner-modal" class="fixed inset-0 z-[100] hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <div class="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 transition-opacity bg-slate-900 bg-opacity-75 backdrop-blur-sm" onclick="stopScanner()"></div>
-        <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-        <div class="inline-block px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-2xl shadow-2xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
-            <div class="mt-3 text-center sm:mt-5">
-                <h3 class="text-lg font-bold leading-6 text-slate-800 mb-4">Escanear Código</h3>
-                <div id="reader" class="mx-auto overflow-hidden rounded-xl border-2 border-indigo-100"></div>
-            </div>
-            <div class="mt-6">
-                <button type="button" onclick="stopScanner()" class="w-full px-4 py-2 text-sm font-bold text-white bg-red-500 rounded-xl hover:bg-red-600 transition-colors">
-                    Cancelar
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-@endpush
+@endsection

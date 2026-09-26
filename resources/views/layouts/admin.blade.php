@@ -352,32 +352,139 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
         .fade-in { animation: fadeIn 0.25s ease-out; }
 
-        :root { --admin-blue: #3157dc; --admin-violet: #653fe0; --admin-navy: #0d1b3b; }
-        body { background: #f4f6fa; }
-        .admin-sidebar { background: linear-gradient(180deg, #0b1730 0%, #142650 100%); border-right-color: #213765; }
-        .sidebar-logo { border-bottom-color: rgba(255,255,255,.1); }
-        .nav-item { border-radius: 11px; }
-        .nav-item.active { background: linear-gradient(100deg, var(--admin-blue), var(--admin-violet)); box-shadow: 0 8px 20px rgba(49,87,220,.3); }
-        .nav-item:hover { background: rgba(255,255,255,.09); }
-        .sidebar-section-label { color: #8192bd; letter-spacing: .13em; }
-        .admin-topbar { min-height: 68px; background: rgba(255,255,255,.97); border-bottom-color: #e4e9f2; box-shadow: 0 3px 16px rgba(22,38,78,.045); }
-        .topbar-search input { border-radius: 11px; background: #f5f7fb; border-color: #e5e9f2; }
-        .topbar-search input:focus { border-color: #7a67e8; box-shadow: 0 0 0 3px rgba(101,63,224,.1); }
-        .soft-card, .kpi-card { border-color: #e4e9f2; border-radius: 16px; box-shadow: 0 5px 18px rgba(25,45,91,.045); }
-        .soft-card:hover, .kpi-card:hover { border-color: #d8ddf2; box-shadow: 0 12px 28px rgba(25,45,91,.09); }
-        .form-input { border-radius: 10px; border-color: #dfe5ef; }
-        .form-input:focus { border-color: #7259e6; box-shadow: 0 0 0 3px rgba(101,63,224,.12); }
-        .btn-primary { background: linear-gradient(110deg, var(--admin-blue), var(--admin-violet)); box-shadow: 0 5px 14px rgba(49,87,220,.2); }
-        .btn-primary:hover { background: linear-gradient(110deg, #2447bf, #5431c5); }
-        .btn-secondary { background: #f6f8fc; border-color: #e1e6f0; }
-        .btn-secondary:hover { background: #f0edff; border-color: #cfc5fb; color: #583bc7; }
-        .admin-table thead tr { background: #f5f7fc; border-bottom-color: #e4e9f2; }
-        .admin-table thead th { color: #71809d; }
-        .admin-table tbody tr { border-bottom-color: #edf0f6; }
-        .admin-table tbody tr:hover { background: #f8f9fe; }
-        .page-title { color: #142143; }
-        .breadcrumb a { color: #4b55d4; }
-        main.fade-in { background: #f4f6fa; }
+        /* Themes */
+        @php
+            $theme = $global_settings['system_theme'] ?? 'light';
+        @endphp
+        
+        @if($theme === 'dark')
+            :root { --admin-blue: #3b82f6; --admin-violet: #8b5cf6; --admin-navy: #0f172a; --bg-body: #0f172a; }
+            body, main.fade-in { background: var(--bg-body) !important; color: #f1f5f9 !important; }
+            .admin-sidebar { background: #1e293b; border-right-color: #334155; }
+            .sidebar-logo { border-bottom-color: rgba(255,255,255,.05); }
+            .nav-item { color: #94a3b8; }
+            .nav-item.active { background: #3b82f6; color: #fff; box-shadow: none; }
+            .nav-item:hover { background: rgba(255,255,255,.05); }
+            .sidebar-section-label { color: #64748b; }
+            .admin-topbar { background: #1e293b; border-bottom-color: #334155; color: #f1f5f9; }
+            .topbar-search input { background: #0f172a; border-color: #334155; color: #f1f5f9; }
+            .soft-card, .kpi-card, .bg-white { background: #1e293b !important; border-color: #334155 !important; color: #f1f5f9 !important; }
+            .admin-table thead tr { background: #0f172a; border-bottom-color: #334155; }
+            .admin-table tbody tr { border-bottom-color: #1e293b; }
+            .admin-table tbody tr:hover { background: #334155; }
+            .admin-table tbody td { color: #e2e8f0; }
+            .page-title, .text-slate-800, .text-slate-700, .text-slate-900 { color: #f8fafc !important; }
+            .text-slate-500, .text-slate-600 { color: #94a3b8 !important; }
+            input.bg-transparent, textarea.bg-transparent, select.bg-transparent { border-color: #334155 !important; color: #f8fafc !important; }
+            .bg-\[\#fdffec\]\/40 { background: #1e293b !important; border-color: #334155 !important; }
+        @elseif($theme === 'indigo')
+            :root { --admin-blue: #3157dc; --admin-violet: #653fe0; --admin-navy: #0d1b3b; --bg-body: #f4f6fa; }
+            body, main.fade-in { background: var(--bg-body); color: #1e293b; }
+            .admin-sidebar { background: linear-gradient(180deg, #0b1730 0%, #142650 100%); border-right-color: #213765; }
+            .nav-item { color: #c7d2fe; }
+            .nav-item .nav-icon { color: #a5b4fc; }
+            .nav-item.active { background: linear-gradient(100deg, var(--admin-blue), var(--admin-violet)); box-shadow: 0 8px 20px rgba(49,87,220,.3); color: white; }
+            .nav-item:hover { color: #ffffff; background: rgba(255,255,255,0.1); }
+            .sidebar-section-label { color: #818cf8; }
+            .admin-sidebar .text-slate-500 { color: #a5b4fc !important; }
+            .admin-topbar { background: rgba(255,255,255,.97); border-bottom-color: #e4e9f2; }
+            .btn-primary { background: linear-gradient(110deg, var(--admin-blue), var(--admin-violet)); color: white; }
+        @elseif($theme === 'nature')
+            :root { --admin-blue: #059669; --admin-violet: #10b981; --admin-navy: #064e3b; --bg-body: #f0fdf4; }
+            body, main.fade-in { background: var(--bg-body); color: #064e3b; }
+            .admin-sidebar { background: #064e3b; border-right-color: #065f46; }
+            .nav-item { color: #a7f3d0; }
+            .nav-item .nav-icon { color: #6ee7b7; }
+            .nav-item.active { background: #059669; box-shadow: 0 8px 20px rgba(5,150,105,.3); color: white; }
+            .nav-item:hover { color: #ffffff; background: rgba(255,255,255,0.1); }
+            .sidebar-section-label { color: #34d399; }
+            .admin-sidebar .text-slate-500 { color: #6ee7b7 !important; }
+            .admin-topbar { background: #ffffff; border-bottom-color: #d1fae5; }
+            .btn-primary { background: #059669; color: white; }
+        @elseif($theme === 'ocean')
+            :root { --admin-blue: #0284c7; --admin-violet: #0369a1; --admin-navy: #082f49; --bg-body: #f0f9ff; }
+            body, main.fade-in { background: var(--bg-body); color: #082f49; }
+            .admin-sidebar { background: linear-gradient(180deg, #082f49 0%, #0c4a6e 100%); border-right-color: #075985; }
+            .nav-item { color: #bae6fd; }
+            .nav-item .nav-icon { color: #7dd3fc; }
+            .nav-item.active { background: #0284c7; box-shadow: 0 8px 20px rgba(2,132,199,.3); color: white; }
+            .nav-item:hover { color: #ffffff; background: rgba(255,255,255,0.1); }
+            .sidebar-section-label { color: #38bdf8; }
+            .admin-sidebar .text-slate-500 { color: #7dd3fc !important; }
+            .admin-topbar { background: #ffffff; border-bottom-color: #e0f2fe; }
+            .btn-primary { background: #0284c7; color: white; }
+        @elseif($theme === 'sunset')
+            :root { --admin-blue: #ea580c; --admin-violet: #dc2626; --admin-navy: #431407; --bg-body: #fff7ed; }
+            body, main.fade-in { background: var(--bg-body); color: #431407; }
+            .admin-sidebar { background: linear-gradient(180deg, #431407 0%, #7c2d12 100%); border-right-color: #9a3412; }
+            .nav-item { color: #fed7aa; }
+            .nav-item .nav-icon { color: #fdba74; }
+            .nav-item.active { background: linear-gradient(100deg, #ea580c, #dc2626); box-shadow: 0 8px 20px rgba(234,88,12,.3); color: white; }
+            .nav-item:hover { color: #ffffff; background: rgba(255,255,255,0.1); }
+            .sidebar-section-label { color: #fb923c; }
+            .admin-sidebar .text-slate-500 { color: #fdba74 !important; }
+            .admin-topbar { background: #ffffff; border-bottom-color: #ffedd5; }
+            .btn-primary { background: #ea580c; color: white; }
+        @elseif($theme === 'rose')
+            :root { --admin-blue: #e11d48; --admin-violet: #be123c; --admin-navy: #4c0519; --bg-body: #fff1f2; }
+            body, main.fade-in { background: var(--bg-body); color: #4c0519; }
+            .admin-sidebar { background: #4c0519; border-right-color: #881337; }
+            .nav-item { color: #fecdd3; }
+            .nav-item .nav-icon { color: #fda4af; }
+            .nav-item.active { background: #e11d48; box-shadow: 0 8px 20px rgba(225,29,72,.3); color: white; }
+            .nav-item:hover { color: #ffffff; background: rgba(255,255,255,0.1); }
+            .sidebar-section-label { color: #fb7185; }
+            .admin-sidebar .text-slate-500 { color: #fda4af !important; }
+            .admin-topbar { background: #ffffff; border-bottom-color: #ffe4e6; }
+            .btn-primary { background: #e11d48; color: white; }
+        @elseif($theme === 'monochrome')
+            :root { --admin-blue: #475569; --admin-violet: #334155; --admin-navy: #0f172a; --bg-body: #f8fafc; }
+            body, main.fade-in { background: var(--bg-body); color: #0f172a; }
+            .admin-sidebar { background: #1e293b; border-right-color: #334155; }
+            .nav-item { color: #cbd5e1; }
+            .nav-item .nav-icon { color: #94a3b8; }
+            .nav-item.active { background: #475569; box-shadow: 0 8px 20px rgba(71,85,105,.3); color: white; }
+            .nav-item:hover { color: #ffffff; background: rgba(255,255,255,0.1); }
+            .sidebar-section-label { color: #64748b; }
+            .admin-sidebar .text-slate-500 { color: #94a3b8 !important; }
+            .admin-topbar { background: #ffffff; border-bottom-color: #f1f5f9; }
+            .btn-primary { background: #334155; color: white; }
+        @elseif($theme === 'neon')
+            :root { --admin-blue: #c026d3; --admin-violet: #a21caf; --admin-navy: #000000; --bg-body: #000000; }
+            body, main.fade-in { background: var(--bg-body) !important; color: #fdf4ff !important; }
+            .admin-sidebar { background: #000000; border-right: 1px solid #c026d3; }
+            .sidebar-logo { border-bottom-color: #c026d3; }
+            .nav-item { color: #f0abfc; }
+            .nav-item.active { background: transparent; border: 1px solid #c026d3; color: #fdf4ff; box-shadow: 0 0 15px rgba(192,38,211,.5); }
+            .admin-topbar { background: #000000; border-bottom: 1px solid #c026d3; color: #fdf4ff; }
+            .soft-card, .kpi-card, .bg-white { background: #000000 !important; border: 1px solid #a21caf !important; color: #fdf4ff !important; box-shadow: 0 0 20px rgba(162,28,175,.15) !important; }
+            .admin-table thead tr { background: #11001c; border-bottom: 1px solid #c026d3; }
+            .admin-table tbody tr { border-bottom-color: #2e004f; }
+            .admin-table tbody td { color: #fdf4ff; }
+            .page-title, .text-slate-800, .text-slate-700, .text-slate-900 { color: #fdf4ff !important; text-shadow: 0 0 10px rgba(253,244,255,0.5); }
+            .text-slate-500, .text-slate-600 { color: #f5d0fe !important; }
+            input.bg-transparent, textarea.bg-transparent, select.bg-transparent { border-color: #c026d3 !important; color: #fdf4ff !important; }
+            .bg-\[\#fdffec\]\/40 { background: #000000 !important; border-color: #c026d3 !important; }
+        @elseif($theme === 'luxury')
+            :root { --admin-blue: #d97706; --admin-violet: #b45309; --admin-navy: #18181b; --bg-body: #18181b; }
+            body, main.fade-in { background: var(--bg-body) !important; color: #fde68a !important; }
+            .admin-sidebar { background: linear-gradient(180deg, #18181b 0%, #27272a 100%); border-right-color: #d97706; }
+            .sidebar-logo { border-bottom-color: rgba(217,119,6,.3); }
+            .nav-item { color: #fcd34d; }
+            .nav-item.active { background: linear-gradient(100deg, #d97706, #b45309); color: #fff; box-shadow: 0 4px 15px rgba(217,119,6,.4); }
+            .admin-topbar { background: #18181b; border-bottom-color: #d97706; color: #fef3c7; }
+            .soft-card, .kpi-card, .bg-white { background: #27272a !important; border-color: #d97706 !important; color: #fef3c7 !important; }
+            .admin-table thead tr { background: #18181b; border-bottom-color: #d97706; color: #fcd34d;}
+            .admin-table tbody tr { border-bottom-color: #3f3f46; }
+            .admin-table tbody td { color: #fef3c7; }
+            .page-title, .text-slate-800, .text-slate-700, .text-slate-900 { color: #fef3c7 !important; }
+            .text-slate-500, .text-slate-600 { color: #fde68a !important; }
+            input.bg-transparent, textarea.bg-transparent, select.bg-transparent { border-color: #d97706 !important; color: #fef3c7 !important; }
+            .bg-\[\#fdffec\]\/40 { background: #27272a !important; border-color: #d97706 !important; }
+        @else
+            /* Default Light */
+            :root { --bg-body: #f4f6fa; }
+        @endif
 
         @media (max-width: 767px) {
             body.antialiased { display: block; overflow: auto; }
@@ -399,28 +506,28 @@
         }
     </style>
 </head>
-<body class="antialiased min-h-screen flex overflow-hidden">
+<body class="antialiased min-h-screen flex overflow-hidden" x-data="{ sidebarOpen: true }">
 
     <!-- ════════════════════════════════════
          SIDEBAR
     ════════════════════════════════════ -->
-    <aside class="admin-sidebar">
+    <aside class="admin-sidebar transition-all duration-300" :style="sidebarOpen ? 'width: 240px' : 'width: 70px'">
 
         <!-- Logo -->
-        <div class="sidebar-logo">
-            <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5">
+        <div class="sidebar-logo justify-center">
+            <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 w-full" :class="!sidebarOpen ? 'justify-center' : ''">
                 @php
                     $logo = \App\Models\Setting::where('key', 'store_logo')->value('value');
                     $storeName = \App\Models\Setting::where('key', 'store_name')->value('value') ?? 'PORTÁTILES PERÚ';
                 @endphp
                 @if($logo)
-                    <img src="{{ Storage::url($logo) }}" alt="Logo" class="h-9 w-9 rounded-xl object-contain bg-white p-1">
+                    <img src="{{ Storage::url($logo) }}" alt="Logo" class="h-9 w-9 rounded-xl object-contain bg-white p-1 flex-shrink-0">
                 @else
                     <div class="w-9 h-9 rounded-xl flex items-center justify-center font-display font-black text-white text-base italic flex-shrink-0"
                          style="background: linear-gradient(135deg, #2563eb, #7c3aed);">{{ substr($storeName, 0, 1) }}</div>
                 @endif
-                <div class="leading-tight">
-                    <div class="font-display font-black text-white text-sm tracking-wide line-clamp-1">{{ $storeName }}</div>
+                <div class="leading-tight overflow-hidden" x-show="sidebarOpen" x-transition.opacity>
+                    <div class="font-display font-black text-white text-sm tracking-wide truncate">{{ $storeName }}</div>
                     <div class="text-[9px] text-slate-500 tracking-widest font-mono">Panel de Administración</div>
                 </div>
             </a>
@@ -429,92 +536,128 @@
         <!-- Navigation -->
         <nav class="sidebar-nav">
 
-            <p class="sidebar-section-label">Principal</p>
+            <p class="sidebar-section-label whitespace-nowrap overflow-hidden" x-show="sidebarOpen">Principal</p>
 
             <a href="{{ route('dashboard') }}"
-               class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+               class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}" :class="!sidebarOpen ? 'justify-center px-0' : ''" title="Inicio">
                 <i class="fa-solid fa-house-chimney nav-icon"></i>
-                <span>Inicio</span>
+                <span x-show="sidebarOpen" class="whitespace-nowrap">Inicio</span>
             </a>
 
-            <a href="{{ route('admin.products.index') }}"
-               class="nav-item {{ request()->routeIs('admin.products.*') ? 'active' : '' }}">
-                <i class="fa-solid fa-box-open nav-icon"></i>
-                <span>Productos</span>
-            </a>
+            <div x-data="{ expanded: {{ request()->routeIs('admin.products.*') || request()->routeIs('admin.categories.*') || request()->routeIs('admin.subcategories.*') || request()->routeIs('admin.brands.*') || request()->routeIs('admin.models.*') ? 'true' : 'false' }} }">
+                <button type="button" @click="expanded = !expanded;" class="w-full nav-item {{ request()->routeIs('admin.products.*') || request()->routeIs('admin.categories.*') || request()->routeIs('admin.subcategories.*') || request()->routeIs('admin.brands.*') || request()->routeIs('admin.models.*') ? 'active' : '' }}" :class="!sidebarOpen ? 'justify-center px-0' : ''" title="Productos">
+                    <div class="flex items-center gap-2.5 flex-1" :class="!sidebarOpen ? 'justify-center' : ''">
+                        <i class="fa-solid fa-box-open nav-icon"></i>
+                        <span x-show="sidebarOpen" class="whitespace-nowrap">Productos</span>
+                    </div>
+                    <i x-show="sidebarOpen" class="fa-solid fa-chevron-down text-[10px] transition-transform" :class="expanded ? 'rotate-180' : ''"></i>
+                </button>
+                <div x-show="expanded && sidebarOpen" class="pl-3 mt-1 space-y-0.5">
+                    <a href="{{ route('admin.products.create') }}" class="nav-item {{ request()->routeIs('admin.products.create') ? 'bg-white/10 text-white' : '' }}">
+                        <i class="fa-solid fa-pen-to-square nav-icon text-xs"></i>
+                        <span class="whitespace-nowrap">Registrar Producto</span>
+                    </a>
+                    <a href="{{ route('admin.products.index') }}" class="nav-item {{ request()->routeIs('admin.products.index') && !request()->routeIs('admin.products.create') ? 'bg-white/10 text-white' : '' }}">
+                        <i class="fa-solid fa-list nav-icon text-xs"></i>
+                        <span class="whitespace-nowrap">Lista de Productos</span>
+                    </a>
+                    <a href="{{ route('admin.categories.index') }}" class="nav-item {{ request()->routeIs('admin.categories.*') ? 'bg-white/10 text-white' : '' }}">
+                        <i class="fa-solid fa-layer-group nav-icon text-xs"></i>
+                        <span class="whitespace-nowrap">Categorías</span>
+                    </a>
+                    <a href="{{ route('admin.subcategories.index') }}" class="nav-item {{ request()->routeIs('admin.subcategories.*') ? 'bg-white/10 text-white' : '' }}">
+                        <i class="fa-solid fa-sitemap nav-icon text-xs"></i>
+                        <span class="whitespace-nowrap">Subcategorías</span>
+                    </a>
+                    <a href="{{ route('admin.brands.index') }}" class="nav-item {{ request()->routeIs('admin.brands.*') ? 'bg-white/10 text-white' : '' }}">
+                        <i class="fa-solid fa-tags nav-icon text-xs"></i>
+                        <span class="whitespace-nowrap">Marcas</span>
+                    </a>
+                    <a href="{{ route('admin.models.index') }}" class="nav-item {{ request()->routeIs('admin.models.*') ? 'bg-white/10 text-white' : '' }}">
+                        <i class="fa-solid fa-microchip nav-icon text-xs"></i>
+                        <span class="whitespace-nowrap">Modelos</span>
+                    </a>
+                </div>
+            </div>
 
-            <a href="{{ route('admin.categories.index') }}"
-               class="nav-item {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
-                <i class="fa-solid fa-layer-group nav-icon"></i>
-                <span>Categorías</span>
-            </a>
-
-            <a href="{{ route('admin.brands.index') }}"
-               class="nav-item {{ request()->routeIs('admin.brands.*') ? 'active' : '' }}">
-                <i class="fa-solid fa-tags nav-icon"></i>
-                <span>Marcas</span>
-            </a>
-
-            <p class="sidebar-section-label">Ventas</p>
+            <p class="sidebar-section-label whitespace-nowrap overflow-hidden" x-show="sidebarOpen">Ventas</p>
 
             <a href="{{ route('admin.clients.index') }}"
-               class="nav-item {{ request()->routeIs('admin.clients.*') ? 'active' : '' }}">
+               class="nav-item {{ request()->routeIs('admin.clients.*') ? 'active' : '' }}" :class="!sidebarOpen ? 'justify-center px-0' : ''" title="Clientes">
                 <i class="fa-solid fa-users nav-icon"></i>
-                <span>Clientes</span>
+                <span x-show="sidebarOpen" class="whitespace-nowrap">Clientes</span>
             </a>
 
             <a href="{{ route('admin.orders.index') }}"
-               class="nav-item {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
+               class="nav-item {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}" :class="!sidebarOpen ? 'justify-center px-0' : ''" title="Ventas">
                 <i class="fa-brands fa-whatsapp nav-icon" style="{{ request()->routeIs('admin.orders.*') ? '' : 'color:#22c55e' }}"></i>
-                <span>Ventas (WhatsApp)</span>
+                <span x-show="sidebarOpen" class="whitespace-nowrap">Ventas (WhatsApp)</span>
                 @php $pendingOrders = \App\Models\Order::where('status', 'Pendiente')->count(); @endphp
                 @if($pendingOrders > 0)
-                <span class="ml-auto text-[9px] font-black bg-red-500 text-white px-1.5 py-0.5 rounded-full">{{ $pendingOrders }}</span>
+                <span x-show="sidebarOpen" class="ml-auto text-[9px] font-black bg-red-500 text-white px-1.5 py-0.5 rounded-full">{{ $pendingOrders }}</span>
                 @endif
             </a>
 
-            <p class="sidebar-section-label">Marketing</p>
+            <p class="sidebar-section-label whitespace-nowrap overflow-hidden" x-show="sidebarOpen">Marketing</p>
 
-            <a href="{{ route('admin.sliders.index') }}"
-               class="nav-item {{ request()->routeIs('admin.sliders.*') ? 'active' : '' }}">
-                <i class="fa-solid fa-image nav-icon"></i>
-                <span>Publicidad / Slider</span>
+            <a href="{{ route('admin.publicidad.index') }}"
+               class="nav-item {{ request()->routeIs('admin.publicidad.*') ? 'active' : '' }}" :class="!sidebarOpen ? 'justify-center px-0' : ''" title="Publicidad">
+                <i class="fa-solid fa-bullhorn nav-icon"></i>
+                <span x-show="sidebarOpen" class="whitespace-nowrap">Publicidad</span>
             </a>
 
-            <p class="sidebar-section-label">Sistema</p>
+            <a href="{{ route('admin.sliders.index') }}"
+               class="nav-item {{ request()->routeIs('admin.sliders.*') ? 'active' : '' }}" :class="!sidebarOpen ? 'justify-center px-0' : ''" title="Sliders">
+                <i class="fa-solid fa-image nav-icon"></i>
+                <span x-show="sidebarOpen" class="whitespace-nowrap">Sliders</span>
+            </a>
+
+            <a href="{{ route('admin.banners.index') }}"
+               class="nav-item {{ request()->routeIs('admin.banners.*') ? 'active' : '' }}" :class="!sidebarOpen ? 'justify-center px-0' : ''" title="Banners">
+                <i class="fa-solid fa-rectangle-ad nav-icon"></i>
+                <span x-show="sidebarOpen" class="whitespace-nowrap">Banners</span>
+            </a>
+
+            <p class="sidebar-section-label whitespace-nowrap overflow-hidden" x-show="sidebarOpen">Sistema</p>
 
             <a href="{{ route('admin.users.index') }}"
-               class="nav-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+               class="nav-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}" :class="!sidebarOpen ? 'justify-center px-0' : ''" title="Usuarios">
                 <i class="fa-regular fa-user nav-icon"></i>
-                <span>Usuarios</span>
+                <span x-show="sidebarOpen" class="whitespace-nowrap">Usuarios</span>
             </a>
 
             <a href="{{ route('admin.settings.index') }}"
-               class="nav-item {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
+               class="nav-item {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}" :class="!sidebarOpen ? 'justify-center px-0' : ''" title="Configuración">
                 <i class="fa-solid fa-gear nav-icon"></i>
-                <span>Configuración</span>
+                <span x-show="sidebarOpen" class="whitespace-nowrap">Configuración</span>
+            </a>
+
+            <a href="{{ route('admin.backups.index') }}"
+               class="nav-item {{ request()->routeIs('admin.backups.*') ? 'active' : '' }}" :class="!sidebarOpen ? 'justify-center px-0' : ''" title="Backups">
+                <i class="fa-solid fa-database nav-icon" style="{{ request()->routeIs('admin.backups.*') ? '' : 'color:#f59e0b' }}"></i>
+                <span x-show="sidebarOpen" class="whitespace-nowrap">Backups / Historial</span>
             </a>
 
             <a href="{{ route('admin.imports.index') }}"
-               class="nav-item {{ request()->routeIs('admin.imports.*') ? 'active' : '' }}">
+               class="nav-item {{ request()->routeIs('admin.imports.*') ? 'active' : '' }}" :class="!sidebarOpen ? 'justify-center px-0' : ''" title="Importar Excel">
                 <i class="fa-solid fa-file-excel nav-icon" style="{{ request()->routeIs('admin.imports.*') ? '' : 'color:#22c55e' }}"></i>
-                <span>Importar Excel</span>
+                <span x-show="sidebarOpen" class="whitespace-nowrap">Importar Excel</span>
             </a>
 
             <a href="{{ route('admin.pdf.index') }}"
-               class="nav-item {{ request()->routeIs('admin.pdf.*') ? 'active' : '' }}">
+               class="nav-item {{ request()->routeIs('admin.pdf.*') ? 'active' : '' }}" :class="!sidebarOpen ? 'justify-center px-0' : ''" title="Generar PDF">
                 <i class="fa-solid fa-file-pdf nav-icon" style="{{ request()->routeIs('admin.pdf.*') ? '' : 'color:#ef4444' }}"></i>
-                <span>Generar PDF</span>
+                <span x-show="sidebarOpen" class="whitespace-nowrap">Generar PDF</span>
             </a>
 
             <!-- Divider -->
             <div style="border-top: 1px solid rgba(255,255,255,0.05); margin: 10px 6px;"></div>
 
             <a href="{{ route('home') }}" target="_blank"
-               class="nav-item">
+               class="nav-item" :class="!sidebarOpen ? 'justify-center px-0' : ''" title="Ver Tienda">
                 <i class="fa-solid fa-store nav-icon" style="color:#60a5fa"></i>
-                <span>Ver Tienda Pública</span>
-                <i class="fa-solid fa-external-link text-[9px] ml-auto text-slate-600"></i>
+                <span x-show="sidebarOpen" class="whitespace-nowrap">Ver Tienda Pública</span>
+                <i x-show="sidebarOpen" class="fa-solid fa-external-link text-[9px] ml-auto text-slate-600"></i>
             </a>
         </nav>
 
@@ -523,9 +666,10 @@
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit"
-                        class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                        class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                        :class="!sidebarOpen ? 'justify-center px-0' : ''" title="Cerrar Sesión">
                     <i class="fa-solid fa-right-from-bracket w-4 text-center"></i>
-                    <span>Cerrar Sesión</span>
+                    <span x-show="sidebarOpen" class="whitespace-nowrap">Cerrar Sesión</span>
                 </button>
             </form>
         </div>
@@ -534,13 +678,18 @@
     <!-- ════════════════════════════════════
          MAIN WRAPPER
     ════════════════════════════════════ -->
-    <div class="flex-1 flex flex-col h-screen overflow-hidden" style="background:#f4f6f9;">
+    <div class="flex-1 flex flex-col h-screen overflow-hidden" style="background:var(--bg-body, transparent);">
 
         <!-- Top Header -->
         <header class="admin-topbar">
             <div class="flex items-center gap-4 flex-1">
+                <!-- Hamburger -->
+                <button type="button" @click="sidebarOpen = !sidebarOpen" class="text-slate-500 hover:text-blue-600 hidden md:flex items-center justify-center h-10 w-10 rounded-xl transition-colors hover:bg-slate-100">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+                
                 <!-- Search -->
-                <div class="topbar-search hidden md:block" x-data="globalScanner()">
+                <div class="topbar-search hidden lg:block" x-data="globalScanner()">
                     <div class="relative w-full">
                         <i class="fa-solid fa-magnifying-glass search-icon z-10"></i>
                         <input type="text" placeholder="Buscar en categorías, marcas, productos..." @keydown.enter="handleSearch($event.target.value)">
@@ -695,7 +844,8 @@
                                     <div class="text-left mt-4 text-sm">
                                         <p><strong>Nombre:</strong> ${data.product.name}</p>
                                         <p><strong>Código:</strong> ${data.product.code}</p>
-                                        <p><strong>Precio:</strong> S/ ${parseFloat(data.product.price).toFixed(2)}</p>
+                                        <p><strong>Precio Normal:</strong> <span class="${data.product.is_offer ? 'line-through text-red-500' : ''}">S/ ${parseFloat(data.product.price).toFixed(2)}</span></p>
+                                        ${data.product.is_offer ? `<p><strong>Precio Oferta:</strong> <span class="font-bold text-green-600">S/ ${parseFloat(data.product.offer_price).toFixed(2)}</span></p>` : ''}
                                         <p><strong>Stock:</strong> ${data.product.stock} un.</p>
                                     </div>
                                 `,

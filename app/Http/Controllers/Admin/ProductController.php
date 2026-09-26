@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\Category;
+use App\Models\Subcategory;
 use App\Models\Brand;
 use App\Models\DeviceModel;
 use Illuminate\Http\Request;
@@ -27,28 +28,31 @@ class ProductController extends Controller
     public function create()
     {
         $categories = Category::where('status', true)->get();
+        $subcategories = Subcategory::where('status', true)->get();
         $brands = Brand::where('status', true)->get();
         $models = DeviceModel::where('status', true)->get();
 
-        return view('admin.products.create', compact('categories', 'brands', 'models'));
+        return view('admin.products.create', compact('categories', 'subcategories', 'brands', 'models'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
+            'subcategory_id' => 'required|exists:subcategories,id',
             'brand_id' => 'required|exists:brands,id',
             'device_model_id' => 'nullable|exists:device_models,id',
             'code' => 'required|string|unique:products,code|max:255',
             'sku' => 'nullable|string|max:255|unique:products,sku',
-            'control_type' => 'required|string|in:quantity,serial,lot',
             'serial_number' => 'nullable|string|max:255|unique:products,serial_number',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
+            'min_price' => 'required|numeric|min:0',
             'offer_price' => 'nullable|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'warranty' => 'nullable|string|max:255',
+            'state' => 'required|string|max:255',
         ]);
 
         $validated['slug'] = Str::slug($validated['name']) . '-' . Str::random(5);
@@ -62,14 +66,12 @@ class ProductController extends Controller
             $validated['sku'] = 'SKU-' . strtoupper(Str::random(6)) . time();
         }
 
-        // Procesar especificaciones dinámicas (arrays paralelos spec_keys y spec_values)
+        // Procesar especificaciones dinámicas
         $specs = [];
-        if ($request->has('spec_keys') && $request->has('spec_values')) {
-            $keys = $request->input('spec_keys');
-            $values = $request->input('spec_values');
-            foreach ($keys as $index => $key) {
-                if (!empty($key) && !empty($values[$index])) {
-                    $specs[$key] = $values[$index];
+        if ($request->has('specs')) {
+            foreach ($request->input('specs') as $spec) {
+                if (!empty($spec['name']) && !empty($spec['value'])) {
+                    $specs[$spec['name']] = $spec['value'];
                 }
             }
         }
@@ -86,28 +88,31 @@ class ProductController extends Controller
     public function edit(Product $product)
     {
         $categories = Category::where('status', true)->get();
+        $subcategories = Subcategory::where('status', true)->get();
         $brands = Brand::where('status', true)->get();
         $models = DeviceModel::where('status', true)->get();
 
-        return view('admin.products.edit', compact('product', 'categories', 'brands', 'models'));
+        return view('admin.products.edit', compact('product', 'categories', 'subcategories', 'brands', 'models'));
     }
 
     public function update(Request $request, Product $product)
     {
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
+            'subcategory_id' => 'required|exists:subcategories,id',
             'brand_id' => 'required|exists:brands,id',
             'device_model_id' => 'nullable|exists:device_models,id',
             'code' => 'required|string|max:255|unique:products,code,' . $product->id,
             'sku' => 'nullable|string|max:255|unique:products,sku,' . $product->id,
-            'control_type' => 'required|string|in:quantity,serial,lot',
             'serial_number' => 'nullable|string|max:255|unique:products,serial_number,' . $product->id,
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
+            'min_price' => 'required|numeric|min:0',
             'offer_price' => 'nullable|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'warranty' => 'nullable|string|max:255',
+            'state' => 'required|string|max:255',
         ]);
 
         $validated['slug'] = Str::slug($validated['name']) . '-' . Str::random(5);
@@ -123,12 +128,10 @@ class ProductController extends Controller
 
         // Procesar especificaciones
         $specs = [];
-        if ($request->has('spec_keys') && $request->has('spec_values')) {
-            $keys = $request->input('spec_keys');
-            $values = $request->input('spec_values');
-            foreach ($keys as $index => $key) {
-                if (!empty($key) && !empty($values[$index])) {
-                    $specs[$key] = $values[$index];
+        if ($request->has('specs')) {
+            foreach ($request->input('specs') as $spec) {
+                if (!empty($spec['name']) && !empty($spec['value'])) {
+                    $specs[$spec['name']] = $spec['value'];
                 }
             }
         }
@@ -137,7 +140,11 @@ class ProductController extends Controller
         $product->update($validated);
 
         // Si envían imágenes nuevas, reemplazamos las anteriores
-        if ($request->has('image_types')) {
+        $hasNewFiles = $request->hasFile('image_files') || $request->hasFile('images_files');
+        $hasNewUrls = ($request->has('image_urls') && array_filter((array)$request->input('image_urls'))) || 
+                      ($request->has('images_urls') && array_filter((array)$request->input('images_urls')));
+
+        if ($hasNewFiles || $hasNewUrls) {
             // Eliminar imágenes antiguas del storage y de BD
             foreach ($product->images as $img) {
                 if (!filter_var($img->image_path, FILTER_VALIDATE_URL)) {
@@ -159,33 +166,61 @@ class ProductController extends Controller
             }
         }
         $product->delete();
+
         return redirect()->route('admin.products.index')->with('success', 'Producto eliminado exitosamente.');
+    }
+
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:products,id'
+        ]);
+
+        $products = Product::whereIn('id', $request->ids)->get();
+        foreach ($products as $product) {
+            foreach ($product->images as $img) {
+                if (!filter_var($img->image_path, FILTER_VALIDATE_URL)) {
+                    Storage::disk('public')->delete($img->image_path);
+                }
+            }
+            $product->delete();
+        }
+
+        return redirect()->route('admin.products.index')->with('success', count($products) . ' productos eliminados exitosamente.');
     }
 
     private function processImages(Request $request, Product $product)
     {
-        if (!$request->has('image_types')) return;
-
-        $types = $request->input('image_types'); // 'url' o 'file'
-        $urls = $request->input('image_urls');
-        $files = $request->file('image_files');
-        
         $isFirst = true;
 
-        foreach ($types as $index => $type) {
-            $path = null;
-            
-            if ($type === 'url' && !empty($urls[$index])) {
-                $path = $urls[$index];
-            } 
-            elseif ($type === 'file' && isset($files[$index])) {
-                $path = $files[$index]->store('products', 'public');
-            }
+        $files = $request->file('image_files') ?? $request->file('images_files') ?? [];
+        if (!is_array($files)) {
+            $files = [$files];
+        }
 
-            if ($path) {
+        foreach ($files as $file) {
+            if ($file && $file->isValid()) {
+                $path = $file->store('products', 'public');
                 ProductImage::create([
                     'product_id' => $product->id,
                     'image_path' => $path,
+                    'is_main' => $isFirst
+                ]);
+                $isFirst = false;
+            }
+        }
+
+        $urls = $request->input('image_urls') ?? $request->input('images_urls') ?? [];
+        if (!is_array($urls)) {
+            $urls = [$urls];
+        }
+
+        foreach ($urls as $url) {
+            if (!empty($url)) {
+                ProductImage::create([
+                    'product_id' => $product->id,
+                    'image_path' => trim($url),
                     'is_main' => $isFirst
                 ]);
                 $isFirst = false;
@@ -214,5 +249,20 @@ class ProductController extends Controller
             'found' => false,
             'message' => 'No se encontró ningún producto con ese código.'
         ]);
+    }
+
+    public function qrCodes(Request $request)
+    {
+        $categoryId = $request->query('category_id');
+        
+        $query = Product::with(['category', 'brand']);
+        
+        if ($categoryId) {
+            $query->where('category_id', $categoryId);
+        }
+        
+        $products = $query->get();
+        
+        return view('admin.products.qrcodes', compact('products'));
     }
 }

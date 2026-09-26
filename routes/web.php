@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\PdfController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\SliderController;
+use App\Http\Controllers\Admin\SubcategoryController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\FrontController;
 use App\Http\Controllers\ProfileController;
@@ -21,6 +22,22 @@ Route::get('/producto/{slug}', [FrontController::class, 'show'])->name('product.
 Route::get('/producto/{slug}/pdf', [FrontController::class, 'downloadPdf'])->name('product.pdf');
 Route::post('/api/checkout', [FrontController::class, 'checkout'])->middleware('throttle:10,1')->name('api.checkout');
 Route::post('/producto/{slug}/opiniones', [FrontController::class, 'review'])->middleware('throttle:5,1')->name('product.review');
+
+// Fallback directo para servir archivos de storage en servidores locales (evita bloqueos 403 de Apache/symlinks)
+Route::get('/storage/{path}', function (string $path) {
+    $fullPath = storage_path('app/public/' . $path);
+    if (!file_exists($fullPath) || !is_file($fullPath)) {
+        // Check public/storage directly
+        $publicPath = public_path('storage/' . $path);
+        if (file_exists($publicPath) && is_file($publicPath)) {
+            $fullPath = $publicPath;
+        } else {
+            abort(404);
+        }
+    }
+    
+    return response()->file($fullPath);
+})->where('path', '.*')->name('storage.local');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -34,11 +51,19 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('categories', CategoryController::class);
+    Route::resource('subcategories', SubcategoryController::class);
     Route::resource('brands', BrandController::class);
     Route::resource('models', DeviceModelController::class);
     Route::get('products/search-by-code', [ProductController::class, 'searchByCode'])->name('products.searchByCode');
+    Route::get('products/qrcodes', [ProductController::class, 'qrCodes'])->name('products.qrcodes');
+    Route::delete('products/bulk-delete', [ProductController::class, 'bulkDelete'])->name('products.bulk_delete');
     Route::resource('products', ProductController::class);
     Route::resource('sliders', SliderController::class);
+    
+    Route::put('banners/promotions', [\App\Http\Controllers\Admin\BannerController::class, 'updatePromotions'])->name('banners.updatePromotions');
+    Route::resource('banners', \App\Http\Controllers\Admin\BannerController::class);
+    Route::resource('publicidad', \App\Http\Controllers\Admin\AdvertisementController::class);
+
     Route::resource('clients', ClientController::class);
     Route::resource('orders', OrderController::class);
     Route::put('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
@@ -55,6 +80,13 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
 
     Route::get('pdf', [PdfController::class, 'index'])->name('pdf.index');
     Route::post('pdf/generate', [PdfController::class, 'generate'])->name('pdf.generate');
+
+    Route::get('backups', [\App\Http\Controllers\Admin\BackupController::class, 'index'])->name('backups.index');
+    Route::post('backups/generate', [\App\Http\Controllers\Admin\BackupController::class, 'generate'])->name('backups.generate');
+    Route::post('backups/upload', [\App\Http\Controllers\Admin\BackupController::class, 'upload'])->name('backups.upload');
+    Route::get('backups/{filename}/download', [\App\Http\Controllers\Admin\BackupController::class, 'download'])->name('backups.download');
+    Route::post('backups/{filename}/restore', [\App\Http\Controllers\Admin\BackupController::class, 'restore'])->name('backups.restore');
+    Route::delete('backups/{filename}', [\App\Http\Controllers\Admin\BackupController::class, 'delete'])->name('backups.delete');
 });
 
 require __DIR__.'/auth.php';

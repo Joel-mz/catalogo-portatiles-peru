@@ -27,8 +27,9 @@ class FrontController extends Controller
         $categories = Category::where('status', true)->get();
         $brands = Brand::where('status', true)->get();
         $sliders = Slider::where('status', true)->orderBy('order')->get();
+        $advertisements = \App\Models\Advertisement::where('status', true)->whereIn('location', ['home', 'all'])->get();
 
-        return view('front.home', compact('featuredProducts', 'offerProducts', 'categories', 'brands', 'sliders'));
+        return view('front.home', compact('featuredProducts', 'offerProducts', 'categories', 'brands', 'sliders', 'advertisements'));
     }
 
     public function catalog(Request $request)
@@ -101,7 +102,9 @@ class FrontController extends Controller
         $minPrice = Product::where('status', true)->min('price') ?? 0;
         $maxPrice = Product::where('status', true)->max('price') ?? 10000;
 
-        return view('front.catalog', compact('products', 'categories', 'brands', 'minPrice', 'maxPrice', 'sort'));
+        $advertisements = \App\Models\Advertisement::where('status', true)->whereIn('location', ['catalog', 'all'])->get();
+
+        return view('front.catalog', compact('products', 'categories', 'brands', 'minPrice', 'maxPrice', 'sort', 'advertisements'));
     }
 
     public function show($slug)

@@ -44,12 +44,61 @@
         html.dark .bg-slate-50, html.dark .bg-slate-100 { background-color: #0f172a !important; }
         html.dark .bg-white\/95 { background-color: rgba(30, 41, 59, 0.95) !important; }
         html.dark header, html.dark footer { border-color: #334155 !important; }
-        .focus-ring:focus-visible { outline: 3px solid #7654e8; outline-offset: 3px; }
+        .focus-ring:focus-visible { outline: 3px solid var(--admin-blue, #7654e8); outline-offset: 3px; }
         .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
         .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .shop-shadow { box-shadow: 0 14px 36px rgba(25, 45, 91, .08); }
+
+        /* Global Themes injected from Settings */
+        @php
+            $theme = $settings['system_theme'] ?? 'light';
+        @endphp
+        
+        @if($theme === 'dark')
+            :root { --admin-blue: #3b82f6; --admin-violet: #8b5cf6; --admin-navy: #0f172a; --bg-body: #0f172a; }
+            body { background: var(--bg-body) !important; color: #f1f5f9 !important; }
+            .bg-white, .bg-white\/95 { background-color: #1e293b !important; border-color: #334155 !important; color: #f1f5f9 !important; }
+            .text-slate-800, .text-slate-700, .text-slate-900 { color: #f8fafc !important; }
+            .text-slate-500, .text-slate-600 { color: #94a3b8 !important; }
+            header, footer { border-color: #334155 !important; }
+            .bg-slate-50, .bg-slate-100 { background-color: #0f172a !important; border-color: #334155 !important; }
+        @elseif($theme === 'indigo')
+            :root { --admin-blue: #3157dc; --admin-violet: #653fe0; --admin-navy: #0d1b3b; --bg-body: #f4f6fa; }
+            body { background: var(--bg-body); }
+        @elseif($theme === 'nature')
+            :root { --admin-blue: #059669; --admin-violet: #10b981; --admin-navy: #064e3b; --bg-body: #f0fdf4; }
+            body { background: var(--bg-body); }
+        @elseif($theme === 'ocean')
+            :root { --admin-blue: #0284c7; --admin-violet: #0369a1; --admin-navy: #082f49; --bg-body: #f0f9ff; }
+            body { background: var(--bg-body); }
+        @elseif($theme === 'sunset')
+            :root { --admin-blue: #ea580c; --admin-violet: #dc2626; --admin-navy: #431407; --bg-body: #fff7ed; }
+            body { background: var(--bg-body); }
+        @elseif($theme === 'rose')
+            :root { --admin-blue: #e11d48; --admin-violet: #be123c; --admin-navy: #4c0519; --bg-body: #fff1f2; }
+            body { background: var(--bg-body); }
+        @elseif($theme === 'monochrome')
+            :root { --admin-blue: #475569; --admin-violet: #334155; --admin-navy: #0f172a; --bg-body: #f8fafc; }
+            body { background: var(--bg-body); }
+        @elseif($theme === 'neon')
+            :root { --admin-blue: #c026d3; --admin-violet: #a21caf; --admin-navy: #000000; --bg-body: #000000; }
+            body { background: var(--bg-body) !important; color: #fdf4ff !important; }
+            .bg-white, .bg-white\/95 { background-color: #000000 !important; border: 1px solid #c026d3 !important; color: #fdf4ff !important; box-shadow: 0 0 20px rgba(192,38,211,.1) !important; }
+            .text-slate-800, .text-slate-700, .text-slate-900 { color: #fdf4ff !important; text-shadow: 0 0 10px rgba(253,244,255,0.5); }
+            .text-slate-500, .text-slate-600 { color: #f5d0fe !important; }
+            header, footer { border-color: #c026d3 !important; }
+            .bg-slate-50, .bg-slate-100 { background-color: #000000 !important; border-color: #c026d3 !important; }
+        @elseif($theme === 'luxury')
+            :root { --admin-blue: #d97706; --admin-violet: #b45309; --admin-navy: #18181b; --bg-body: #18181b; }
+            body { background: var(--bg-body) !important; color: #fde68a !important; }
+            .bg-white, .bg-white\/95 { background-color: #27272a !important; border-color: #d97706 !important; color: #fef3c7 !important; }
+            .text-slate-800, .text-slate-700, .text-slate-900 { color: #fef3c7 !important; }
+            .text-slate-500, .text-slate-600 { color: #fde68a !important; }
+            header, footer { border-color: #d97706 !important; }
+            .bg-slate-50, .bg-slate-100 { background-color: #18181b !important; border-color: #d97706 !important; }
+        @endif
     </style>
     @yield('head')
 </head>
@@ -130,7 +179,81 @@
         </nav>
     </header>
 
-    <main id="contenido">@yield('content')</main>
+    @php
+        $globalSideAds = \App\Models\Advertisement::where('status', true)->get();
+        $explicitLeft = $globalSideAds->filter(fn($ad) => in_array($ad->location, ['sidebar_left', 'left']));
+        $explicitRight = $globalSideAds->filter(fn($ad) => in_array($ad->location, ['sidebar_right', 'right']));
+        $allLocationAds = $globalSideAds->filter(fn($ad) => in_array($ad->location, ['all', 'home', 'catalog']));
+
+        if ($explicitLeft->isNotEmpty() || $explicitRight->isNotEmpty()) {
+            $leftSideAds = $explicitLeft->concat($allLocationAds)->unique('id')->take(3);
+            $rightSideAds = $explicitRight->concat($allLocationAds)->unique('id')->take(3);
+        } else {
+            if ($allLocationAds->count() === 1) {
+                $leftSideAds = $allLocationAds->take(1);
+                $rightSideAds = $allLocationAds->take(1);
+            } else {
+                $half = (int) ceil($allLocationAds->count() / 2);
+                $leftSideAds = $allLocationAds->slice(0, $half)->take(3);
+                $rightSideAds = $allLocationAds->slice($half)->take(3);
+            }
+        }
+    @endphp
+
+    <div class="mx-auto flex justify-center items-start w-full px-2 sm:px-4 max-w-[1920px]">
+        <!-- Publicidad Lateral Izquierda (Espacio vacío izquierdo) -->
+        @if($leftSideAds->isNotEmpty())
+        <aside class="hidden xl:flex flex-col gap-4 w-40 2xl:w-48 shrink-0 sticky top-24 pt-3 mr-2 lg:mr-4 z-20" aria-label="Publicidad Lateral Izquierda">
+            @foreach($leftSideAds as $ad)
+            <a href="{{ $ad->link ?? '#' }}" class="group relative block overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-2.5 shadow-md transition duration-300 hover:shadow-xl hover:scale-[1.03] hover:border-indigo-400">
+                <div class="relative w-full h-44 sm:h-52 rounded-xl overflow-hidden bg-slate-50 flex items-center justify-center border border-slate-100 p-1">
+                    @if($ad->isVideo())
+                        <video src="{{ $ad->media_url }}" autoplay loop muted playsinline class="w-full h-full object-cover rounded-lg pointer-events-none"></video>
+                    @else
+                        <img src="{{ $ad->media_url }}" alt="{{ $ad->title ?? 'Publicidad' }}" class="w-full h-full object-contain rounded-lg transition-transform duration-300 group-hover:scale-105">
+                    @endif
+                    <span class="absolute top-1.5 left-1.5 bg-slate-900/60 backdrop-blur-sm text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow-sm">
+                        <i class="fa-solid fa-bullhorn text-[7px] mr-1 text-amber-300"></i> Anuncio
+                    </span>
+                </div>
+                @if($ad->title)
+                <span class="block mt-2 text-center text-xs font-bold text-slate-800 group-hover:text-indigo-600 px-1 leading-snug">{{ $ad->title }}</span>
+                @endif
+            </a>
+            @endforeach
+        </aside>
+        @endif
+
+        <!-- Main Content -->
+        <div class="w-full min-w-0 flex-1">
+            <main id="contenido">
+                @yield('content')
+            </main>
+        </div>
+
+        <!-- Publicidad Lateral Derecha (Espacio vacío derecho) -->
+        @if($rightSideAds->isNotEmpty())
+        <aside class="hidden xl:flex flex-col gap-4 w-40 2xl:w-48 shrink-0 sticky top-24 pt-3 ml-2 lg:mr-4 z-20" aria-label="Publicidad Lateral Derecha">
+            @foreach($rightSideAds as $ad)
+            <a href="{{ $ad->link ?? '#' }}" class="group relative block overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-2.5 shadow-md transition duration-300 hover:shadow-xl hover:scale-[1.03] hover:border-indigo-400">
+                <div class="relative w-full h-44 sm:h-52 rounded-xl overflow-hidden bg-slate-50 flex items-center justify-center border border-slate-100 p-1">
+                    @if($ad->isVideo())
+                        <video src="{{ $ad->media_url }}" autoplay loop muted playsinline class="w-full h-full object-cover rounded-lg pointer-events-none"></video>
+                    @else
+                        <img src="{{ $ad->media_url }}" alt="{{ $ad->title ?? 'Publicidad' }}" class="w-full h-full object-contain rounded-lg transition-transform duration-300 group-hover:scale-105">
+                    @endif
+                    <span class="absolute top-1.5 left-1.5 bg-slate-900/60 backdrop-blur-sm text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow-sm">
+                        <i class="fa-solid fa-bullhorn text-[7px] mr-1 text-amber-300"></i> Anuncio
+                    </span>
+                </div>
+                @if($ad->title)
+                <span class="block mt-2 text-center text-xs font-bold text-slate-800 group-hover:text-indigo-600 px-1 leading-snug">{{ $ad->title }}</span>
+                @endif
+            </a>
+            @endforeach
+        </aside>
+        @endif
+    </div>
 
     <dialog id="cart-dialog" class="w-[min(100%-1rem,680px)] max-h-[92vh] overflow-y-auto rounded-3xl border-0 p-0 shadow-2xl backdrop:bg-slate-950/60">
         <div class="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white/95 px-5 py-4 backdrop-blur sm:px-7">

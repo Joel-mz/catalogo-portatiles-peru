@@ -8,14 +8,9 @@
             <i class="fa-solid fa-file-import"></i>
         </div>
         <div>
-            <h2 class="text-xl font-extrabold text-slate-800">Importación Masiva</h2>
-            <p class="text-xs text-slate-500">Agrega o actualiza productos masivamente usando Excel o CSV.</p>
+            <h2 class="text-xl font-extrabold text-slate-800">Importación Masiva de Excel</h2>
+            <p class="text-xs text-slate-500">Sube tu Excel, verifica los datos y guárdalos en el sistema.</p>
         </div>
-    </div>
-    <div class="text-sm font-medium text-slate-500 flex items-center gap-2">
-        <a href="{{ route('admin.products.index') }}" class="hover:text-indigo-600"><i class="fa-solid fa-home text-xs"></i> Productos</a>
-        <i class="fa-solid fa-chevron-right text-[10px]"></i>
-        <span class="text-indigo-700">Importar</span>
     </div>
 </div>
 
@@ -32,114 +27,167 @@
     </div>
 @endif
 
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+<div x-data="importForm()" class="space-y-6">
     
-    <!-- Left Column (Form) -->
-    <div class="lg:col-span-8">
-        <form action="{{ route('admin.imports.store') }}" method="POST" enctype="multipart/form-data" 
-              x-data="importForm()" 
-              class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 relative overflow-hidden">
-            @csrf
-            <div class="absolute top-0 left-0 w-1 h-full bg-indigo-500"></div>
+    <!-- Upload Section -->
+    <div x-show="!parsedData.length" class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 text-center relative overflow-hidden">
+        <div class="max-w-xl mx-auto">
+            <h3 class="text-lg font-extrabold text-slate-800 mb-2">Cargar Archivo de Productos</h3>
+            <p class="text-sm text-slate-500 mb-6">El archivo debe contener las columnas: code, name, price, stock, category_id, brand_id</p>
             
-            <h3 class="text-base font-extrabold text-slate-800 mb-5 flex items-center gap-2">
-                <span class="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 text-xs">1</span> 
-                Seleccionar Archivo
-            </h3>
-
-            <div class="border-2 border-dashed border-indigo-200 rounded-xl p-8 text-center bg-slate-50/50 hover:bg-slate-50 hover:border-indigo-400 transition-colors cursor-pointer group relative"
-                 @click="$refs.fileInput.click()">
+            <div class="border-2 border-dashed border-indigo-200 rounded-2xl p-10 text-center bg-indigo-50/30 hover:bg-indigo-50 hover:border-indigo-400 transition-colors cursor-pointer group"
+                 @click="$refs.fileInput.click()"
+                 @dragover.prevent="$el.classList.add('bg-indigo-100', 'border-indigo-500')"
+                 @dragleave.prevent="$el.classList.remove('bg-indigo-100', 'border-indigo-500')"
+                 @drop.prevent="handleDrop($event); $el.classList.remove('bg-indigo-100', 'border-indigo-500')">
                 
-                <template x-if="!fileName">
-                    <div>
-                        <div class="w-16 h-16 bg-white rounded-full shadow-sm flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-file-excel text-3xl text-indigo-400"></i>
-                        </div>
-                        <p class="text-sm font-bold text-indigo-700">Haz clic o arrastra tu archivo aquí</p>
-                        <p class="text-xs text-slate-500 mt-2">Soporta archivos XLSX, XLS y CSV (Máx 5MB)</p>
-                    </div>
-                </template>
-
-                <template x-if="fileName">
-                    <div>
-                        <div class="w-16 h-16 bg-indigo-100 rounded-full shadow-sm flex items-center justify-center mx-auto mb-4 text-indigo-600">
-                            <i class="fa-solid fa-check text-3xl"></i>
-                        </div>
-                        <p class="text-sm font-bold text-indigo-700" x-text="fileName"></p>
-                        <p class="text-xs text-slate-500 mt-2">Archivo seleccionado. Haz clic en "Iniciar Importación".</p>
-                        <button type="button" @click.stop="clearFile()" class="mt-3 text-xs text-red-500 hover:text-red-700 font-bold">Cambiar archivo</button>
-                    </div>
-                </template>
-
-                <input type="file" name="file" class="hidden" x-ref="fileInput" @change="handleFileSelect" accept=".xlsx,.xls,.csv" required>
+                <div class="w-20 h-20 bg-white rounded-full shadow-sm flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-file-excel text-4xl text-green-500"></i>
+                </div>
+                <p class="text-base font-bold text-indigo-700">Haz clic o arrastra tu archivo Excel aquí</p>
+                <p class="text-xs text-slate-500 mt-2">Soporta .XLSX, .XLS o .CSV</p>
+                
+                <input type="file" class="hidden" x-ref="fileInput" @change="handleFileSelect" accept=".xlsx,.xls,.csv">
             </div>
 
-            <div class="mt-8 flex justify-end">
-                <button type="submit" class="px-6 py-2.5 text-sm font-bold text-white bg-indigo-600 rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-colors flex items-center gap-2"
-                        :class="!fileName ? 'opacity-50 cursor-not-allowed' : ''" :disabled="!fileName">
-                    <i class="fa-solid fa-cloud-arrow-up"></i> Iniciar Importación
-                </button>
+            <div class="mt-6 flex justify-center gap-4">
+                <a href="{{ route('admin.imports.template') }}" class="px-5 py-2.5 bg-slate-100 text-slate-600 rounded-xl text-sm font-bold hover:bg-slate-200 transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-download"></i> Descargar Plantilla
+                </a>
             </div>
-        </form>
+        </div>
     </div>
 
-    <!-- Right Column (Instructions) -->
-    <div class="lg:col-span-4 space-y-6">
-        <section class="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-2xl shadow-sm border border-indigo-100 p-5 relative overflow-hidden">
-            <h3 class="text-sm font-extrabold text-indigo-900 mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-circle-info text-indigo-500"></i> Instrucciones
-            </h3>
-            
-            <p class="text-xs text-indigo-800/80 mb-4 leading-relaxed">
-                El archivo debe tener las siguientes columnas en la primera fila. Las columnas marcadas con (*) son obligatorias:
-            </p>
-
-            <ul class="space-y-2 text-xs text-indigo-900 mb-6 font-medium">
-                <li class="flex gap-2 items-start"><i class="fa-solid fa-check text-indigo-400 mt-0.5"></i> <span><strong>code *</strong> : Código Oficial (P/N)</span></li>
-                <li class="flex gap-2 items-start"><i class="fa-solid fa-check text-indigo-400 mt-0.5"></i> <span><strong>name *</strong> : Nombre del Producto</span></li>
-                <li class="flex gap-2 items-start"><i class="fa-solid fa-check text-indigo-400 mt-0.5"></i> <span><strong>price *</strong> : Precio Venta (S/)</span></li>
-                <li class="flex gap-2 items-start"><i class="fa-solid fa-check text-indigo-400 mt-0.5"></i> <span><strong>stock *</strong> : Stock Actual</span></li>
-                <li class="flex gap-2 items-start"><i class="fa-solid fa-check text-indigo-400 mt-0.5"></i> <span><strong>category_id *</strong> : ID de Categoría</span></li>
-                <li class="flex gap-2 items-start"><i class="fa-solid fa-check text-indigo-400 mt-0.5"></i> <span><strong>brand_id *</strong> : ID de Marca</span></li>
-                <li class="flex gap-2 items-start"><i class="fa-solid fa-minus text-slate-400 mt-0.5"></i> <span class="text-slate-500"><strong>control_type</strong> : quantity, serial, o lot</span></li>
-                <li class="flex gap-2 items-start"><i class="fa-solid fa-minus text-slate-400 mt-0.5"></i> <span class="text-slate-500"><strong>serial_number</strong> : (Solo si aplica)</span></li>
-            </ul>
-
-            <a href="{{ route('admin.imports.template') }}" class="flex items-center justify-center gap-2 w-full px-4 py-2 bg-white text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold hover:bg-indigo-50 transition-colors shadow-sm">
-                <i class="fa-solid fa-download"></i> Descargar Plantilla
-            </a>
-        </section>
-
-        <!-- Export -->
-        <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 relative overflow-hidden">
-            <h3 class="text-sm font-extrabold text-slate-800 mb-2 flex items-center gap-2">
-                <i class="fa-solid fa-file-export text-emerald-500"></i> Exportar
-            </h3>
-            <p class="text-xs text-slate-500 mb-4">Descarga todo tu catálogo actual en un archivo Excel.</p>
-            <a href="{{ route('admin.imports.export') }}" class="flex items-center justify-center gap-2 w-full px-4 py-2 bg-emerald-50 text-emerald-700 rounded-xl text-xs font-bold hover:bg-emerald-100 transition-colors">
-                <i class="fa-solid fa-download"></i> Exportar Productos
-            </a>
-        </section>
+    <!-- Preview & Edit Section -->
+    <div x-show="parsedData.length > 0" x-cloak class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div class="p-5 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div>
+                <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-table-list text-indigo-500"></i> Vista Previa de Productos
+                </h3>
+                <p class="text-xs text-slate-500 mt-1">Revisa y edita los datos antes de subirlos al sistema. Mostrando <span x-text="parsedData.length" class="font-bold"></span> registros.</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <button type="button" @click="clearData()" class="px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors">
+                    <i class="fa-solid fa-rotate-left"></i> Cambiar Archivo
+                </button>
+                
+                <form action="{{ route('admin.imports.store') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="products" :value="JSON.stringify(parsedData)">
+                    <button type="submit" class="px-5 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Guardar en el Sistema
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm whitespace-nowrap">
+                <thead class="bg-slate-50 text-slate-600 text-xs uppercase font-bold border-b border-slate-200">
+                    <tr>
+                        <th class="px-4 py-3">Código</th>
+                        <th class="px-4 py-3">Nombre</th>
+                        <th class="px-4 py-3">Precio (S/)</th>
+                        <th class="px-4 py-3">Stock</th>
+                        <th class="px-4 py-3">ID Categoría</th>
+                        <th class="px-4 py-3">ID Marca</th>
+                        <th class="px-4 py-3 text-center">Acción</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-slate-700">
+                    <template x-for="(row, index) in parsedData" :key="index">
+                        <tr class="hover:bg-indigo-50/30 transition-colors">
+                            <td class="px-4 py-2">
+                                <input type="text" x-model="row.code" class="w-24 px-2 py-1 text-xs border border-transparent hover:border-slate-300 focus:border-indigo-500 rounded bg-transparent focus:bg-white focus:ring-1 focus:ring-indigo-500">
+                            </td>
+                            <td class="px-4 py-2">
+                                <input type="text" x-model="row.name" class="w-48 lg:w-64 px-2 py-1 text-xs border border-transparent hover:border-slate-300 focus:border-indigo-500 rounded bg-transparent focus:bg-white focus:ring-1 focus:ring-indigo-500">
+                            </td>
+                            <td class="px-4 py-2">
+                                <input type="number" x-model="row.price" step="0.01" class="w-20 px-2 py-1 text-xs border border-transparent hover:border-slate-300 focus:border-indigo-500 rounded bg-transparent focus:bg-white focus:ring-1 focus:ring-indigo-500 text-right">
+                            </td>
+                            <td class="px-4 py-2">
+                                <input type="number" x-model="row.stock" class="w-16 px-2 py-1 text-xs border border-transparent hover:border-slate-300 focus:border-indigo-500 rounded bg-transparent focus:bg-white focus:ring-1 focus:ring-indigo-500 text-center">
+                            </td>
+                            <td class="px-4 py-2">
+                                <input type="number" x-model="row.category_id" class="w-16 px-2 py-1 text-xs border border-transparent hover:border-slate-300 focus:border-indigo-500 rounded bg-transparent focus:bg-white focus:ring-1 focus:ring-indigo-500 text-center">
+                            </td>
+                            <td class="px-4 py-2">
+                                <input type="number" x-model="row.brand_id" class="w-16 px-2 py-1 text-xs border border-transparent hover:border-slate-300 focus:border-indigo-500 rounded bg-transparent focus:bg-white focus:ring-1 focus:ring-indigo-500 text-center">
+                            </td>
+                            <td class="px-4 py-2 text-center">
+                                <button type="button" @click="parsedData.splice(index, 1)" class="text-red-400 hover:text-red-600 p-1" title="Eliminar fila">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 @endsection
 
 @push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('importForm', () => ({
-            fileName: '',
+            parsedData: [],
             
             handleFileSelect(event) {
-                const files = event.target.files;
-                if (files.length > 0) {
-                    this.fileName = files[0].name;
+                this.processFile(event.target.files[0]);
+            },
+            
+            handleDrop(event) {
+                if (event.dataTransfer.files.length > 0) {
+                    this.processFile(event.dataTransfer.files[0]);
                 }
             },
-            clearFile() {
-                this.fileName = '';
-                this.$refs.fileInput.value = '';
+            
+            processFile(file) {
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    
+                    // Convierte la hoja a un array de objetos
+                    const json = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+                    
+                    // Mapear al formato esperado si las columnas difieren ligeramente (case-insensitive)
+                    this.parsedData = json.map(row => {
+                        const getVal = (keyStr) => {
+                            const foundKey = Object.keys(row).find(k => k.toLowerCase().includes(keyStr.toLowerCase()));
+                            return foundKey ? row[foundKey] : '';
+                        };
+                        
+                        return {
+                            code: getVal('code') || getVal('codigo'),
+                            name: getVal('name') || getVal('nombre'),
+                            price: getVal('price') || getVal('precio'),
+                            stock: getVal('stock') || getVal('cantidad'),
+                            category_id: getVal('category_id') || getVal('categoria_id') || getVal('categoria') || '1',
+                            brand_id: getVal('brand_id') || getVal('marca_id') || getVal('marca') || '1'
+                        };
+                    }).filter(row => row.code || row.name); // Filtrar filas totalmente vacías
+                };
+                
+                reader.readAsArrayBuffer(file);
+            },
+            
+            clearData() {
+                this.parsedData = [];
+                if (this.$refs.fileInput) {
+                    this.$refs.fileInput.value = '';
+                }
             }
         }))
     });
