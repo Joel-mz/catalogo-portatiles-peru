@@ -39,20 +39,21 @@ class ProductController extends Controller
     {
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
-            'subcategory_id' => 'required|exists:subcategories,id',
+            'subcategory_id' => 'nullable|exists:subcategories,id',
             'brand_id' => 'required|exists:brands,id',
             'device_model_id' => 'nullable|exists:device_models,id',
             'code' => 'required|string|unique:products,code|max:255',
             'sku' => 'nullable|string|max:255|unique:products,sku',
             'serial_number' => 'nullable|string|max:255|unique:products,serial_number',
+            'control_type' => 'nullable|string|max:255',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
-            'min_price' => 'required|numeric|min:0',
+            'min_price' => 'nullable|numeric|min:0',
             'offer_price' => 'nullable|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'warranty' => 'nullable|string|max:255',
-            'state' => 'required|string|max:255',
+            'state' => 'nullable|string|max:255',
         ]);
 
         $validated['slug'] = Str::slug($validated['name']) . '-' . Str::random(5);
@@ -60,6 +61,9 @@ class ProductController extends Controller
         $validated['is_offer'] = $request->has('is_offer');
         $validated['is_featured'] = $request->has('is_featured');
         $validated['is_new'] = $request->has('is_new');
+        $validated['min_price'] = !empty($validated['min_price']) ? floatval($validated['min_price']) : (floatval($validated['price']) * 0.9);
+        $validated['state'] = !empty($validated['state']) ? $validated['state'] : 'Nuevo';
+        $validated['control_type'] = !empty($validated['control_type']) ? $validated['control_type'] : 'Por Cantidad';
 
         // Generar SKU automático si está vacío
         if (empty($validated['sku'])) {
@@ -126,20 +130,21 @@ class ProductController extends Controller
     {
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
-            'subcategory_id' => 'required|exists:subcategories,id',
+            'subcategory_id' => 'nullable|exists:subcategories,id',
             'brand_id' => 'required|exists:brands,id',
             'device_model_id' => 'nullable|exists:device_models,id',
             'code' => 'required|string|max:255|unique:products,code,' . $product->id,
             'sku' => 'nullable|string|max:255|unique:products,sku,' . $product->id,
             'serial_number' => 'nullable|string|max:255|unique:products,serial_number,' . $product->id,
+            'control_type' => 'nullable|string|max:255',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
-            'min_price' => 'required|numeric|min:0',
+            'min_price' => 'nullable|numeric|min:0',
             'offer_price' => 'nullable|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'warranty' => 'nullable|string|max:255',
-            'state' => 'required|string|max:255',
+            'state' => 'nullable|string|max:255',
         ]);
 
         $validated['slug'] = Str::slug($validated['name']) . '-' . Str::random(5);
@@ -147,6 +152,9 @@ class ProductController extends Controller
         $validated['is_offer'] = $request->has('is_offer');
         $validated['is_featured'] = $request->has('is_featured');
         $validated['is_new'] = $request->has('is_new');
+        $validated['min_price'] = !empty($validated['min_price']) ? floatval($validated['min_price']) : (floatval($validated['price']) * 0.9);
+        $validated['state'] = !empty($validated['state']) ? $validated['state'] : 'Nuevo';
+        $validated['control_type'] = !empty($validated['control_type']) ? $validated['control_type'] : 'Por Cantidad';
 
         // Generar SKU automático si está vacío
         if (empty($validated['sku'])) {
