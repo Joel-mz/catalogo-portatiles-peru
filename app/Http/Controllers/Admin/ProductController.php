@@ -72,10 +72,12 @@ class ProductController extends Controller
 
         // Procesar especificaciones dinámicas
         $specs = [];
-        if ($request->has('specs')) {
+        if ($request->has('specs') && is_array($request->input('specs'))) {
             foreach ($request->input('specs') as $spec) {
-                if (!empty($spec['name']) && !empty($spec['value'])) {
-                    $specs[$spec['name']] = $spec['value'];
+                $k = trim($spec['name'] ?? $spec['key'] ?? '');
+                $v = trim($spec['value'] ?? '');
+                if (!empty($k) && !empty($v)) {
+                    $specs[$k] = $v;
                 }
             }
         }

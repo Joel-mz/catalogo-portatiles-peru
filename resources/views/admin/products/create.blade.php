@@ -264,18 +264,10 @@
                                 <div class="grid grid-cols-12 gap-2 items-center group">
                                     <div class="col-span-5 relative">
                                         <i class="fa-solid fa-grip-vertical absolute left-2 top-1/2 -translate-y-1/2 text-slate-300 text-[9px] cursor-move"></i>
-                                        <select x-model="spec.name" :name="'specs['+index+'][name]'" class="w-full pl-6 pr-2 py-1.5 bg-white border border-slate-200 rounded-lg text-[11px] focus:ring-1 focus:ring-black focus:border-black appearance-none">
-                                            <option value="">Seleccionar...</option>
-                                            <option value="Procesador">Procesador</option>
-                                            <option value="Memoria RAM">Memoria RAM</option>
-                                            <option value="Almacenamiento">Almacenamiento</option>
-                                            <option value="Pantalla">Pantalla</option>
-                                            <option value="Sistema Operativo">Sistema Operativo</option>
-                                            <option value="Gráficos">Gráficos</option>
-                                        </select>
+                                        <input type="text" list="commonSpecsCreate" x-model="spec.name" :name="'specs['+index+'][name]'" class="w-full pl-6 pr-2 py-1.5 bg-white border border-slate-200 rounded-lg text-[11px] font-semibold text-slate-800 focus:ring-1 focus:ring-black focus:border-black" placeholder="Ej. Procesador, RAM, Resolución...">
                                     </div>
                                     <div class="col-span-6">
-                                        <input type="text" x-model="spec.value" :name="'specs['+index+'][value]'" class="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-[11px] focus:ring-1 focus:ring-black focus:border-black" placeholder="Ej. Ryzen 5 7520U">
+                                        <input type="text" x-model="spec.value" :name="'specs['+index+'][value]'" class="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-[11px] focus:ring-1 focus:ring-black focus:border-black" placeholder="Ej. Ryzen 5 7520U / 3K / 16GB">
                                     </div>
                                     <div class="col-span-1 text-center">
                                         <button type="button" @click="removeSpec(index)" class="text-red-400 hover:text-red-600 p-1">
@@ -284,6 +276,26 @@
                                     </div>
                                 </div>
                             </template>
+                            <datalist id="commonSpecsCreate">
+                                <option value="Procesador">
+                                <option value="Memoria RAM">
+                                <option value="Almacenamiento">
+                                <option value="Pantalla">
+                                <option value="Gráficos">
+                                <option value="Sistema Operativo">
+                                <option value="Resolución">
+                                <option value="Visión Nocturna">
+                                <option value="Ángulo de Cobertura">
+                                <option value="Conectividad">
+                                <option value="Detección Inteligente">
+                                <option value="Protección">
+                                <option value="Tipo de Impresión">
+                                <option value="Funciones">
+                                <option value="Resolución de Impresión">
+                                <option value="Velocidad de Impresión">
+                                <option value="Capacidad de Bandeja">
+                                <option value="Batería">
+                            </datalist>
                         </div>
                         
                         <div class="flex gap-2">
@@ -514,10 +526,12 @@
     </div>
 </div>
 </div>
+@endsection
 
+@push('scripts')
 <script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('productForm', () => ({
+    function productForm() {
+        return {
             name: '',
             price: '',
             description: '',
@@ -552,7 +566,7 @@
             
             openAiModal(target) {
                 this.aiTargetField = target;
-                const pName = this.name || '';
+                const pName = (this.name || '').trim();
                 if (target === 'description') {
                     this.aiPrompt = pName ? `Generar descripción comercial para: ${pName}` : '';
                 } else {
@@ -568,18 +582,20 @@
 
                 setTimeout(() => {
                     if (this.aiTargetField === 'description') {
-                        if (lower.includes('camara') || lower.includes('cámara') || lower.includes('ezviz') || lower.includes('imou') || lower.includes('seguridad')) {
-                            this.description = `${promptText} con visión nocturna a color, detección inteligente de movimiento, audio bidireccional y alta resistencia para exteriores o interiores.`;
-                        } else if (lower.includes('impresora') || lower.includes('epson') || lower.includes('canon') || lower.includes('hp smart')) {
-                            this.description = `Impresora multifuncional de alto rendimiento con sistema continuo de tinta, conexión inalámbrica Wi-Fi y máxima velocidad de impresión con bajo costo por página.`;
+                        if (lower.includes('camara') || lower.includes('cámara') || lower.includes('ezviz') || lower.includes('imou') || lower.includes('seguridad') || lower.includes('dahua') || lower.includes('hikvision')) {
+                            this.description = `${promptText || 'Cámara de Seguridad Inteligente'} con visión nocturna a color, detección IA de movimiento, audio bidireccional y alta resistencia para exteriores o interiores.`;
+                        } else if (lower.includes('impresora') || lower.includes('epson') || lower.includes('canon') || lower.includes('hp smart') || lower.includes('multifuncional') || lower.includes('ecotank')) {
+                            this.description = `${promptText || 'Impresora Multifuncional'} de alto rendimiento con sistema continuo de tinta, conexión inalámbrica Wi-Fi y máxima velocidad de impresión con bajo costo por página.`;
+                        } else if (lower.includes('monitor') || lower.includes('pantalla') || lower.includes('display')) {
+                            this.description = `${promptText || 'Monitor Profesional'} con alta tasa de refresco, panel de colores vivos y tecnología de protección ocular para gaming y productividad.`;
                         } else {
-                            this.description = `Laptop de alto rendimiento ideal para trabajo profesional, multitarea y entretenimiento, equipada con tecnología de última generación para máxima velocidad y autonomía.`;
+                            this.description = `${promptText || 'Laptop'} de alto rendimiento ideal para trabajo profesional, multitarea y entretenimiento, con tecnología de última generación para máxima velocidad y autonomía.`;
                         }
                         if (this.description.length > 200) {
                             this.description = this.description.substring(0, 197) + '...';
                         }
                     } else if (this.aiTargetField === 'specs') {
-                        if (lower.includes('camara') || lower.includes('cámara') || lower.includes('ezviz') || lower.includes('imou') || lower.includes('seguridad')) {
+                        if (lower.includes('camara') || lower.includes('cámara') || lower.includes('ezviz') || lower.includes('imou') || lower.includes('seguridad') || lower.includes('dahua') || lower.includes('hikvision')) {
                             this.specs = [
                                 { name: 'Resolución', value: lower.includes('3k') ? '3K (5 Megapíxeles)' : (lower.includes('2k') ? '2K (3 Megapíxeles)' : 'Full HD 1080p') },
                                 { name: 'Visión Nocturna', value: 'A color inteligente con focos LED y luz infrarroja' },
@@ -589,7 +605,7 @@
                                 { name: 'Detección Inteligente', value: 'IA para personas y vehículos' },
                                 { name: 'Protección', value: 'IP66 resistente a lluvia y polvo' }
                             ];
-                        } else if (lower.includes('impresora') || lower.includes('multifuncional')) {
+                        } else if (lower.includes('impresora') || lower.includes('multifuncional') || lower.includes('ecotank') || lower.includes('epson') || lower.includes('canon')) {
                             this.specs = [
                                 { name: 'Tipo de Impresión', value: 'Inyección de tinta continua EcoTank' },
                                 { name: 'Funciones', value: 'Imprime, Copia, Escanea' },
@@ -597,6 +613,15 @@
                                 { name: 'Resolución de Impresión', value: 'Hasta 5760 x 1440 dpi' },
                                 { name: 'Velocidad de Impresión', value: '33 ppm en negro y 15 ppm en color' },
                                 { name: 'Capacidad de Bandeja', value: '100 hojas de papel común' }
+                            ];
+                        } else if (lower.includes('monitor') || lower.includes('pantalla')) {
+                            this.specs = [
+                                { name: 'Tamaño de Pantalla', value: lower.includes('27') ? '27 pulgadas' : (lower.includes('24') ? '24 pulgadas' : '27 pulgadas') },
+                                { name: 'Resolución', value: lower.includes('4k') ? '4K UHD (3840x2160)' : (lower.includes('2k') || lower.includes('qhd') ? '2K QHD (2560x1440)' : 'Full HD (1920x1080)') },
+                                { name: 'Tasa de Refresco', value: lower.includes('165') ? '165Hz' : (lower.includes('144') ? '144Hz' : (lower.includes('240') ? '240Hz' : '100Hz')) },
+                                { name: 'Tipo de Panel', value: 'IPS con amplios ángulos de visión' },
+                                { name: 'Tiempo de Respuesta', value: '1ms (MPRT / GtG)' },
+                                { name: 'Conectividad', value: 'HDMI 2.0, DisplayPort 1.4, Audio Out' }
                             ];
                         } else {
                             let cpu = 'Intel Core i5 / AMD Ryzen 5';
@@ -626,7 +651,7 @@
                     }
                     this.isAiLoading = false;
                     this.aiModalOpen = false;
-                }, 600);
+                }, 100);
             },
             
             openQuickAddModal(type, label) {
@@ -640,25 +665,22 @@
                 if (!this.quickAddValue.trim()) return;
                 this.isQuickAddLoading = true;
                 
-                // Simulate saving via AJAX to backend
                 setTimeout(() => {
                     const selectEl = document.querySelector(`select[name="${this.quickAddType}"]`);
                     if (selectEl) {
                         const option = document.createElement('option');
-                        option.value = "new_" + Date.now(); // Dummy ID for visual feedback
+                        option.value = "new_" + Date.now();
                         option.text = this.quickAddValue;
                         option.selected = true;
                         selectEl.add(option);
                         
-                        // Update model if bound
                         if (this.quickAddType === 'category_id') this.categoryId = option.value;
                         if (this.quickAddType === 'brand_id') this.brandId = option.value;
                     }
                     
                     this.isQuickAddLoading = false;
                     this.quickAddModalOpen = false;
-                    // Note: Here you would normally POST to your backend route
-                }, 800);
+                }, 300);
             },
 
             updateCategoryName(e) {
@@ -674,15 +696,6 @@
                 this.specs.splice(index, 1);
             }
         };
-    }
-
-    window.productForm = productForm;
-    if (window.Alpine) {
-        Alpine.data('productForm', productForm);
-    } else {
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('productForm', productForm);
-        });
     }
 
     function imageUploadManager() {
@@ -729,7 +742,6 @@
                     preview: this.imageUrl
                 });
                 
-                // Add a hidden input to submit the URL
                 this.$nextTick(() => {
                     const container = document.getElementById('hidden-inputs-container');
                     const input = document.createElement('input');
@@ -797,15 +809,5 @@
             }
         };
     }
-
-    window.imageUploadManager = imageUploadManager;
-    if (window.Alpine) {
-        Alpine.data('imageUploadManager', imageUploadManager);
-    } else {
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('imageUploadManager', imageUploadManager);
-        });
-    }
 </script>
-
-@endsection
+@endpush

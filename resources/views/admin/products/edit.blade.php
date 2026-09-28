@@ -3,17 +3,31 @@
 @section('content')
 
 @php
-    $formattedSpecs = collect($product->technical_specs)->map(function($val, $key) {
-        return ['key' => $key, 'value' => $val];
-    })->values()->all();
-    
-    if(empty($formattedSpecs)) {
-        $formattedSpecs = [
-            ['key' => 'Procesador', 'value' => ''],
-            ['key' => 'Memoria RAM', 'value' => ''],
-            ['key' => 'Almacenamiento', 'value' => ''],
-            ['key' => 'Pantalla', 'value' => '']
-        ];
+    if (!isset($formattedSpecs) || empty($formattedSpecs)) {
+        $formattedSpecs = [];
+        if (is_array($product->technical_specs)) {
+            foreach ($product->technical_specs as $key => $value) {
+                if (is_array($value) && isset($value['name'])) {
+                    $formattedSpecs[] = [
+                        'name' => (string)$value['name'],
+                        'value' => (string)($value['value'] ?? '')
+                    ];
+                } else {
+                    $formattedSpecs[] = [
+                        'name' => (string)$key,
+                        'value' => (string)$value
+                    ];
+                }
+            }
+        }
+        if (empty($formattedSpecs)) {
+            $formattedSpecs = [
+                ['name' => 'Procesador', 'value' => ''],
+                ['name' => 'Memoria RAM', 'value' => ''],
+                ['name' => 'Almacenamiento', 'value' => ''],
+                ['name' => 'Pantalla', 'value' => '']
+            ];
+        }
     }
 
     $existingImages = collect($product->images)->map(function($img) {
@@ -272,7 +286,7 @@
                             <div class="flex items-center gap-2">
                                 <div class="relative w-1/3">
                                     <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 text-slate-400 text-xs"><i class="fa-solid fa-grip-vertical"></i></span>
-                                    <input type="text" :name="'specs['+index+'][name]'" x-model="spec.name" :placeholder="getSpecPlaceholder(spec.name, 'name')" class="w-full pl-7 pr-2 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
+                                    <input type="text" list="commonSpecsEdit" :name="'specs['+index+'][name]'" x-model="spec.name" :placeholder="getSpecPlaceholder(spec.name, 'name')" class="w-full pl-7 pr-2 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
                                 </div>
                                 <div class="relative flex-1">
                                     <input type="text" :name="'specs['+index+'][value]'" x-model="spec.value" :placeholder="getSpecPlaceholder(spec.name, 'value')" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
@@ -282,6 +296,27 @@
                                 </button>
                             </div>
                         </template>
+
+                        <datalist id="commonSpecsEdit">
+                            <option value="Procesador">
+                            <option value="Memoria RAM">
+                            <option value="Almacenamiento">
+                            <option value="Pantalla">
+                            <option value="Gráficos">
+                            <option value="Sistema Operativo">
+                            <option value="Resolución">
+                            <option value="Visión Nocturna">
+                            <option value="Ángulo de Cobertura">
+                            <option value="Conectividad">
+                            <option value="Detección Inteligente">
+                            <option value="Protección">
+                            <option value="Tipo de Impresión">
+                            <option value="Funciones">
+                            <option value="Resolución de Impresión">
+                            <option value="Velocidad de Impresión">
+                            <option value="Capacidad de Bandeja">
+                            <option value="Batería">
+                        </datalist>
                         
                         <div class="mt-4 flex flex-wrap items-center gap-2">
                             <button type="button" @click="addSpec()" class="px-3.5 py-2 bg-indigo-50 text-indigo-700 rounded-xl text-xs font-bold hover:bg-indigo-100 transition-colors flex items-center gap-1.5">
@@ -587,18 +622,20 @@
 
                 setTimeout(() => {
                     if (this.aiTargetField === 'description') {
-                        if (lower.includes('camara') || lower.includes('cámara') || lower.includes('ezviz') || lower.includes('imou') || lower.includes('seguridad')) {
-                            this.description = `${promptText} con visión nocturna a color, detección inteligente de movimiento, audio bidireccional y alta resistencia para exteriores o interiores.`;
-                        } else if (lower.includes('impresora') || lower.includes('epson') || lower.includes('canon') || lower.includes('hp smart')) {
-                            this.description = `Impresora multifuncional de alto rendimiento con sistema continuo de tinta, conexión inalámbrica Wi-Fi y máxima velocidad de impresión con bajo costo por página.`;
+                        if (lower.includes('camara') || lower.includes('cámara') || lower.includes('ezviz') || lower.includes('imou') || lower.includes('seguridad') || lower.includes('dahua') || lower.includes('hikvision')) {
+                            this.description = `${promptText || 'Cámara de Seguridad Inteligente'} con visión nocturna a color, detección IA de movimiento, audio bidireccional y alta resistencia para exteriores o interiores.`;
+                        } else if (lower.includes('impresora') || lower.includes('epson') || lower.includes('canon') || lower.includes('hp smart') || lower.includes('multifuncional') || lower.includes('ecotank')) {
+                            this.description = `${promptText || 'Impresora Multifuncional'} de alto rendimiento con sistema continuo de tinta, conexión inalámbrica Wi-Fi y máxima velocidad de impresión con bajo costo por página.`;
+                        } else if (lower.includes('monitor') || lower.includes('pantalla') || lower.includes('display')) {
+                            this.description = `${promptText || 'Monitor Profesional'} con alta tasa de refresco, panel de colores vivos y tecnología de protección ocular para gaming y productividad.`;
                         } else {
-                            this.description = `Laptop de alto rendimiento ideal para trabajo profesional, multitarea y entretenimiento, equipada con tecnología de última generación para máxima velocidad y autonomía.`;
+                            this.description = `${promptText || 'Laptop'} de alto rendimiento ideal para trabajo profesional, multitarea y entretenimiento, con tecnología de última generación para máxima velocidad y autonomía.`;
                         }
                         if (this.description.length > 200) {
                             this.description = this.description.substring(0, 197) + '...';
                         }
                     } else if (this.aiTargetField === 'specs') {
-                        if (lower.includes('camara') || lower.includes('cámara') || lower.includes('ezviz') || lower.includes('imou') || lower.includes('seguridad')) {
+                        if (lower.includes('camara') || lower.includes('cámara') || lower.includes('ezviz') || lower.includes('imou') || lower.includes('seguridad') || lower.includes('dahua') || lower.includes('hikvision')) {
                             this.specs = [
                                 { name: 'Resolución', value: lower.includes('3k') ? '3K (5 Megapíxeles)' : (lower.includes('2k') ? '2K (3 Megapíxeles)' : 'Full HD 1080p') },
                                 { name: 'Visión Nocturna', value: 'A color inteligente con focos LED y luz infrarroja' },
@@ -608,7 +645,7 @@
                                 { name: 'Detección Inteligente', value: 'IA para personas y vehículos' },
                                 { name: 'Protección', value: 'IP66 resistente a lluvia y polvo' }
                             ];
-                        } else if (lower.includes('impresora') || lower.includes('multifuncional')) {
+                        } else if (lower.includes('impresora') || lower.includes('multifuncional') || lower.includes('ecotank') || lower.includes('epson') || lower.includes('canon')) {
                             this.specs = [
                                 { name: 'Tipo de Impresión', value: 'Inyección de tinta continua EcoTank' },
                                 { name: 'Funciones', value: 'Imprime, Copia, Escanea' },
@@ -616,6 +653,15 @@
                                 { name: 'Resolución de Impresión', value: 'Hasta 5760 x 1440 dpi' },
                                 { name: 'Velocidad de Impresión', value: '33 ppm en negro y 15 ppm en color' },
                                 { name: 'Capacidad de Bandeja', value: '100 hojas de papel común' }
+                            ];
+                        } else if (lower.includes('monitor') || lower.includes('pantalla')) {
+                            this.specs = [
+                                { name: 'Tamaño de Pantalla', value: lower.includes('27') ? '27 pulgadas' : (lower.includes('24') ? '24 pulgadas' : '27 pulgadas') },
+                                { name: 'Resolución', value: lower.includes('4k') ? '4K UHD (3840x2160)' : (lower.includes('2k') || lower.includes('qhd') ? '2K QHD (2560x1440)' : 'Full HD (1920x1080)') },
+                                { name: 'Tasa de Refresco', value: lower.includes('165') ? '165Hz' : (lower.includes('144') ? '144Hz' : (lower.includes('240') ? '240Hz' : '100Hz')) },
+                                { name: 'Tipo de Panel', value: 'IPS con amplios ángulos de visión' },
+                                { name: 'Tiempo de Respuesta', value: '1ms (MPRT / GtG)' },
+                                { name: 'Conectividad', value: 'HDMI 2.0, DisplayPort 1.4, Audio Out' }
                             ];
                         } else {
                             let cpu = 'Intel Core i5 / AMD Ryzen 5';
@@ -645,7 +691,7 @@
                     }
                     this.isAiLoading = false;
                     this.aiModalOpen = false;
-                }, 600);
+                }, 100);
             },
 
             getSpecPlaceholder(name, type) {
