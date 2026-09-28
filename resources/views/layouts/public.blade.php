@@ -180,7 +180,7 @@
         </div>
         <nav aria-label="Navegación principal" class="border-t border-slate-100">
             <div class="hide-scrollbar mx-auto flex max-w-[1440px] items-center gap-2 overflow-x-auto px-4 py-2.5 sm:px-7">
-                <a href="{{ route('catalog') }}" style="background-color: {{ $primaryColor }}" class="focus-ring flex shrink-0 items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold text-white"><i class="fa-solid fa-bars" aria-hidden="true"></i>Todo el catálogo</a>
+                <a href="{{ route('catalog') }}" onclick="if(window.location.pathname.includes('/catalogo') && typeof toggleFilterDrawer === 'function' && window.innerWidth < 1024) { toggleFilterDrawer(true); return false; }" style="background-color: {{ $primaryColor }}" class="focus-ring flex shrink-0 items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold text-white"><i class="fa-solid fa-bars" aria-hidden="true"></i>Todo el catálogo</a>
                 <a href="{{ route('home') }}" class="focus-ring shrink-0 rounded-lg px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-700">Inicio</a>
                 <a href="{{ route('catalog') }}" class="focus-ring shrink-0 rounded-lg px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-700">Equipos</a>
                 <a href="{{ route('catalog', ['offers' => 1]) }}" class="focus-ring shrink-0 rounded-lg px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-700"><i class="fa-solid fa-bolt mr-1 text-amber-500" aria-hidden="true"></i>Ofertas</a>
