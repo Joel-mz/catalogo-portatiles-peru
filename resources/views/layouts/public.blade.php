@@ -126,6 +126,10 @@
                     <a href="{{ route('home') }}" class="focus-ring leading-tight"><span class="block font-display text-sm font-extrabold tracking-tight text-[#111c36] uppercase">{{ $storeName }}</span></a>
                 </div>
                 <div class="flex items-center gap-2">
+                    <button type="button" data-open-wishlist class="focus-ring relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600" aria-label="Abrir favoritos" title="Mis Favoritos">
+                        <i class="fa-regular fa-heart text-base text-rose-500"></i>
+                        <span id="wishlist-count-mobile" style="display: none;" class="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-extrabold text-white shadow-sm">0</span>
+                    </button>
                     <button type="button" data-open-cart class="focus-ring relative inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700" aria-label="Abrir carrito">
                         <i class="fa-solid fa-bag-shopping text-base"></i><span id="cart-count" class="flex h-5 min-w-5 items-center justify-center rounded-full bg-indigo-600 px-1 text-[10px] font-extrabold text-white">0</span>
                     </button>
@@ -149,7 +153,7 @@
                 </form>
 
                 <!-- Actions (Desktop & Extra Mobile buttons) -->
-                <div class="flex items-center justify-between gap-2 lg:w-[390px] lg:shrink-0 lg:justify-end">
+                <div class="flex items-center justify-between gap-2 lg:w-[450px] lg:shrink-0 lg:justify-end">
                     <button type="button" id="theme-toggle" class="focus-ring flex min-h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700" aria-label="Cambiar tema">
                         <i class="fa-solid fa-moon dark:hidden"></i>
                         <i class="fa-solid fa-sun hidden dark:inline"></i>
@@ -157,8 +161,15 @@
                     @auth
                         <a href="{{ route('dashboard') }}" class="focus-ring flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-blue-700 lg:flex"><i class="fa-regular fa-user text-base"></i><span class="hidden sm:inline">Mi cuenta</span></a>
                     @endauth
+
+                    <!-- Desktop Wishlist Button -->
+                    <button type="button" data-open-wishlist class="focus-ring relative hidden h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 lg:inline-flex" aria-label="Abrir favoritos" title="Mis Favoritos">
+                        <i class="fa-regular fa-heart text-base text-rose-500"></i>
+                        <span>Favoritos</span>
+                        <span id="wishlist-count-desktop" style="display: none;" class="flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-extrabold text-white shadow-sm">0</span>
+                    </button>
                     
-                    <!-- Desktop Cart (Hidden on Mobile since it's on Top Row) -->
+                    <!-- Desktop Cart -->
                     <button type="button" data-open-cart class="focus-ring relative hidden h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 lg:inline-flex" aria-label="Abrir carrito">
                         <i class="fa-solid fa-bag-shopping text-base"></i><span>Carrito</span><span id="cart-count-desktop" class="flex h-5 min-w-5 items-center justify-center rounded-full bg-indigo-600 px-1 text-[10px] font-extrabold text-white">0</span>
                     </button>
@@ -287,6 +298,47 @@
         </div>
     </dialog>
 
+    <dialog id="wishlist-dialog" class="w-[min(100%-1rem,680px)] max-h-[92vh] overflow-y-auto rounded-3xl border-0 p-0 shadow-2xl backdrop:bg-slate-950/60">
+        <div class="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white/95 px-5 py-4 backdrop-blur sm:px-7">
+            <div class="flex items-center gap-3">
+                <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-50 text-rose-500">
+                    <i class="fa-solid fa-heart text-lg"></i>
+                </div>
+                <div>
+                    <p class="text-[9px] font-extrabold uppercase tracking-[.18em] text-rose-500">Guardados</p>
+                    <h2 class="mt-0.5 font-display text-xl font-extrabold text-[#142143]">Mis Favoritos</h2>
+                </div>
+            </div>
+            <button type="button" data-close-wishlist class="focus-ring flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200" aria-label="Cerrar favoritos">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="p-5 sm:p-7">
+            <div id="wishlist-items" class="space-y-3"></div>
+            <div id="wishlist-empty" class="hidden flex-col items-center justify-center rounded-2xl bg-slate-50 px-4 py-12 text-center">
+                <div class="flex h-16 w-16 items-center justify-center rounded-full bg-rose-50 text-rose-300 text-3xl mb-3">
+                    <i class="fa-regular fa-heart"></i>
+                </div>
+                <h3 class="text-sm font-bold text-slate-700">No tienes productos en favoritos</h3>
+                <p class="mt-1 max-w-xs text-xs text-slate-500">Haz clic en el corazoncito de cualquier producto para guardarlo aquí y consultarlo cuando quieras.</p>
+                <a href="{{ route('catalog') }}" class="mt-5 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-indigo-700 transition">
+                    <i class="fa-solid fa-store"></i> Explorar Catálogo
+                </a>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- Wishlist Toast Notification -->
+    <div id="wishlist-toast" class="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl bg-slate-900/95 text-white px-4 py-3 shadow-2xl backdrop-blur transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none border border-white/10">
+        <div id="wishlist-toast-icon" class="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-500/20 text-rose-400 shrink-0 text-base">
+            <i class="fa-solid fa-heart"></i>
+        </div>
+        <div class="pr-2">
+            <p id="wishlist-toast-msg" class="text-xs font-bold leading-tight"></p>
+            <p id="wishlist-toast-sub" class="text-[10px] text-slate-400 line-clamp-1 mt-0.5"></p>
+        </div>
+    </div>
+
     <footer class="mt-16 bg-[#0b1730] text-white">
         <div class="mx-auto grid max-w-[1440px] gap-8 px-4 py-10 sm:px-7 md:grid-cols-[1.3fr_.7fr_.7fr] md:py-14">
             <div>
@@ -308,7 +360,9 @@
     <script>
         (() => {
             const storageKey = 'mpc-shopping-cart';
+            const wishlistStorageKey = 'mpc-wishlist';
             const dialog = document.getElementById('cart-dialog');
+            const wishlistDialog = document.getElementById('wishlist-dialog');
             const itemsContainer = document.getElementById('cart-items');
             const countBadges = document.querySelectorAll('#cart-count, #cart-count-desktop');
             const checkoutForm = document.getElementById('cart-checkout-form');
@@ -316,13 +370,20 @@
             const emptyMessage = document.getElementById('cart-empty');
             const errorMessage = document.getElementById('cart-error');
             const currency = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' });
+            
             let cart = [];
+            let wishlist = [];
 
             try { cart = JSON.parse(localStorage.getItem(storageKey) || '[]'); } catch { cart = []; }
             if (!Array.isArray(cart)) cart = [];
 
+            try { wishlist = JSON.parse(localStorage.getItem(wishlistStorageKey) || '[]'); } catch { wishlist = []; }
+            if (!Array.isArray(wishlist)) wishlist = [];
+
             const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[character]);
             const saveCart = () => localStorage.setItem(storageKey, JSON.stringify(cart));
+            const saveWishlist = () => localStorage.setItem(wishlistStorageKey, JSON.stringify(wishlist));
+
             const renderCart = () => {
                 const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
                 countBadges.forEach(badge => badge.textContent = itemCount);
@@ -337,9 +398,153 @@
                 checkoutPanel.classList.toggle('hidden', cart.length === 0);
             };
 
+            const showWishlistToast = (msg, sub, isAdded) => {
+                const toast = document.getElementById('wishlist-toast');
+                const toastMsg = document.getElementById('wishlist-toast-msg');
+                const toastSub = document.getElementById('wishlist-toast-sub');
+                const toastIcon = document.getElementById('wishlist-toast-icon');
+                if (!toast) return;
+
+                toastMsg.textContent = msg;
+                toastSub.textContent = sub;
+                if (isAdded) {
+                    toastIcon.innerHTML = '<i class="fa-solid fa-heart text-rose-500"></i>';
+                } else {
+                    toastIcon.innerHTML = '<i class="fa-regular fa-heart text-slate-400"></i>';
+                }
+
+                toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+                toast.classList.add('translate-y-0', 'opacity-100');
+
+                clearTimeout(window.wishlistToastTimeout);
+                window.wishlistToastTimeout = setTimeout(() => {
+                    toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+                    toast.classList.remove('translate-y-0', 'opacity-100');
+                }, 2800);
+            };
+
+            const updateWishlistUI = () => {
+                const count = wishlist.length;
+                document.querySelectorAll('#wishlist-count-mobile, #wishlist-count-desktop').forEach(badge => {
+                    badge.textContent = count;
+                    badge.style.display = count > 0 ? 'flex' : 'none';
+                });
+
+                // Update heart icons across the page
+                document.querySelectorAll('[data-wishlist-toggle]').forEach(btn => {
+                    const id = Number(btn.dataset.productId);
+                    const isFav = wishlist.some(item => item.product_id === id);
+                    const icon = btn.querySelector('i');
+                    if (isFav) {
+                        btn.classList.add('bg-rose-50', 'text-rose-500', 'border-rose-200');
+                        btn.classList.remove('text-slate-400', 'bg-white/90');
+                        if (icon) {
+                            icon.classList.remove('fa-regular');
+                            icon.classList.add('fa-solid', 'text-rose-500');
+                        }
+                    } else {
+                        btn.classList.remove('bg-rose-50', 'text-rose-500', 'border-rose-200');
+                        btn.classList.add('text-slate-400', 'bg-white/90');
+                        if (icon) {
+                            icon.classList.remove('fa-solid', 'text-rose-500');
+                            icon.classList.add('fa-regular');
+                        }
+                    }
+                });
+
+                // Render Wishlist Dialog items
+                const wishlistContainer = document.getElementById('wishlist-items');
+                const wishlistEmpty = document.getElementById('wishlist-empty');
+                if (wishlistContainer && wishlistEmpty) {
+                    if (wishlist.length === 0) {
+                        wishlistContainer.innerHTML = '';
+                        wishlistEmpty.classList.remove('hidden');
+                        wishlistEmpty.classList.add('flex');
+                    } else {
+                        wishlistEmpty.classList.add('hidden');
+                        wishlistEmpty.classList.remove('flex');
+                        wishlistContainer.innerHTML = wishlist.map(item => `
+                            <article class="flex items-center gap-3 rounded-2xl border border-slate-200 p-3 bg-white hover:border-rose-200 transition">
+                                <div class="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-50 border border-slate-100">
+                                    ${item.image ? `<img src="${escapeHtml(item.image)}" alt="" class="h-full w-full object-contain p-1">` : '<i class="fa-solid fa-laptop text-xl text-indigo-400"></i>'}
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <a href="${escapeHtml(item.url)}" class="line-clamp-1 text-xs font-bold text-slate-800 hover:text-indigo-700">${escapeHtml(item.name)}</a>
+                                    <p class="mt-0.5 text-xs font-extrabold text-indigo-700">${currency.format(item.price)}</p>
+                                </div>
+                                <div class="flex items-center gap-1.5 shrink-0">
+                                    <button type="button" 
+                                            data-add-to-cart 
+                                            data-product-id="${item.product_id}" 
+                                            data-product-name="${escapeHtml(item.name)}" 
+                                            data-product-price="${item.price}" 
+                                            data-product-stock="10" 
+                                            data-product-image="${escapeHtml(item.image || '')}" 
+                                            data-product-url="${escapeHtml(item.url)}" 
+                                            class="flex h-8 items-center gap-1 rounded-lg bg-indigo-50 px-2.5 text-[10px] font-bold text-indigo-700 hover:bg-indigo-100 transition" 
+                                            title="Agregar al carrito">
+                                        <i class="fa-solid fa-bag-shopping"></i>
+                                        <span class="hidden sm:inline">Al carrito</span>
+                                    </button>
+                                    <button type="button" 
+                                            data-wishlist-remove="${item.product_id}" 
+                                            class="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition" 
+                                            title="Quitar de favoritos">
+                                        <i class="fa-solid fa-trash-can text-xs"></i>
+                                    </button>
+                                </div>
+                            </article>
+                        `).join('');
+                    }
+                }
+            };
+
             document.addEventListener('click', (event) => {
                 if (event.target.closest('[data-open-cart]')) dialog.showModal();
                 if (event.target.closest('[data-close-cart]')) dialog.close();
+
+                if (event.target.closest('[data-open-wishlist]')) {
+                    updateWishlistUI();
+                    if (wishlistDialog) wishlistDialog.showModal();
+                }
+                if (event.target.closest('[data-close-wishlist]')) {
+                    if (wishlistDialog) wishlistDialog.close();
+                }
+
+                const wishlistToggleBtn = event.target.closest('[data-wishlist-toggle]');
+                if (wishlistToggleBtn) {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    const id = Number(wishlistToggleBtn.dataset.productId);
+                    const name = wishlistToggleBtn.dataset.productName || 'Producto';
+                    const price = Number(wishlistToggleBtn.dataset.productPrice || 0);
+                    const image = wishlistToggleBtn.dataset.productImage || '';
+                    const url = wishlistToggleBtn.dataset.productUrl || '#';
+
+                    const index = wishlist.findIndex(item => item.product_id === id);
+                    if (index > -1) {
+                        wishlist.splice(index, 1);
+                        saveWishlist();
+                        updateWishlistUI();
+                        showWishlistToast('Eliminado de Favoritos', name, false);
+                    } else {
+                        wishlist.push({ product_id: id, name, price, image, url });
+                        saveWishlist();
+                        updateWishlistUI();
+                        showWishlistToast('¡Añadido a Favoritos! ❤️', name, true);
+                    }
+                }
+
+                const wishlistRemoveBtn = event.target.closest('[data-wishlist-remove]');
+                if (wishlistRemoveBtn) {
+                    const id = Number(wishlistRemoveBtn.dataset.wishlistRemove);
+                    const item = wishlist.find(i => i.product_id === id);
+                    wishlist = wishlist.filter(i => i.product_id !== id);
+                    saveWishlist();
+                    updateWishlistUI();
+                    if (item) showWishlistToast('Eliminado de Favoritos', item.name, false);
+                }
 
                 const addButton = event.target.closest('[data-add-to-cart]');
                 if (addButton) {
@@ -423,6 +628,7 @@
             }
 
             renderCart();
+            updateWishlistUI();
         })();
     </script>
 </body>

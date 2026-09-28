@@ -31,6 +31,19 @@
             <div id="image-zoom-container" class="relative order-1 flex min-h-[350px] cursor-zoom-in items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-[#eef1fa] via-white to-[#e7eaff] p-2 sm:min-h-[550px] sm:p-4 {{ $gallery->count() > 1 ? 'sm:order-2' : 'sm:col-span-2' }}">
                 <div class="absolute right-[-10%] top-[-10%] h-64 w-64 rounded-full bg-violet-200/40 blur-3xl"></div>
                 @if($product->is_offer && $product->offer_price)<span class="absolute left-5 top-5 z-10 rounded-lg bg-rose-500 px-3 py-1.5 text-[10px] font-extrabold text-white">PRECIO ESPECIAL</span>@endif
+                
+                <button type="button" 
+                        data-wishlist-toggle 
+                        data-product-id="{{ $product->id }}" 
+                        data-product-name="{{ $product->name }}" 
+                        data-product-price="{{ (float) $price }}" 
+                        data-product-image="{{ $mainImageUrl ?? '' }}" 
+                        data-product-url="{{ route('product.show', $product->slug) }}" 
+                        class="absolute right-5 top-5 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-slate-400 shadow-md backdrop-blur transition-all duration-200 hover:bg-rose-50 hover:text-rose-500 hover:scale-110 active:scale-95 focus:outline-none" 
+                        title="Guardar en favoritos">
+                    <i class="fa-regular fa-heart text-base transition-colors pointer-events-none"></i>
+                </button>
+
                 @if($mainImage)
                     <img id="main-product-image" src="{{ filter_var($mainImage, FILTER_VALIDATE_URL) ? $mainImage : asset('storage/' . $mainImage) }}" alt="{{ $product->name }}" class="relative z-10 max-h-[550px] w-full object-contain mix-blend-multiply drop-shadow-xl" style="transition: transform 0.1s ease-out;">
                 @else
@@ -60,6 +73,17 @@
             <div data-product-quantity class="mt-5 flex gap-2">
                 <label for="product-quantity" class="sr-only">Cantidad</label><input id="product-quantity" type="number" min="1" max="{{ max(1, $product->stock) }}" value="1" @disabled($product->stock < 1) class="h-12 w-20 rounded-xl border border-slate-200 bg-slate-50 px-3 text-center text-sm font-bold outline-none focus:border-indigo-400">
                 <button type="button" data-add-to-cart data-product-id="{{ $product->id }}" data-product-name="{{ $product->name }}" data-product-price="{{ (float) $price }}" data-product-stock="{{ (int) $product->stock }}" data-product-image="{{ $mainImageUrl ?? '' }}" data-product-url="{{ route('product.show', $product->slug) }}" @disabled($product->stock < 1) class="focus-ring flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3 text-xs font-extrabold text-indigo-700 transition hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"><i class="fa-solid fa-bag-shopping" aria-hidden="true"></i> AGREGAR AL CARRITO</button>
+                <button type="button" 
+                        data-wishlist-toggle 
+                        data-product-id="{{ $product->id }}" 
+                        data-product-name="{{ $product->name }}" 
+                        data-product-price="{{ (float) $price }}" 
+                        data-product-image="{{ $mainImageUrl ?? '' }}" 
+                        data-product-url="{{ route('product.show', $product->slug) }}" 
+                        class="focus-ring flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-rose-300 hover:bg-rose-50 hover:text-rose-500" 
+                        title="Guardar en favoritos">
+                    <i class="fa-regular fa-heart text-lg pointer-events-none"></i>
+                </button>
             </div>
             <a href="https://wa.me/{{ $whatsappNumber }}?text={{ urlencode($whatsappMessage) }}" target="_blank" rel="noopener noreferrer" class="focus-ring mt-2 flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#25d366] px-4 text-sm font-extrabold text-white shadow-lg shadow-emerald-600/15 transition hover:bg-emerald-600"><i class="fa-brands fa-whatsapp text-lg" aria-hidden="true"></i> COMPRAR POR WHATSAPP</a>
             <a href="{{ route('product.pdf', $product->slug) }}" class="focus-ring mt-2 flex min-h-12 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-extrabold text-slate-700 shadow-sm transition hover:bg-slate-50"><i class="fa-solid fa-file-pdf text-lg text-rose-500" aria-hidden="true"></i> DESCARGAR FICHA TÉCNICA</a>

@@ -20,9 +20,18 @@
         </div>
 
         <!-- Wishlist Button -->
-        <a href="https://wa.me/{{ $whatsappNumber }}?text={{ urlencode('Hola, me interesa este producto: ' . $product->name) }}" target="_blank" rel="noopener noreferrer" class="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-slate-400 shadow-sm transition hover:bg-rose-50 hover:text-rose-500" title="Consultar por WhatsApp">
-            <i class="fa-regular fa-heart text-xs"></i>
-        </a>
+        <button type="button" 
+                data-wishlist-toggle 
+                data-product-id="{{ $product->id }}" 
+                data-product-name="{{ $product->name }}" 
+                data-product-price="{{ (float) $currentPrice }}" 
+                data-product-image="{{ $imageUrl ?? '' }}" 
+                data-product-url="{{ route('product.show', $product->slug) }}" 
+                class="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-slate-400 shadow-sm transition-all duration-200 hover:bg-rose-50 hover:text-rose-500 hover:scale-110 active:scale-95 focus:outline-none" 
+                aria-label="Guardar en favoritos" 
+                title="Añadir a favoritos">
+            <i class="fa-regular fa-heart text-xs transition-colors pointer-events-none"></i>
+        </button>
 
         <!-- Product Image -->
         <a href="{{ route('product.show', $product->slug) }}" class="focus-ring block aspect-square w-full overflow-hidden">
