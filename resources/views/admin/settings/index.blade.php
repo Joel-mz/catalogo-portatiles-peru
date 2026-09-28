@@ -33,7 +33,7 @@
                               hover:file:bg-slate-200
                               border border-slate-200 rounded-lg bg-transparent
                             ">
-                            @if(isset($settings['store_logo']))
+                            @if(!empty($settings['store_logo']))
                                 <div class="mt-2">
                                     <img src="{{ Storage::url($settings['store_logo']) }}" alt="Logo" class="h-12 object-contain bg-slate-100 rounded p-1">
                                 </div>
@@ -111,33 +111,204 @@
                         <input type="text" name="top_banner_text" value="{{ $settings['top_banner_text'] ?? '' }}" class="block w-full rounded-xl border-slate-200 bg-transparent shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-4 py-2.5 placeholder-slate-400" placeholder="Ej: ¡Envíos gratis a todo el Perú en compras mayores a S/ 2000!">
                     </div>
 
-                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
                         @php
                             $themes = [
-                                'light' => ['name' => 'Claro', 'filter' => 'hue-rotate(0deg) saturate(1)'],
-                                'dark' => ['name' => 'Oscuro', 'filter' => 'invert(0.9) hue-rotate(180deg)'],
-                                'indigo' => ['name' => 'Índigo', 'filter' => 'hue-rotate(220deg) saturate(1.5)'],
-                                'nature' => ['name' => 'Naturaleza', 'filter' => 'hue-rotate(140deg) saturate(1.2)'],
-                                'ocean' => ['name' => 'Océano', 'filter' => 'hue-rotate(190deg) saturate(1.4)'],
-                                'sunset' => ['name' => 'Atardecer', 'filter' => 'hue-rotate(10deg) saturate(1.6) brightness(0.9)'],
-                                'rose' => ['name' => 'Rosa Pastel', 'filter' => 'hue-rotate(320deg) saturate(1.3)'],
-                                'monochrome' => ['name' => 'Monocromático', 'filter' => 'grayscale(1)'],
-                                'neon' => ['name' => 'Neón', 'filter' => 'invert(1) hue-rotate(280deg) saturate(2)'],
-                                'luxury' => ['name' => 'Lujo', 'filter' => 'invert(0.9) sepia(1) hue-rotate(350deg) saturate(2)'],
+                                'light' => [
+                                    'name' => 'Claro',
+                                    'desc' => 'Azul clásico',
+                                    'preview_bg' => 'bg-[#f4f6fa]',
+                                    'sidebar' => 'bg-[#0f172a]',
+                                    'logo' => 'bg-blue-500',
+                                    'navActive' => 'bg-blue-600',
+                                    'nav' => 'bg-slate-700',
+                                    'topbar' => 'bg-white border border-slate-200',
+                                    'card' => 'bg-white border border-slate-200',
+                                    'text' => 'bg-slate-700',
+                                    'textMuted' => 'bg-slate-300',
+                                    'accent' => 'bg-blue-600',
+                                    'badge' => 'bg-emerald-500',
+                                ],
+                                'dark' => [
+                                    'name' => 'Oscuro',
+                                    'desc' => 'Nocturno azulado',
+                                    'preview_bg' => 'bg-[#0f172a]',
+                                    'sidebar' => 'bg-[#1e293b]',
+                                    'logo' => 'bg-blue-500',
+                                    'navActive' => 'bg-blue-500',
+                                    'nav' => 'bg-slate-600',
+                                    'topbar' => 'bg-[#1e293b] border border-slate-700',
+                                    'card' => 'bg-[#1e293b] border border-slate-700',
+                                    'text' => 'bg-slate-200',
+                                    'textMuted' => 'bg-slate-500',
+                                    'accent' => 'bg-blue-500',
+                                    'badge' => 'bg-emerald-400',
+                                ],
+                                'indigo' => [
+                                    'name' => 'Índigo',
+                                    'desc' => 'Gradiente violeta',
+                                    'preview_bg' => 'bg-[#f4f6fa]',
+                                    'sidebar' => 'bg-gradient-to-b from-[#0b1730] to-[#142650]',
+                                    'logo' => 'bg-indigo-500',
+                                    'navActive' => 'bg-gradient-to-r from-blue-600 to-indigo-600',
+                                    'nav' => 'bg-indigo-900',
+                                    'topbar' => 'bg-white border border-indigo-100',
+                                    'card' => 'bg-white border border-indigo-100',
+                                    'text' => 'bg-slate-700',
+                                    'textMuted' => 'bg-indigo-200',
+                                    'accent' => 'bg-indigo-600',
+                                    'badge' => 'bg-violet-500',
+                                ],
+                                'nature' => [
+                                    'name' => 'Naturaleza',
+                                    'desc' => 'Verde orgánico',
+                                    'preview_bg' => 'bg-[#f0fdf4]',
+                                    'sidebar' => 'bg-[#064e3b]',
+                                    'logo' => 'bg-emerald-400',
+                                    'navActive' => 'bg-emerald-600',
+                                    'nav' => 'bg-emerald-900',
+                                    'topbar' => 'bg-white border border-emerald-100',
+                                    'card' => 'bg-white border border-emerald-100',
+                                    'text' => 'bg-emerald-900',
+                                    'textMuted' => 'bg-emerald-200',
+                                    'accent' => 'bg-emerald-600',
+                                    'badge' => 'bg-teal-500',
+                                ],
+                                'ocean' => [
+                                    'name' => 'Océano',
+                                    'desc' => 'Marino profundo',
+                                    'preview_bg' => 'bg-[#f0f9ff]',
+                                    'sidebar' => 'bg-gradient-to-b from-[#082f49] to-[#0c4a6e]',
+                                    'logo' => 'bg-sky-400',
+                                    'navActive' => 'bg-sky-600',
+                                    'nav' => 'bg-sky-950',
+                                    'topbar' => 'bg-white border border-sky-100',
+                                    'card' => 'bg-white border border-sky-100',
+                                    'text' => 'bg-slate-800',
+                                    'textMuted' => 'bg-sky-200',
+                                    'accent' => 'bg-sky-600',
+                                    'badge' => 'bg-cyan-500',
+                                ],
+                                'sunset' => [
+                                    'name' => 'Atardecer',
+                                    'desc' => 'Cálido carmesí',
+                                    'preview_bg' => 'bg-[#fff7ed]',
+                                    'sidebar' => 'bg-gradient-to-b from-[#431407] to-[#7c2d12]',
+                                    'logo' => 'bg-orange-500',
+                                    'navActive' => 'bg-gradient-to-r from-orange-500 to-red-500',
+                                    'nav' => 'bg-orange-950',
+                                    'topbar' => 'bg-white border border-orange-100',
+                                    'card' => 'bg-white border border-orange-100',
+                                    'text' => 'bg-amber-950',
+                                    'textMuted' => 'bg-orange-200',
+                                    'accent' => 'bg-orange-600',
+                                    'badge' => 'bg-red-500',
+                                ],
+                                'rose' => [
+                                    'name' => 'Rosa Pastel',
+                                    'desc' => 'Carmín & magenta',
+                                    'preview_bg' => 'bg-[#fff1f2]',
+                                    'sidebar' => 'bg-[#4c0519]',
+                                    'logo' => 'bg-rose-400',
+                                    'navActive' => 'bg-rose-600',
+                                    'nav' => 'bg-rose-950',
+                                    'topbar' => 'bg-white border border-rose-100',
+                                    'card' => 'bg-white border border-rose-100',
+                                    'text' => 'bg-rose-950',
+                                    'textMuted' => 'bg-rose-200',
+                                    'accent' => 'bg-rose-600',
+                                    'badge' => 'bg-pink-500',
+                                ],
+                                'monochrome' => [
+                                    'name' => 'Monocromático',
+                                    'desc' => 'Escala de grises',
+                                    'preview_bg' => 'bg-[#f8fafc]',
+                                    'sidebar' => 'bg-[#1e293b]',
+                                    'logo' => 'bg-slate-400',
+                                    'navActive' => 'bg-slate-600',
+                                    'nav' => 'bg-slate-800',
+                                    'topbar' => 'bg-white border border-slate-200',
+                                    'card' => 'bg-white border border-slate-200',
+                                    'text' => 'bg-slate-800',
+                                    'textMuted' => 'bg-slate-300',
+                                    'accent' => 'bg-slate-600',
+                                    'badge' => 'bg-slate-400',
+                                ],
+                                'neon' => [
+                                    'name' => 'Neón',
+                                    'desc' => 'Cyberpunk fucsia',
+                                    'preview_bg' => 'bg-[#000000]',
+                                    'sidebar' => 'bg-black border-r border-fuchsia-500',
+                                    'logo' => 'bg-fuchsia-500',
+                                    'navActive' => 'bg-fuchsia-600 text-white',
+                                    'nav' => 'bg-fuchsia-950/40',
+                                    'topbar' => 'bg-black border border-fuchsia-500',
+                                    'card' => 'bg-black border border-fuchsia-600',
+                                    'text' => 'bg-fuchsia-300',
+                                    'textMuted' => 'bg-fuchsia-800',
+                                    'accent' => 'bg-fuchsia-500',
+                                    'badge' => 'bg-cyan-400',
+                                ],
+                                'luxury' => [
+                                    'name' => 'Lujo',
+                                    'desc' => 'Oro & antracita',
+                                    'preview_bg' => 'bg-[#18181b]',
+                                    'sidebar' => 'bg-gradient-to-b from-[#18181b] to-[#27272a] border-r border-amber-600',
+                                    'logo' => 'bg-amber-500',
+                                    'navActive' => 'bg-gradient-to-r from-amber-600 to-amber-700',
+                                    'nav' => 'bg-amber-950/40',
+                                    'topbar' => 'bg-[#18181b] border border-amber-600/60',
+                                    'card' => 'bg-[#27272a] border border-amber-600/40',
+                                    'text' => 'bg-amber-200',
+                                    'textMuted' => 'bg-amber-800',
+                                    'accent' => 'bg-amber-500',
+                                    'badge' => 'bg-yellow-400',
+                                ],
                             ];
                             $currentTheme = $settings['system_theme'] ?? 'light';
                         @endphp
 
                         @foreach($themes as $key => $data)
-                        <label class="cursor-pointer group relative">
+                        <label class="cursor-pointer group relative block">
                             <input type="radio" name="system_theme" value="{{ $key }}" class="peer hidden" {{ $currentTheme === $key ? 'checked' : '' }}>
-                            <div class="border-2 border-transparent peer-checked:border-indigo-600 rounded-2xl overflow-hidden transition-all peer-checked:shadow-[0_0_15px_rgba(79,70,229,0.3)] bg-slate-100 relative">
-                                <div class="aspect-video w-full overflow-hidden relative">
-                                    <img src="{{ Storage::url('base_theme_preview.jpg') }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" style="filter: {{ $data['filter'] }}">
+                            <div class="border-2 border-transparent peer-checked:border-indigo-600 rounded-2xl overflow-hidden transition-all duration-200 peer-checked:shadow-[0_0_15px_rgba(79,70,229,0.35)] peer-checked:scale-[1.02] bg-white shadow-sm hover:shadow-md relative">
+                                
+                                {{-- Mini UI Mockup Preview --}}
+                                <div class="aspect-[16/10] w-full p-2 flex gap-1 {{ $data['preview_bg'] }} transition-transform duration-300 group-hover:scale-[1.02]">
+                                    <!-- Mini Sidebar -->
+                                    <div class="w-[28%] h-full rounded-md flex flex-col gap-1 p-1 {{ $data['sidebar'] }} shadow-xs">
+                                        <div class="h-1.5 w-4 rounded-full {{ $data['logo'] }}"></div>
+                                        <div class="h-1 w-full rounded-full {{ $data['navActive'] }} mt-0.5"></div>
+                                        <div class="h-1 w-3/4 rounded-full {{ $data['nav'] }}"></div>
+                                        <div class="h-1 w-1/2 rounded-full {{ $data['nav'] }}"></div>
+                                    </div>
+                                    <!-- Mini Content -->
+                                    <div class="flex-1 h-full flex flex-col gap-1">
+                                        <!-- Mini Topbar -->
+                                        <div class="h-2.5 w-full rounded flex items-center justify-between px-1.5 {{ $data['topbar'] }}">
+                                            <div class="h-1 w-1/3 rounded-full {{ $data['textMuted'] }}"></div>
+                                            <div class="h-1.5 w-1.5 rounded-full {{ $data['accent'] }}"></div>
+                                        </div>
+                                        <!-- Mini Dashboard Cards -->
+                                        <div class="flex-1 grid grid-cols-2 gap-1">
+                                            <div class="rounded p-1 flex flex-col justify-between {{ $data['card'] }}">
+                                                <div class="h-1 w-3/4 rounded-full {{ $data['text'] }}"></div>
+                                                <div class="h-1.5 w-1/2 rounded-full {{ $data['accent'] }}"></div>
+                                            </div>
+                                            <div class="rounded p-1 flex flex-col justify-between {{ $data['card'] }}">
+                                                <div class="h-1 w-3/4 rounded-full {{ $data['text'] }}"></div>
+                                                <div class="h-1.5 w-1/2 rounded-full {{ $data['badge'] }}"></div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="p-2.5 text-center bg-white border-t border-slate-100 flex items-center justify-between">
-                                    <span class="text-[11px] font-bold text-slate-700">{{ $data['name'] }}</span>
-                                    <div class="w-4 h-4 rounded-full border border-slate-300 peer-checked:border-indigo-600 peer-checked:bg-indigo-600 flex items-center justify-center transition-colors">
+
+                                <!-- Label & Checkbox Indicator -->
+                                <div class="p-2.5 bg-white border-t border-slate-100 flex items-center justify-between">
+                                    <div class="min-w-0">
+                                        <span class="block text-xs font-bold text-slate-800 truncate">{{ $data['name'] }}</span>
+                                    </div>
+                                    <div class="w-4 h-4 rounded-full border-2 border-slate-300 peer-checked:border-indigo-600 peer-checked:bg-indigo-600 flex items-center justify-center transition-all flex-shrink-0">
                                         <i class="fa-solid fa-check text-[8px] text-white opacity-0 peer-checked:opacity-100"></i>
                                     </div>
                                 </div>
