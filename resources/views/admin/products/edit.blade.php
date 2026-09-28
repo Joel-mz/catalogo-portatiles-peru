@@ -513,7 +513,7 @@
                     </div>
                 </div>
 
-                <a href="{{ route('front.product', $product->slug) }}" target="_blank" class="mt-3 w-full py-2.5 bg-indigo-700 hover:bg-indigo-800 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors shadow-lg shadow-indigo-200/50">
+                <a href="{{ route('product.show', $product->slug) }}" target="_blank" class="mt-3 w-full py-2.5 bg-indigo-700 hover:bg-indigo-800 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors shadow-lg shadow-indigo-200/50">
                     <i class="fa-solid fa-eye"></i> Ver en catálogo público
                 </a>
             </section>
