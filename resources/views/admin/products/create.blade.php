@@ -494,42 +494,45 @@
      x-cloak 
      class="fixed inset-0 z-[150] flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4"
      @keydown.window.escape="aiModalOpen = false">
-    <div @click.away="aiModalOpen = false" class="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-6 border border-slate-100 relative">
+    <div @click.away="aiModalOpen = false" class="bg-white rounded-3xl shadow-2xl w-full max-w-xl p-6 border border-slate-100 relative">
         <div class="flex items-center justify-between mb-3">
             <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2.5">
                 <div class="w-9 h-9 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center shadow-sm">
                     <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
                 </div>
-                <span x-text="aiTargetField === 'specs' ? 'Autocompletar Especificaciones con IA' : 'Generar Descripción con IA'"></span>
+                <span x-text="aiTargetField === 'specs' ? 'Autocompletar / Pegar Ficha Técnica con IA' : 'Generar Descripción con IA'"></span>
             </h3>
             <button type="button" @click="aiModalOpen = false" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition">
                 <i class="fa-solid fa-xmark text-sm"></i>
             </button>
         </div>
         
-        <p class="text-xs text-slate-500 mb-3 leading-relaxed" x-text="aiTargetField === 'specs' ? 'Ingresa o ajusta el nombre/modelo del producto para extraer y organizar automáticamente todas sus especificaciones técnicas de hardware.' : 'Genera una descripción comercial, llamativa y persuasiva ideal para atraer clientes en tu catálogo.'"></p>
+        <p class="text-xs text-slate-500 mb-3 leading-relaxed">
+            <span class="font-semibold text-purple-700">💡 Pega directamente la ficha técnica copiada</span> (de Excel, PDF o página web) o escribe el nombre del producto para que la IA extraiga y organice todas las filas exactas.
+        </p>
 
         <!-- Category Presets / Tags -->
-        <div class="mb-3 flex flex-wrap gap-1.5">
+        <div class="mb-3 flex flex-wrap gap-1.5 items-center">
             <span class="text-[10px] font-bold text-slate-400 self-center mr-1">Atajos:</span>
             <button type="button" @click="setAiPreset('Laptop Gamer')" class="px-2 py-1 bg-slate-100 hover:bg-purple-100 hover:text-purple-700 text-slate-600 rounded-lg text-[10px] font-semibold transition">💻 Laptop Gamer</button>
             <button type="button" @click="setAiPreset('Laptop Oficina')" class="px-2 py-1 bg-slate-100 hover:bg-purple-100 hover:text-purple-700 text-slate-600 rounded-lg text-[10px] font-semibold transition">💼 Laptop Oficina</button>
             <button type="button" @click="setAiPreset('Cámara de Seguridad')" class="px-2 py-1 bg-slate-100 hover:bg-purple-100 hover:text-purple-700 text-slate-600 rounded-lg text-[10px] font-semibold transition">📷 Cámara</button>
             <button type="button" @click="setAiPreset('Impresora EcoTank')" class="px-2 py-1 bg-slate-100 hover:bg-purple-100 hover:text-purple-700 text-slate-600 rounded-lg text-[10px] font-semibold transition">🖨️ Impresora</button>
             <button type="button" @click="setAiPreset('Monitor Gaming')" class="px-2 py-1 bg-slate-100 hover:bg-purple-100 hover:text-purple-700 text-slate-600 rounded-lg text-[10px] font-semibold transition">🖥️ Monitor</button>
+            <button type="button" @click="aiPrompt = ''" class="ml-auto text-[10px] font-bold text-red-500 hover:underline">Limpiar texto</button>
         </div>
 
-        <label class="block text-xs font-bold text-slate-700 mb-1">Nombre o detalles del producto:</label>
-        <textarea x-model="aiPrompt" rows="3" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-800 focus:ring-2 focus:ring-purple-500 focus:bg-white transition-colors mb-4 resize-none" placeholder="Ej. Laptop HP Pavilion 15 Core i7 1355U 16GB 512GB SSD RTX 3050..."></textarea>
+        <label class="block text-xs font-bold text-slate-700 mb-1">Pega aquí el texto, tabla de especificaciones o nombre:</label>
+        <textarea x-model="aiPrompt" rows="6" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-800 focus:ring-2 focus:ring-purple-500 focus:bg-white transition-colors mb-4 resize-y font-mono" placeholder="Pega aquí la tabla copiada de especificaciones (ej: Sensor de imagen: CMOS..., Resolución: 2880*1620, Alarma inteligente: Detección IA...) o el nombre del equipo..."></textarea>
         
         <div class="flex items-center justify-between">
             <button type="button" @click="aiModalOpen = false" class="px-4 py-2 text-xs text-slate-600 hover:bg-slate-100 rounded-xl font-bold transition">
                 Cancelar
             </button>
-            <button type="button" @click="processAiGeneration()" :disabled="isAiLoading" class="px-5 py-2 text-xs bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold shadow-md shadow-purple-600/30 flex items-center gap-2 transition cursor-pointer">
+            <button type="button" @click="processAiGeneration()" :disabled="isAiLoading" class="px-5 py-2.5 text-xs bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold shadow-md shadow-purple-600/30 flex items-center gap-2 transition cursor-pointer">
                 <i class="fa-solid fa-bolt" x-show="!isAiLoading"></i>
                 <i class="fa-solid fa-spinner fa-spin" x-show="isAiLoading"></i>
-                <span x-text="isAiLoading ? 'Completando...' : 'Completar con IA'"></span>
+                <span x-text="isAiLoading ? 'Procesando...' : (aiTargetField === 'specs' ? 'Procesar y Llenar Especificaciones' : 'Generar Descripción Comercial')"></span>
             </button>
         </div>
     </div>
@@ -557,9 +560,127 @@
 
 @push('scripts')
 <script>
+    // Exact Parser for pasted datasheets / tables / text
+    function parseRawSpecs(text) {
+        if (!text || !text.trim()) return [];
+
+        const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+        const results = [];
+        const sectionHeaders = [
+            'especificaciones', 'especificacion', 'especificaciones tecnicas', 'especificaciones técnicas',
+            'cámara', 'camara', 'vídeo y audio', 'video y audio', 'video', 'vídeo', 'audio',
+            'red', 'redes', 'conectividad', 'funciones', 'funciones principales', 'almacenamiento',
+            'general', 'generales', 'contenido de la caja', 'certificados', 'certificaciones',
+            'pantalla', 'procesador', 'memoria', 'dimensiones', 'peso', 'puertos', 'caracteristicas',
+            'características', 'datos tecnicos', 'datos técnicos', 'hardware', 'software', 'óptica', 'optica'
+        ];
+
+        for (let rawLine of lines) {
+            let line = rawLine.replace(/^[\*\-\•\–\—\>\#\·\+]\s*/, '').trim();
+            if (!line) continue;
+
+            let key = '';
+            let val = '';
+
+            if (line.includes('\t')) {
+                const parts = line.split('\t').map(p => p.trim()).filter(p => p.length > 0);
+                if (parts.length >= 2) {
+                    key = parts[0];
+                    val = parts.slice(1).join(' - ');
+                }
+            } else if (line.includes(':') && !line.startsWith('http://') && !line.startsWith('https://')) {
+                const colonIdx = line.indexOf(':');
+                key = line.substring(0, colonIdx).trim();
+                val = line.substring(colonIdx + 1).trim();
+            } else if (line.includes(' | ')) {
+                const parts = line.split(' | ');
+                key = parts[0].trim();
+                val = parts.slice(1).join(' | ').trim();
+            } else if (line.includes(' - ') && !line.startsWith('-')) {
+                const parts = line.split(' - ');
+                key = parts[0].trim();
+                val = parts.slice(1).join(' - ').trim();
+            } else if (line.includes(' = ')) {
+                const parts = line.split(' = ');
+                key = parts[0].trim();
+                val = parts.slice(1).join(' = ').trim();
+            }
+
+            if (key && val) {
+                key = key.replace(/[\:\-\=\|]+$/, '').trim();
+                val = val.replace(/^[\:\-\=\|\s]+/, '').trim();
+                if (key.length > 0 && val.length > 0 && key.length < 90) {
+                    if (key.toLowerCase() !== val.toLowerCase() && !sectionHeaders.includes(key.toLowerCase() + ':' + val.toLowerCase())) {
+                        results.push({ name: key, value: val });
+                    }
+                }
+            }
+        }
+
+        // Fallback: If no delimited pairs found or fewer than 2, check alternating lines
+        if (results.length < 2 && lines.length >= 4) {
+            const altResults = [];
+            for (let i = 0; i < lines.length - 1; i += 2) {
+                const k = lines[i].replace(/^[\*\-\•\–\—\>\#\·\+]\s*/, '').replace(/[\:\-\=]+$/, '').trim();
+                const v = lines[i+1].trim();
+                if (k && v && k.length < 70 && !sectionHeaders.includes(k.toLowerCase()) && k.toLowerCase() !== v.toLowerCase()) {
+                    altResults.push({ name: k, value: v });
+                }
+            }
+            if (altResults.length >= 2) {
+                return altResults;
+            }
+        }
+
+        return results;
+    }
+
     // Smart AI Generator Helper
     function runSmartAiEngine(promptText, targetField, categoryHint = '', brandHint = '') {
         const raw = (promptText || '').trim();
+        const parsedSpecs = parseRawSpecs(raw);
+
+        // 1. If user pasted actual specs and wants SPECS: USE THE EXACT PARSED SPECS!
+        if (targetField === 'specs') {
+            if (parsedSpecs.length > 0) {
+                return parsedSpecs;
+            }
+        }
+
+        // 2. If user pasted specs and wants a DESCRIPTION: synthesize from their exact data!
+        if (targetField === 'description' && parsedSpecs.length > 0) {
+            const findSpec = (keywords) => {
+                for (let spec of parsedSpecs) {
+                    const k = spec.name.toLowerCase();
+                    if (keywords.some(kw => k.includes(kw))) {
+                        return spec.value;
+                    }
+                }
+                return null;
+            };
+
+            const modelVal = findSpec(['modelo', 'model', 'nombre']);
+            const resVal = findSpec(['resolución', 'resolucion', 'resolution']);
+            const sensorVal = findSpec(['sensor', 'lente', 'procesador', 'cpu']);
+            const nightVal = findSpec(['nocturn', 'visión', 'vision', 'pantalla']);
+            const storageVal = findSpec(['almacenamiento', 'disco', 'ssd', 'microsd', 'ram']);
+            const featuresVal = findSpec(['alarma', 'detección', 'deteccion', 'funciones', 'conectividad']);
+
+            let parts = [];
+            if (modelVal) parts.push(modelVal);
+            if (resVal) parts.push(`con resolución ${resVal}`);
+            if (sensorVal) parts.push(`${sensorVal}`);
+            if (nightVal) parts.push(`visión ${nightVal}`);
+            if (featuresVal) parts.push(`${featuresVal}`);
+            if (storageVal) parts.push(`soporte ${storageVal}`);
+
+            let desc = parts.length > 0 
+                ? parts.join(', ') + '.'
+                : `${raw.substring(0, 180)}...`;
+            
+            return desc.length > 200 ? desc.substring(0, 197) + '...' : desc;
+        }
+
         const lower = (raw + ' ' + categoryHint + ' ' + brandHint).toLowerCase();
 
         const isCamera = lower.includes('camara') || lower.includes('cámara') || lower.includes('ezviz') || lower.includes('imou') || lower.includes('seguridad') || lower.includes('dahua') || lower.includes('hikvision') || lower.includes('tapo') || lower.includes('cctv') || lower.includes('domo') || lower.includes('bullet') || lower.includes('vigilancia');
