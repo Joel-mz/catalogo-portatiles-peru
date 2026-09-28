@@ -13,90 +13,288 @@
     $whatsappMessage = 'Hola, quiero COMPRAR POR WHATSAPP: ' . $product->name . ' — S/ ' . number_format((float) $price, 2) . '. ' . route('product.show', $product->slug);
 @endphp
 
-<div class="mx-auto max-w-[1440px] px-4 py-6 sm:px-7 sm:py-9">
-    <nav aria-label="Ruta de navegación" class="mb-5 flex flex-wrap items-center gap-2 text-[10px] text-slate-500"><a href="{{ route('home') }}" class="focus-ring hover:text-blue-700">Inicio</a><i class="fa-solid fa-chevron-right text-[8px] text-slate-300"></i><a href="{{ route('catalog', ['category' => $product->category->slug ?? null]) }}" class="focus-ring hover:text-blue-700">{{ $product->category->name ?? 'Catálogo' }}</a><i class="fa-solid fa-chevron-right text-[8px] text-slate-300"></i><span class="font-semibold text-slate-700">{{ $product->name }}</span></nav>
+<div class="mx-auto max-w-[1440px] px-4 py-6 sm:px-7 sm:py-8">
+    <!-- Breadcrumb -->
+    <nav aria-label="Ruta de navegación" class="mb-5 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+        <a href="{{ route('home') }}" class="transition hover:text-indigo-600">Inicio</a>
+        <i class="fa-solid fa-chevron-right text-[9px] text-slate-300"></i>
+        <a href="{{ route('catalog', ['category' => $product->category->slug ?? null]) }}" class="transition hover:text-indigo-600">{{ $product->category->name ?? 'Catálogo' }}</a>
+        <i class="fa-solid fa-chevron-right text-[9px] text-slate-300"></i>
+        <span class="font-medium text-slate-800 line-clamp-1 max-w-xs sm:max-w-md">{{ $product->name }}</span>
+    </nav>
 
-    <section class="grid gap-6 lg:grid-cols-[1.2fr_.8fr]">
-        <div class="grid gap-3 sm:grid-cols-[82px_minmax(0,1fr)]">
+    <!-- Top Product Showcase -->
+    <section class="grid gap-8 lg:grid-cols-12 items-start">
+        <!-- Left Column: Gallery & Images -->
+        <div class="lg:col-span-7 flex flex-col gap-4">
+            <!-- Main Image Frame -->
+            <div id="image-zoom-container" class="group relative w-full aspect-square sm:aspect-[4/3] max-h-[540px] flex items-center justify-center overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-10 shadow-sm transition-all">
+                <!-- Badges -->
+                <div class="absolute left-4 top-4 z-20 flex flex-col gap-1.5">
+                    @if($product->is_offer && $product->offer_price)
+                        <span class="rounded-full bg-rose-600 px-3 py-1 text-[11px] font-black uppercase tracking-wider text-white shadow-md shadow-rose-500/20">
+                            Oferta Especial
+                        </span>
+                    @endif
+                    @if($product->is_new)
+                        <span class="rounded-full bg-indigo-600 px-3 py-1 text-[11px] font-black uppercase tracking-wider text-white shadow-md shadow-indigo-500/20">
+                            Nuevo
+                        </span>
+                    @endif
+                </div>
+                
+                <!-- Wishlist Toggle -->
+                <button type="button" 
+                        data-wishlist-toggle 
+                        data-product-id="{{ $product->id }}" 
+                        data-product-name="{{ $product->name }}" 
+                        data-product-price="{{ (float) $price }}" 
+                        data-product-image="{{ $mainImageUrl ?? '' }}" 
+                        data-product-url="{{ route('product.show', $product->slug) }}" 
+                        class="absolute right-4 top-4 z-20 flex h-11 w-11 items-center justify-center rounded-2xl bg-white/90 text-slate-400 shadow-md border border-slate-100 backdrop-blur transition-all duration-200 hover:bg-rose-50 hover:text-rose-500 hover:scale-105 active:scale-95 focus:outline-none" 
+                        title="Guardar en favoritos">
+                    <i class="fa-regular fa-heart text-lg transition-colors pointer-events-none"></i>
+                </button>
+
+                <!-- Product Image (Clean, No blend artifacts) -->
+                @if($mainImage)
+                    <img id="main-product-image" 
+                         src="{{ filter_var($mainImage, FILTER_VALIDATE_URL) ? $mainImage : asset('storage/' . $mainImage) }}" 
+                         alt="{{ $product->name }}" 
+                         class="relative z-10 h-full w-full object-contain transition-transform duration-150 ease-out select-none cursor-zoom-in"
+                         loading="eager">
+                @else
+                    <div class="relative z-10 flex h-64 w-64 items-center justify-center rounded-3xl bg-slate-100 text-slate-300">
+                        <i class="fa-solid fa-image text-6xl"></i>
+                    </div>
+                @endif
+                
+                <span class="absolute bottom-4 right-5 z-10 text-[10px] font-bold uppercase tracking-widest text-slate-300 pointer-events-none">
+                    {{ $product->brand->name ?? 'Portátiles Perú' }}
+                </span>
+            </div>
+
+            <!-- Thumbnails Gallery -->
             @if($gallery->count() > 1)
-                <div class="order-2 flex gap-2 overflow-x-auto sm:order-1 sm:flex-col">
-                    @foreach($gallery->take(4) as $image)
+                <div class="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-thin">
+                    @foreach($gallery as $image)
                         @php
                             $imgUrl = filter_var($image->image_path, FILTER_VALIDATE_URL) ? $image->image_path : asset('storage/' . $image->image_path);
                         @endphp
-                        <button type="button" onclick="document.getElementById('main-product-image').src = '{{ $imgUrl }}'" class="relative aspect-square h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-white p-2 transition hover:border-indigo-400 focus:border-indigo-500 focus:outline-none sm:h-[74px] sm:w-[74px]"><img src="{{ $imgUrl }}" alt="{{ $product->name }} — imagen {{ $loop->iteration }}" class="h-full w-full object-contain"></button>
+                        <button type="button" 
+                                onclick="switchMainImage('{{ $imgUrl }}', this)" 
+                                class="thumbnail-btn relative aspect-square h-20 w-20 shrink-0 overflow-hidden rounded-2xl border-2 {{ $loop->first ? 'border-indigo-600 ring-2 ring-indigo-500/20' : 'border-slate-200 hover:border-indigo-300' }} bg-white p-2 transition-all duration-200">
+                            <img src="{{ $imgUrl }}" alt="{{ $product->name }} miniatura {{ $loop->iteration }}" class="h-full w-full object-contain">
+                        </button>
                     @endforeach
                 </div>
             @endif
-            <div id="image-zoom-container" class="relative order-1 flex min-h-[350px] cursor-zoom-in items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-[#eef1fa] via-white to-[#e7eaff] p-2 sm:min-h-[550px] sm:p-4 {{ $gallery->count() > 1 ? 'sm:order-2' : 'sm:col-span-2' }}">
-                <div class="absolute right-[-10%] top-[-10%] h-64 w-64 rounded-full bg-violet-200/40 blur-3xl"></div>
-                @if($product->is_offer && $product->offer_price)<span class="absolute left-5 top-5 z-10 rounded-lg bg-rose-500 px-3 py-1.5 text-[10px] font-extrabold text-white">PRECIO ESPECIAL</span>@endif
-                
-                <button type="button" 
-                        data-wishlist-toggle 
-                        data-product-id="{{ $product->id }}" 
-                        data-product-name="{{ $product->name }}" 
-                        data-product-price="{{ (float) $price }}" 
-                        data-product-image="{{ $mainImageUrl ?? '' }}" 
-                        data-product-url="{{ route('product.show', $product->slug) }}" 
-                        class="absolute right-5 top-5 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-slate-400 shadow-md backdrop-blur transition-all duration-200 hover:bg-rose-50 hover:text-rose-500 hover:scale-110 active:scale-95 focus:outline-none" 
-                        title="Guardar en favoritos">
-                    <i class="fa-regular fa-heart text-base transition-colors pointer-events-none"></i>
-                </button>
-
-                @if($mainImage)
-                    <img id="main-product-image" src="{{ filter_var($mainImage, FILTER_VALIDATE_URL) ? $mainImage : asset('storage/' . $mainImage) }}" alt="{{ $product->name }}" class="relative z-10 max-h-[550px] w-full object-contain mix-blend-multiply drop-shadow-xl" style="transition: transform 0.1s ease-out;">
-                @else
-                    <div class="relative z-10 flex h-64 w-[78%] items-center justify-center rounded-[2rem] border border-slate-300 bg-gradient-to-br from-white via-slate-200 to-slate-400 p-4 shadow-2xl sm:h-[330px]">
-                        <div class="flex h-[86%] w-[88%] items-center justify-center rounded-xl bg-gradient-to-br from-[#101b36] via-[#2458c9] to-[#763fe1] text-6xl text-white/80 shadow-inner"><i class="fa-solid fa-laptop" aria-hidden="true"></i></div>
-                    </div>
-                @endif
-                <span class="absolute bottom-4 right-5 z-10 text-[9px] font-semibold uppercase tracking-[.16em] text-slate-400">{{ $product->brand->name ?? 'MPC Antigravity' }}</span>
-            </div>
         </div>
 
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-            <div class="flex items-center justify-between gap-3"><span class="text-[10px] font-extrabold uppercase tracking-[.16em] text-violet-600">{{ $product->brand->name ?? 'MPC Antigravity' }}</span><span class="rounded-full px-3 py-1 text-[9px] font-bold {{ $product->stock > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">{{ $product->stock > 0 ? 'Disponible' : 'Consultar stock' }}</span></div>
-            <h1 class="mt-3 font-display text-2xl font-extrabold leading-tight text-[#142143] sm:text-4xl">{{ $product->name }}</h1>
-            <p class="mt-2 text-xs text-slate-500">Código: {{ $product->code }}@if($product->deviceModel) <span class="px-1">·</span> Modelo: {{ $product->deviceModel->name }}@endif</p>
-            <a href="#opiniones" class="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-indigo-700"><span class="text-amber-400">@for($star = 1; $star <= 5; $star++)<i class="fa-solid fa-star {{ $star <= round((float) $product->reviews_avg_rating) ? '' : 'text-slate-200' }}"></i>@endfor</span><span>{{ $product->reviews_count }} opiniones</span></a>
-            <p class="mt-4 text-[10px] font-semibold text-indigo-600"><i class="fa-solid fa-circle-check mr-1"></i> Equipo seleccionado por MPC Antigravity</p>
-            <p class="mt-5 text-sm leading-6 text-slate-600">{{ $product->description ?: 'Consulta las especificaciones y disponibilidad con nuestro equipo.' }}</p>
-
-            <div class="mt-6 rounded-xl bg-slate-50 p-4 sm:p-5">
-                <p class="text-[9px] font-bold uppercase tracking-[.14em] text-slate-400">Precio de referencia</p>
-                @if($product->is_offer && $product->offer_price)<p class="mt-2 text-xs text-slate-400 line-through">S/ {{ number_format((float) $product->price, 2) }}</p>@endif
-                <p class="font-display text-3xl font-extrabold text-[#15264d]">S/ {{ number_format((float) $price, 2) }}</p>
-                <p class="mt-2 text-[10px] text-slate-500"><i class="fa-solid fa-box mr-1 text-indigo-500"></i>{{ $product->stock > 0 ? $product->stock . ' unidades disponibles' : 'Confirma disponibilidad con un asesor' }}</p>
+        <!-- Right Column: Product Info & Actions -->
+        <div class="lg:col-span-5 rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-sm flex flex-col">
+            <!-- Header Badges -->
+            <div class="flex items-center justify-between gap-3 flex-wrap">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-indigo-50 text-indigo-700">
+                    <i class="fa-solid fa-tag text-[10px]"></i> {{ $product->brand->name ?? 'Marca' }}
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold {{ $product->stock > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">
+                    <span class="w-2 h-2 rounded-full {{ $product->stock > 0 ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500' }}"></span>
+                    {{ $product->stock > 0 ? 'Disponible (' . $product->stock . ' unid.)' : 'Consultar stock' }}
+                </span>
             </div>
 
-            <div data-product-quantity class="mt-5 flex gap-2">
-                <label for="product-quantity" class="sr-only">Cantidad</label><input id="product-quantity" type="number" min="1" max="{{ max(1, $product->stock) }}" value="1" @disabled($product->stock < 1) class="h-12 w-20 rounded-xl border border-slate-200 bg-slate-50 px-3 text-center text-sm font-bold outline-none focus:border-indigo-400">
-                <button type="button" data-add-to-cart data-product-id="{{ $product->id }}" data-product-name="{{ $product->name }}" data-product-price="{{ (float) $price }}" data-product-stock="{{ (int) $product->stock }}" data-product-image="{{ $mainImageUrl ?? '' }}" data-product-url="{{ route('product.show', $product->slug) }}" @disabled($product->stock < 1) class="focus-ring flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3 text-xs font-extrabold text-indigo-700 transition hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"><i class="fa-solid fa-bag-shopping" aria-hidden="true"></i> AGREGAR AL CARRITO</button>
-                <button type="button" 
-                        data-wishlist-toggle 
-                        data-product-id="{{ $product->id }}" 
-                        data-product-name="{{ $product->name }}" 
-                        data-product-price="{{ (float) $price }}" 
-                        data-product-image="{{ $mainImageUrl ?? '' }}" 
-                        data-product-url="{{ route('product.show', $product->slug) }}" 
-                        class="focus-ring flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-rose-300 hover:bg-rose-50 hover:text-rose-500" 
-                        title="Guardar en favoritos">
-                    <i class="fa-regular fa-heart text-lg pointer-events-none"></i>
-                </button>
-            </div>
-            <a href="https://wa.me/{{ $whatsappNumber }}?text={{ urlencode($whatsappMessage) }}" target="_blank" rel="noopener noreferrer" class="focus-ring mt-2 flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#25d366] px-4 text-sm font-extrabold text-white shadow-lg shadow-emerald-600/15 transition hover:bg-emerald-600"><i class="fa-brands fa-whatsapp text-lg" aria-hidden="true"></i> COMPRAR POR WHATSAPP</a>
-            <a href="{{ route('product.pdf', $product->slug) }}" class="focus-ring mt-2 flex min-h-12 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-extrabold text-slate-700 shadow-sm transition hover:bg-slate-50"><i class="fa-solid fa-file-pdf text-lg text-rose-500" aria-hidden="true"></i> DESCARGAR FICHA TÉCNICA</a>
-            <p class="mt-2 text-center text-[9px] text-slate-400">Un asesor confirmará el precio y coordinará contigo.</p>
+            <!-- Product Title -->
+            <h1 class="mt-4 font-display text-2xl sm:text-3xl font-black leading-snug text-slate-900">
+                {{ $product->name }}
+            </h1>
 
+            <!-- Meta details -->
+            <div class="mt-3 flex items-center gap-3 text-xs text-slate-500 flex-wrap">
+                <span class="font-medium text-slate-600"><span class="text-slate-400">P/N:</span> {{ $product->code }}</span>
+                @if($product->deviceModel)
+                    <span>•</span>
+                    <span class="font-medium text-slate-600"><span class="text-slate-400">Modelo:</span> {{ $product->deviceModel->name }}</span>
+                @endif
+                <span>•</span>
+                <a href="#opiniones" class="inline-flex items-center gap-1.5 text-amber-400 hover:underline">
+                    <div class="flex">
+                        @for($star = 1; $star <= 5; $star++)
+                            <i class="fa-solid fa-star {{ $star <= round((float) $product->reviews_avg_rating) ? 'text-amber-400' : 'text-slate-200' }} text-[11px]"></i>
+                        @endfor
+                    </div>
+                    <span class="text-slate-500 font-semibold text-[11px]">({{ $product->reviews_count }})</span>
+                </a>
+            </div>
+
+            <!-- Price Block -->
+            <div class="mt-5 rounded-2xl bg-gradient-to-br from-slate-50 to-indigo-50/30 p-4 sm:p-5 border border-slate-100">
+                <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Precio especial</p>
+                @if($product->is_offer && $product->offer_price)
+                    <p class="mt-1 text-sm text-slate-400 line-through font-medium">S/ {{ number_format((float) $product->price, 2) }}</p>
+                @endif
+                <div class="mt-1 flex items-baseline gap-2">
+                    <span class="text-sm font-black text-indigo-700">S/</span>
+                    <span class="font-display text-3xl sm:text-4xl font-black tracking-tight text-slate-900">
+                        {{ number_format((float) $price, 2) }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="mt-5">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Descripción</h3>
+                <div class="text-xs sm:text-sm leading-relaxed text-slate-600 whitespace-pre-line max-h-48 overflow-y-auto pr-2 scrollbar-thin">
+                    {{ $product->description ?: 'Consulta las especificaciones y disponibilidad con nuestro equipo de atención al cliente.' }}
+                </div>
+            </div>
+
+            <!-- CTA Actions -->
+            <div class="mt-6 space-y-3 pt-4 border-t border-slate-100">
+                <div data-product-quantity class="flex gap-2">
+                    <label for="product-quantity" class="sr-only">Cantidad</label>
+                    <input id="product-quantity" type="number" min="1" max="{{ max(1, $product->stock) }}" value="1" @disabled($product->stock < 1) class="h-12 w-16 sm:w-20 rounded-2xl border border-slate-200 bg-slate-50 px-2 text-center text-sm font-bold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500">
+                    <button type="button" 
+                            data-add-to-cart 
+                            data-product-id="{{ $product->id }}" 
+                            data-product-name="{{ $product->name }}" 
+                            data-product-price="{{ (float) $price }}" 
+                            data-product-stock="{{ (int) $product->stock }}" 
+                            data-product-image="{{ $mainImageUrl ?? '' }}" 
+                            data-product-url="{{ route('product.show', $product->slug) }}" 
+                            @disabled($product->stock < 1) 
+                            class="flex-1 h-12 flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs sm:text-sm shadow-lg shadow-indigo-600/20 transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-cart-plus text-base"></i> AGREGAR AL CARRITO
+                    </button>
+                </div>
+
+                <a href="https://wa.me/{{ $whatsappNumber }}?text={{ urlencode($whatsappMessage) }}" 
+                   target="_blank" 
+                   rel="noopener noreferrer" 
+                   class="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-extrabold text-xs sm:text-sm shadow-lg shadow-emerald-600/20 transition-all duration-200 active:scale-[0.98]">
+                    <i class="fa-brands fa-whatsapp text-lg"></i> COMPRAR POR WHATSAPP
+                </a>
+
+                <a href="{{ route('product.pdf', $product->slug) }}" 
+                   class="flex h-11 w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs shadow-xs transition-colors">
+                    <i class="fa-solid fa-file-pdf text-rose-500 text-sm"></i> DESCARGAR FICHA TÉCNICA
+                </a>
+            </div>
+
+            <!-- Guarantees & Perks -->
             <div class="mt-6 grid grid-cols-2 gap-3 border-t border-slate-100 pt-5">
-                <div class="flex items-start gap-2"><i class="fa-solid fa-shield-halved mt-0.5 text-sm text-indigo-500"></i><span><b class="block text-[10px] text-slate-700">Garantía</b><span class="mt-1 block text-[9px] text-slate-400">{{ $product->warranty ?: 'Consulta condiciones' }}</span></span></div>
-                <div class="flex items-start gap-2"><i class="fa-solid fa-truck-fast mt-0.5 text-sm text-indigo-500"></i><span><b class="block text-[10px] text-slate-700">Envío</b><span class="mt-1 block text-[9px] text-slate-400">Coordinación nacional</span></span></div>
+                <div class="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50/80 border border-slate-100">
+                    <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0 text-sm">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <div>
+                        <div class="text-[11px] font-bold text-slate-800">Garantía</div>
+                        <div class="text-[10px] text-slate-500">{{ $product->warranty ?: 'Oficial' }}</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50/80 border border-slate-100">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 text-sm">
+                        <i class="fa-solid fa-truck-fast"></i>
+                    </div>
+                    <div>
+                        <div class="text-[11px] font-bold text-slate-800">Envío Rápido</div>
+                        <div class="text-[10px] text-slate-500">A todo el Perú</div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
+    <!-- Technical Specs & Contact Section -->
+    <section class="mt-10 grid gap-8 lg:grid-cols-12 items-start">
+        <!-- Specs Table (Span 8) -->
+        <div class="lg:col-span-8 rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-sm">
+            <div class="flex items-center justify-between gap-4 mb-6 border-b border-slate-100 pb-4">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-600">Detalles Técnicos</span>
+                    <h2 class="mt-1 font-display text-xl sm:text-2xl font-black text-slate-900">Especificaciones del producto</h2>
+                </div>
+                <div class="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                    <i class="fa-solid fa-microchip text-lg"></i>
+                </div>
+            </div>
+
+            <div class="overflow-hidden rounded-2xl border border-slate-100">
+                <div class="divide-y divide-slate-100">
+                    <div class="grid grid-cols-1 sm:grid-cols-[220px_1fr] gap-2 p-3.5 text-xs bg-slate-50/70">
+                        <span class="font-bold text-slate-600 flex items-center gap-2"><i class="fa-solid fa-tag text-slate-400 text-[10px]"></i> Marca</span>
+                        <span class="text-slate-800 font-medium">{{ $product->brand->name ?? '—' }}</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-[220px_1fr] gap-2 p-3.5 text-xs">
+                        <span class="font-bold text-slate-600 flex items-center gap-2"><i class="fa-solid fa-layer-group text-slate-400 text-[10px]"></i> Categoría</span>
+                        <span class="text-slate-800 font-medium">{{ $product->category->name ?? '—' }}</span>
+                    </div>
+                    @if(is_array($product->technical_specs))
+                        @foreach($product->technical_specs as $key => $value)
+                            <div class="grid grid-cols-1 sm:grid-cols-[220px_1fr] gap-2 p-3.5 text-xs {{ $loop->even ? 'bg-slate-50/50' : 'bg-white' }}">
+                                <span class="font-bold text-slate-700 flex items-center gap-2">
+                                    <i class="fa-solid fa-circle-check text-indigo-500 text-[9px]"></i> {{ $key }}
+                                </span>
+                                <span class="text-slate-800 leading-relaxed font-normal">{{ $value }}</span>
+                            </div>
+                        @endforeach
+                    @endif
+                    <div class="grid grid-cols-1 sm:grid-cols-[220px_1fr] gap-2 p-3.5 text-xs bg-slate-50/70">
+                        <span class="font-bold text-slate-600 flex items-center gap-2"><i class="fa-solid fa-shield-halved text-slate-400 text-[10px]"></i> Garantía</span>
+                        <span class="text-slate-800 font-medium">{{ $product->warranty ?: 'Consultar' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sticky Contact & Advisory Sidebar (Span 4) -->
+        <div class="lg:col-span-4 sticky top-24 space-y-4">
+            <div class="rounded-3xl bg-gradient-to-br from-[#121c3b] via-[#1e2e60] to-[#3a1d7c] p-6 sm:p-7 text-white shadow-xl shadow-indigo-950/15">
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-2xl text-indigo-300 backdrop-blur-md">
+                    <i class="fa-solid fa-headset"></i>
+                </div>
+                <h3 class="mt-4 font-display text-xl font-extrabold text-white">¿Tienes dudas sobre este equipo?</h3>
+                <p class="mt-2 text-xs leading-relaxed text-blue-100/80">
+                    Nuestros asesores expertos te ayudan con especificaciones personalizadas, compatibilidad y cotizaciones corporativas.
+                </p>
+                <a href="https://wa.me/{{ $whatsappNumber }}?text={{ urlencode('Hola, tengo una consulta sobre ' . $product->name . '.') }}" 
+                   target="_blank" 
+                   rel="noopener noreferrer" 
+                   class="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-xs font-black text-[#121c3b] hover:bg-slate-100 shadow-md transition-all active:scale-95">
+                    <i class="fa-brands fa-whatsapp text-emerald-600 text-base"></i> Chatear con un Asesor
+                </a>
+            </div>
+
+            <div class="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm text-xs text-slate-600 space-y-3">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-credit-card text-indigo-600 text-base"></i>
+                    <span>Aceptamos transferencias, Yape, Plin y tarjetas</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-box-check text-indigo-600 text-base"></i>
+                    <span>Productos nuevos con empaque original y garantía</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Switching & Zoom Script -->
     <script>
+        function switchMainImage(url, btnElement) {
+            const mainImg = document.getElementById('main-product-image');
+            if (mainImg) {
+                mainImg.src = url;
+            }
+            document.querySelectorAll('.thumbnail-btn').forEach(btn => {
+                btn.classList.remove('border-indigo-600', 'ring-2', 'ring-indigo-500/20');
+                btn.classList.add('border-slate-200');
+            });
+            if (btnElement) {
+                btnElement.classList.add('border-indigo-600', 'ring-2', 'ring-indigo-500/20');
+                btnElement.classList.remove('border-slate-200');
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const container = document.getElementById('image-zoom-container');
             const img = document.getElementById('main-product-image');
@@ -108,7 +306,7 @@
                     const y = ((e.clientY - top) / height) * 100;
                     
                     img.style.transformOrigin = `${x}% ${y}%`;
-                    img.style.transform = 'scale(2.5)';
+                    img.style.transform = 'scale(1.75)';
                 });
                 
                 container.addEventListener('mouseleave', () => {
@@ -118,25 +316,6 @@
             }
         });
     </script>
-
-    <section class="mt-7 grid gap-5 lg:grid-cols-[1.1fr_.9fr]">
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
-            <p class="text-[9px] font-extrabold uppercase tracking-[.16em] text-violet-600">Información técnica</p><h2 class="mt-2 font-display text-xl font-extrabold text-[#142143]">Especificaciones del equipo</h2>
-            <div class="mt-5 divide-y divide-slate-100 border-y border-slate-100">
-                <div class="grid grid-cols-[minmax(110px,.6fr)_1fr] gap-3 py-3 text-xs"><span class="font-semibold text-slate-500">Marca</span><span class="text-slate-800">{{ $product->brand->name ?? '—' }}</span></div>
-                <div class="grid grid-cols-[minmax(110px,.6fr)_1fr] gap-3 py-3 text-xs"><span class="font-semibold text-slate-500">Categoría</span><span class="text-slate-800">{{ $product->category->name ?? '—' }}</span></div>
-                @if(is_array($product->technical_specs))
-                    @foreach($product->technical_specs as $key => $value)
-                        <div class="grid grid-cols-[minmax(110px,.6fr)_1fr] gap-3 py-3 text-xs"><span class="font-semibold text-slate-500">{{ $key }}</span><span class="text-slate-800">{{ $value }}</span></div>
-                    @endforeach
-                @endif
-                <div class="grid grid-cols-[minmax(110px,.6fr)_1fr] gap-3 py-3 text-xs"><span class="font-semibold text-slate-500">Garantía</span><span class="text-slate-800">{{ $product->warranty ?: 'Consultar' }}</span></div>
-            </div>
-        </div>
-        <div class="rounded-2xl bg-gradient-to-br from-[#101c3b] to-[#263c83] p-6 text-white sm:p-7">
-            <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-xl text-indigo-200"><i class="fa-solid fa-headset"></i></span><h2 class="mt-4 font-display text-xl font-extrabold">¿Tienes dudas sobre este equipo?</h2><p class="mt-2 text-xs leading-5 text-blue-100/75">Escríbenos y te ayudaremos con las especificaciones, disponibilidad y opciones de entrega.</p><a href="https://wa.me/{{ $whatsappNumber }}?text={{ urlencode('Hola, tengo una consulta sobre ' . $product->name . '.') }}" target="_blank" rel="noopener noreferrer" class="focus-ring mt-5 inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-xs font-bold text-blue-800 hover:bg-indigo-50"><i class="fa-brands fa-whatsapp"></i> Consultar por WhatsApp</a>
-        </div>
-    </section>
 
     <section id="opiniones" class="mt-8 scroll-mt-36 rounded-2xl border border-slate-200 bg-white p-5 sm:p-7" aria-labelledby="reviews-title">
         <div class="grid gap-7 lg:grid-cols-[.85fr_1.15fr]">
