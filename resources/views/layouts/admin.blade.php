@@ -2,7 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('header_title', 'Panel') — {{ \App\Models\Setting::where('key', 'store_name')->value('value') ?? 'MPC Antigravity' }}</title>
 
@@ -20,6 +20,9 @@
                         sans: ['Inter', 'sans-serif'],
                         display: ['Outfit', 'sans-serif'],
                     },
+                    screens: {
+                        'xs': '480px',
+                    }
                 }
             }
         }
@@ -40,9 +43,11 @@
             font-family: 'Inter', sans-serif;
             background: #f4f6f9;
             color: #1e293b;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #2563eb; border-radius: 4px; }
 
@@ -56,7 +61,7 @@
             flex-direction: column;
             height: 100vh;
             position: relative;
-            z-index: 20;
+            z-index: 30;
         }
 
         .sidebar-logo {
@@ -122,32 +127,38 @@
 
         /* ─── Top Header ─── */
         .admin-topbar {
-            height: 64px;
+            min-height: 64px;
             background: #ffffff;
             border-bottom: 1px solid #e2e8f0;
             display: flex;
             align-items: center;
-            padding: 0 24px;
+            padding: 0 16px;
             justify-content: space-between;
             flex-shrink: 0;
             box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            position: relative;
+            z-index: 20;
+        }
+        @media (min-width: 768px) {
+            .admin-topbar { padding: 0 24px; }
         }
 
         .topbar-search {
             position: relative;
-            width: 360px;
+            width: 100%;
+            max-width: 440px;
         }
         .topbar-search input {
             width: 100%;
             height: 40px;
             background: #f8fafc;
             border: 1.5px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 0 14px 0 40px;
+            border-radius: 12px;
+            padding: 0 44px 0 40px;
             font-size: 13px;
             color: #374151;
             outline: none;
-            transition: border-color 0.2s, background 0.2s;
+            transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
         }
         .topbar-search input:focus {
             border-color: #2563eb;
@@ -160,7 +171,7 @@
             top: 50%;
             transform: translateY(-50%);
             color: #94a3b8;
-            font-size: 12px;
+            font-size: 13px;
             pointer-events: none;
         }
 
@@ -291,13 +302,17 @@
             justify-content: space-between;
             margin-bottom: 20px;
             gap: 12px;
+            flex-wrap: wrap;
         }
         .page-title {
             font-family: 'Outfit', sans-serif;
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 800;
             color: #0f172a;
             line-height: 1.2;
+        }
+        @media(min-width: 640px) {
+            .page-title { font-size: 22px; }
         }
         .page-subtitle {
             font-size: 12px;
@@ -310,24 +325,30 @@
             background: #fff;
             border: 1px solid #e2e8f0;
             border-radius: 14px;
-            padding: 20px;
+            padding: 16px;
             transition: all 0.2s;
             position: relative;
             overflow: hidden;
+        }
+        @media (min-width: 640px) {
+            .kpi-card { padding: 20px; }
         }
         .kpi-card:hover {
             box-shadow: 0 6px 20px rgba(0,0,0,0.07);
             transform: translateY(-1px);
         }
         .kpi-icon {
-            width: 44px;
-            height: 44px;
+            width: 40px;
+            height: 40px;
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            font-size: 16px;
             flex-shrink: 0;
+        }
+        @media(min-width: 640px) {
+            .kpi-icon { width: 44px; height: 44px; font-size: 18px; }
         }
 
         /* ─── Misc ─── */
@@ -485,41 +506,216 @@
             /* Default Light */
             :root { --bg-body: #f4f6fa; }
         @endif
-
-        @media (max-width: 767px) {
-            body.antialiased { display: block; overflow: auto; }
-            .admin-sidebar { width: 100%; height: auto; position: relative; }
-            .sidebar-logo { height: 58px; padding: 0 14px; }
-            .sidebar-nav { display: flex; align-items: center; gap: 4px; overflow-x: auto; padding: 8px 10px; }
-            .sidebar-section-label { display: none; }
-            .nav-item { flex: 0 0 auto; margin: 0; padding: 9px 11px; font-size: 11px; }
-            .admin-sidebar > div:last-child { padding: 7px 10px; }
-            .admin-sidebar > div:last-child button { width: auto; padding: 7px 10px; }
-            .admin-sidebar > div:last-child button span { display: none; }
-            .admin-sidebar > div:last-child { position: absolute; top: 8px; right: 8px; }
-            .admin-sidebar > div:last-child form button { font-size: 0; }
-            .admin-sidebar > div:last-child form button i { font-size: 14px; }
-            .admin-sidebar + div.flex-1 { height: auto; min-height: calc(100vh - 112px); overflow: visible; }
-            .admin-topbar { height: auto; min-height: 58px; padding: 10px 14px; }
-            main.fade-in { overflow: visible; padding: 16px 12px; }
-            .page-header { flex-wrap: wrap; }
-        }
     </style>
 </head>
-<body class="antialiased min-h-screen flex overflow-hidden" x-data="{ sidebarOpen: true }">
+<body class="antialiased min-h-screen flex flex-col lg:flex-row overflow-x-hidden" 
+      x-data="{ 
+          sidebarOpen: true, 
+          mobileSidebarOpen: false, 
+          mobileSearchOpen: false 
+      }"
+      @keydown.escape.window="mobileSidebarOpen = false; mobileSearchOpen = false">
+
+    @php
+        $logo = \App\Models\Setting::where('key', 'store_logo')->value('value');
+        $storeName = \App\Models\Setting::where('key', 'store_name')->value('value') ?? 'PORTÁTILES PERÚ';
+    @endphp
 
     <!-- ════════════════════════════════════
-         SIDEBAR
+         MOBILE / TABLET DRAWER OVERLAY
     ════════════════════════════════════ -->
-    <aside class="admin-sidebar transition-all duration-300" :style="sidebarOpen ? 'width: 240px' : 'width: 70px'">
+    <div x-show="mobileSidebarOpen" 
+         x-cloak 
+         class="fixed inset-0 z-50 lg:hidden flex" 
+         role="dialog" 
+         aria-modal="true">
+        <!-- Backdrop -->
+        <div x-show="mobileSidebarOpen" 
+             x-transition:enter="transition-opacity ease-linear duration-300" 
+             x-transition:enter-start="opacity-0" 
+             x-transition:enter-end="opacity-100" 
+             x-transition:leave="transition-opacity ease-linear duration-300" 
+             x-transition:leave-start="opacity-100" 
+             x-transition:leave-end="opacity-0" 
+             class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm" 
+             @click="mobileSidebarOpen = false"></div>
+
+        <!-- Sliding Off-Canvas Drawer -->
+        <div x-show="mobileSidebarOpen" 
+             x-transition:enter="transition ease-in-out duration-300 transform" 
+             x-transition:enter-start="-translate-x-full" 
+             x-transition:enter-end="translate-x-0" 
+             x-transition:leave="transition ease-in-out duration-300 transform" 
+             x-transition:leave-start="translate-x-0" 
+             x-transition:leave-end="-translate-x-full" 
+             class="relative flex-1 flex flex-col max-w-xs w-full bg-[#0f172a] text-white shadow-2xl z-50 h-full">
+            
+            <!-- Drawer Header -->
+            <div class="h-16 flex items-center justify-between px-5 border-b border-white/10">
+                <a href="{{ route('dashboard') }}" class="flex items-center gap-3 min-w-0" @click="mobileSidebarOpen = false">
+                    @if($logo)
+                        <img src="{{ Storage::url($logo) }}" alt="Logo" class="h-8 w-8 rounded-xl object-contain bg-white p-1 flex-shrink-0">
+                    @else
+                        <div class="w-8 h-8 rounded-xl flex items-center justify-center font-display font-black text-white text-sm italic flex-shrink-0"
+                             style="background: linear-gradient(135deg, #2563eb, #7c3aed);">{{ substr($storeName, 0, 1) }}</div>
+                    @endif
+                    <div class="leading-tight overflow-hidden">
+                        <div class="font-display font-black text-white text-sm tracking-wide truncate">{{ $storeName }}</div>
+                        <div class="text-[9px] text-slate-400 tracking-widest font-mono">Panel Administrador</div>
+                    </div>
+                </a>
+                <button type="button" @click="mobileSidebarOpen = false" class="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-white/10 transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Drawer Scrollable Navigation -->
+            <nav class="flex-1 overflow-y-auto p-3 space-y-1">
+                <p class="sidebar-section-label">Principal</p>
+
+                <a href="{{ route('dashboard') }}"
+                   class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}" @click="mobileSidebarOpen = false">
+                    <i class="fa-solid fa-house-chimney nav-icon"></i>
+                    <span>Inicio</span>
+                </a>
+
+                <div x-data="{ expanded: {{ request()->routeIs('admin.products.*') || request()->routeIs('admin.categories.*') || request()->routeIs('admin.subcategories.*') || request()->routeIs('admin.brands.*') || request()->routeIs('admin.models.*') ? 'true' : 'false' }} }">
+                    <button type="button" @click="expanded = !expanded" class="w-full nav-item {{ request()->routeIs('admin.products.*') || request()->routeIs('admin.categories.*') || request()->routeIs('admin.subcategories.*') || request()->routeIs('admin.brands.*') || request()->routeIs('admin.models.*') ? 'active' : '' }}">
+                        <div class="flex items-center gap-2.5 flex-1">
+                            <i class="fa-solid fa-box-open nav-icon"></i>
+                            <span>Productos</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-down text-[10px] transition-transform" :class="expanded ? 'rotate-180' : ''"></i>
+                    </button>
+                    <div x-show="expanded" class="pl-4 mt-1 space-y-0.5" x-cloak>
+                        <a href="{{ route('admin.products.create') }}" class="nav-item {{ request()->routeIs('admin.products.create') ? 'bg-white/10 text-white font-bold' : '' }}" @click="mobileSidebarOpen = false">
+                            <i class="fa-solid fa-pen-to-square nav-icon text-xs"></i>
+                            <span>Registrar Producto</span>
+                        </a>
+                        <a href="{{ route('admin.products.index') }}" class="nav-item {{ request()->routeIs('admin.products.index') && !request()->routeIs('admin.products.create') ? 'bg-white/10 text-white font-bold' : '' }}" @click="mobileSidebarOpen = false">
+                            <i class="fa-solid fa-list nav-icon text-xs"></i>
+                            <span>Lista de Productos</span>
+                        </a>
+                        <a href="{{ route('admin.categories.index') }}" class="nav-item {{ request()->routeIs('admin.categories.*') ? 'bg-white/10 text-white font-bold' : '' }}" @click="mobileSidebarOpen = false">
+                            <i class="fa-solid fa-layer-group nav-icon text-xs"></i>
+                            <span>Categorías</span>
+                        </a>
+                        <a href="{{ route('admin.subcategories.index') }}" class="nav-item {{ request()->routeIs('admin.subcategories.*') ? 'bg-white/10 text-white font-bold' : '' }}" @click="mobileSidebarOpen = false">
+                            <i class="fa-solid fa-sitemap nav-icon text-xs"></i>
+                            <span>Subcategorías</span>
+                        </a>
+                        <a href="{{ route('admin.brands.index') }}" class="nav-item {{ request()->routeIs('admin.brands.*') ? 'bg-white/10 text-white font-bold' : '' }}" @click="mobileSidebarOpen = false">
+                            <i class="fa-solid fa-tags nav-icon text-xs"></i>
+                            <span>Marcas</span>
+                        </a>
+                        <a href="{{ route('admin.models.index') }}" class="nav-item {{ request()->routeIs('admin.models.*') ? 'bg-white/10 text-white font-bold' : '' }}" @click="mobileSidebarOpen = false">
+                            <i class="fa-solid fa-microchip nav-icon text-xs"></i>
+                            <span>Modelos</span>
+                        </a>
+                    </div>
+                </div>
+
+                <p class="sidebar-section-label">Ventas</p>
+
+                <a href="{{ route('admin.clients.index') }}"
+                   class="nav-item {{ request()->routeIs('admin.clients.*') ? 'active' : '' }}" @click="mobileSidebarOpen = false">
+                    <i class="fa-solid fa-users nav-icon"></i>
+                    <span>Clientes</span>
+                </a>
+
+                <a href="{{ route('admin.orders.index') }}"
+                   class="nav-item {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}" @click="mobileSidebarOpen = false">
+                    <i class="fa-brands fa-whatsapp nav-icon" style="{{ request()->routeIs('admin.orders.*') ? '' : 'color:#22c55e' }}"></i>
+                    <span>Ventas (WhatsApp)</span>
+                    @php $pendingOrdersMobile = \App\Models\Order::where('status', 'Pendiente')->count(); @endphp
+                    @if($pendingOrdersMobile > 0)
+                        <span class="ml-auto text-[9px] font-black bg-red-500 text-white px-1.5 py-0.5 rounded-full">{{ $pendingOrdersMobile }}</span>
+                    @endif
+                </a>
+
+                <p class="sidebar-section-label">Marketing</p>
+
+                <a href="{{ route('admin.publicidad.index') }}"
+                   class="nav-item {{ request()->routeIs('admin.publicidad.*') ? 'active' : '' }}" @click="mobileSidebarOpen = false">
+                    <i class="fa-solid fa-bullhorn nav-icon"></i>
+                    <span>Publicidad</span>
+                </a>
+
+                <a href="{{ route('admin.sliders.index') }}"
+                   class="nav-item {{ request()->routeIs('admin.sliders.*') ? 'active' : '' }}" @click="mobileSidebarOpen = false">
+                    <i class="fa-solid fa-image nav-icon"></i>
+                    <span>Sliders</span>
+                </a>
+
+                <a href="{{ route('admin.banners.index') }}"
+                   class="nav-item {{ request()->routeIs('admin.banners.*') ? 'active' : '' }}" @click="mobileSidebarOpen = false">
+                    <i class="fa-solid fa-rectangle-ad nav-icon"></i>
+                    <span>Banners</span>
+                </a>
+
+                <p class="sidebar-section-label">Sistema</p>
+
+                <a href="{{ route('admin.users.index') }}"
+                   class="nav-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}" @click="mobileSidebarOpen = false">
+                    <i class="fa-regular fa-user nav-icon"></i>
+                    <span>Usuarios</span>
+                </a>
+
+                <a href="{{ route('admin.settings.index') }}"
+                   class="nav-item {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}" @click="mobileSidebarOpen = false">
+                    <i class="fa-solid fa-gear nav-icon"></i>
+                    <span>Configuración</span>
+                </a>
+
+                <a href="{{ route('admin.backups.index') }}"
+                   class="nav-item {{ request()->routeIs('admin.backups.*') ? 'active' : '' }}" @click="mobileSidebarOpen = false">
+                    <i class="fa-solid fa-database nav-icon" style="{{ request()->routeIs('admin.backups.*') ? '' : 'color:#f59e0b' }}"></i>
+                    <span>Backups / Historial</span>
+                </a>
+
+                <a href="{{ route('admin.imports.index') }}"
+                   class="nav-item {{ request()->routeIs('admin.imports.*') ? 'active' : '' }}" @click="mobileSidebarOpen = false">
+                    <i class="fa-solid fa-file-excel nav-icon" style="{{ request()->routeIs('admin.imports.*') ? '' : 'color:#22c55e' }}"></i>
+                    <span>Importar Excel</span>
+                </a>
+
+                <a href="{{ route('admin.pdf.index') }}"
+                   class="nav-item {{ request()->routeIs('admin.pdf.*') ? 'active' : '' }}" @click="mobileSidebarOpen = false">
+                    <i class="fa-solid fa-file-pdf nav-icon" style="{{ request()->routeIs('admin.pdf.*') ? '' : 'color:#ef4444' }}"></i>
+                    <span>Generar PDF</span>
+                </a>
+
+                <div class="border-t border-white/10 my-2 pt-2"></div>
+
+                <a href="{{ route('home') }}" target="_blank" class="nav-item">
+                    <i class="fa-solid fa-store nav-icon" style="color:#60a5fa"></i>
+                    <span>Ver Tienda Pública</span>
+                    <i class="fa-solid fa-external-link text-[9px] ml-auto text-slate-500"></i>
+                </a>
+            </nav>
+
+            <!-- Drawer Footer Logout -->
+            <div class="p-3 border-t border-white/10">
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                        <i class="fa-solid fa-right-from-bracket w-4 text-center"></i>
+                        <span>Cerrar Sesión</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════
+         DESKTOP SIDEBAR (>= 1024px)
+    ════════════════════════════════════ -->
+    <aside class="admin-sidebar hidden lg:flex transition-all duration-300" :style="sidebarOpen ? 'width: 240px' : 'width: 70px'">
 
         <!-- Logo -->
         <div class="sidebar-logo justify-center">
             <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 w-full" :class="!sidebarOpen ? 'justify-center' : ''">
-                @php
-                    $logo = \App\Models\Setting::where('key', 'store_logo')->value('value');
-                    $storeName = \App\Models\Setting::where('key', 'store_name')->value('value') ?? 'PORTÁTILES PERÚ';
-                @endphp
                 @if($logo)
                     <img src="{{ Storage::url($logo) }}" alt="Logo" class="h-9 w-9 rounded-xl object-contain bg-white p-1 flex-shrink-0">
                 @else
@@ -552,7 +748,7 @@
                     </div>
                     <i x-show="sidebarOpen" class="fa-solid fa-chevron-down text-[10px] transition-transform" :class="expanded ? 'rotate-180' : ''"></i>
                 </button>
-                <div x-show="expanded && sidebarOpen" class="pl-3 mt-1 space-y-0.5">
+                <div x-show="expanded && sidebarOpen" class="pl-3 mt-1 space-y-0.5" x-cloak>
                     <a href="{{ route('admin.products.create') }}" class="nav-item {{ request()->routeIs('admin.products.create') ? 'bg-white/10 text-white' : '' }}">
                         <i class="fa-solid fa-pen-to-square nav-icon text-xs"></i>
                         <span class="whitespace-nowrap">Registrar Producto</span>
@@ -675,54 +871,82 @@
         </div>
     </aside>
 
-    <!-- ════════════════════════════════════
-         MAIN WRAPPER
-    ════════════════════════════════════ -->
-    <div class="flex-1 flex flex-col h-screen overflow-hidden" style="background:var(--bg-body, transparent);">
 
-        <!-- Top Header -->
+    <!-- ════════════════════════════════════
+         MAIN CONTENT AREA
+    ════════════════════════════════════ -->
+    <div class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden" 
+         x-data="globalScanner()" 
+         style="background:var(--bg-body, transparent);">
+
+        <!-- Top Header Bar -->
         <header class="admin-topbar">
-            <div class="flex items-center gap-4 flex-1">
-                <!-- Hamburger -->
-                <button type="button" @click="sidebarOpen = !sidebarOpen" class="text-slate-500 hover:text-blue-600 hidden md:flex items-center justify-center h-10 w-10 rounded-xl transition-colors hover:bg-slate-100">
+            
+            <!-- Left Header: Mobile Toggle, Desktop Toggle, and Branding/Search -->
+            <div class="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                
+                <!-- Mobile Hamburger Button (< 1024px) -->
+                <button type="button" 
+                        @click="mobileSidebarOpen = true" 
+                        class="lg:hidden flex items-center justify-center h-10 w-10 rounded-xl text-slate-600 hover:text-blue-600 hover:bg-slate-100 transition-colors flex-shrink-0"
+                        aria-label="Abrir Menú">
                     <i class="fa-solid fa-bars text-lg"></i>
                 </button>
-                
-                <!-- Search -->
-                <div class="topbar-search hidden lg:block" x-data="globalScanner()">
+
+                <!-- Desktop Sidebar Collapse Toggle (>= 1024px) -->
+                <button type="button" 
+                        @click="sidebarOpen = !sidebarOpen" 
+                        class="hidden lg:flex items-center justify-center h-10 w-10 rounded-xl text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition-colors flex-shrink-0"
+                        title="Alternar Menú Lateral">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+
+                <!-- Mobile Store Name / Header Title -->
+                <div class="lg:hidden flex items-center gap-2 min-w-0 mr-1 sm:mr-2">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center font-display font-black text-white text-xs italic flex-shrink-0"
+                         style="background: linear-gradient(135deg, #2563eb, #7c3aed);">{{ substr($storeName, 0, 1) }}</div>
+                    <span class="font-display font-extrabold text-slate-900 text-sm truncate max-w-[130px] xs:max-w-[180px] sm:max-w-none">
+                        @yield('header_title', 'Panel')
+                    </span>
+                </div>
+
+                <!-- Desktop / Tablet Inline Search Bar (>= 640px) -->
+                <div class="topbar-search hidden sm:block flex-1 max-w-md ml-2">
                     <div class="relative w-full">
-                        <i class="fa-solid fa-magnifying-glass search-icon z-10"></i>
-                        <input type="text" placeholder="Buscar en categorías, marcas, productos..." @keydown.enter="handleSearch($event.target.value)">
-                        <button type="button" @click="startScanner" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-500 hover:text-blue-700 p-1" title="Escanear Código">
-                            <i class="fa-solid fa-barcode text-lg"></i>
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input type="text" 
+                               placeholder="Buscar en categorías, marcas, productos..." 
+                               @keydown.enter="handleSearch($event.target.value)">
+                        <button type="button" 
+                                @click="startScanner()" 
+                                class="absolute right-2.5 top-1/2 -translate-y-1/2 text-blue-600 hover:text-blue-800 p-1.5 rounded-lg hover:bg-blue-50 transition" 
+                                title="Escanear Código de Barras o QR">
+                            <i class="fa-solid fa-barcode text-base"></i>
                         </button>
                     </div>
-
-                    <!-- Global Scanner Modal -->
-                    <div class="fixed inset-0 z-[200] bg-black/90 flex flex-col items-center justify-center" x-show="showScanner" x-cloak x-transition.opacity>
-                        <div class="w-full max-w-lg bg-white rounded-xl overflow-hidden shadow-2xl relative">
-                            <div class="px-4 py-3 bg-slate-800 text-white flex justify-between items-center">
-                                <h3 class="font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-barcode"></i> Buscador por Código de Barras</h3>
-                                <button type="button" @click="stopScanner()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-                            </div>
-                            <div class="p-4 bg-black relative">
-                                <div id="global-reader" class="w-full overflow-hidden rounded-lg bg-black min-h-[300px]"></div>
-                            </div>
-                            <div class="px-4 py-3 bg-slate-100 text-center text-xs text-slate-600 font-medium">
-                                Apunta la cámara al código de barras o QR para buscar el producto.
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
-                <!-- Page breadcrumb (mobile) -->
-                <div class="md:hidden">
-                    <p class="font-display font-bold text-slate-800 text-sm">@yield('header_title', 'Panel')</p>
-                </div>
             </div>
 
-            <!-- Right Actions -->
-            <div class="flex items-center gap-2">
+            <!-- Right Actions (Scanner button for mobile, Notifications, User profile) -->
+            <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+
+                <!-- Mobile Quick Search / Barcode Action Buttons (< 640px) -->
+                <div class="flex sm:hidden items-center gap-1">
+                    <button type="button" 
+                            @click="mobileSearchOpen = !mobileSearchOpen" 
+                            class="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 transition" 
+                            title="Buscar Productos">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    </button>
+                    
+                    <button type="button" 
+                            @click="startScanner()" 
+                            class="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 border border-blue-200 text-blue-600 hover:bg-blue-100 transition" 
+                            title="Escanear Código">
+                        <i class="fa-solid fa-barcode text-sm"></i>
+                    </button>
+                </div>
 
                 <!-- Notifications -->
                 @php
@@ -730,9 +954,16 @@
                     $pendingOrdersCount = \App\Models\Order::where('status', 'Pendiente')->count();
                 @endphp
                 <div class="relative">
-                    <button type="button" data-notifications-toggle aria-expanded="false" aria-controls="admin-notifications" aria-label="Notificaciones: {{ $pendingOrdersCount }} pedidos pendientes" class="relative flex h-10 w-10 items-center justify-center rounded-xl border border-transparent text-slate-500 transition-all hover:border-blue-100 hover:bg-blue-50 hover:text-blue-600">
-                        <i class="fa-regular fa-bell text-base"></i>
-                        @if($pendingOrdersCount > 0)<span class="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-white bg-rose-500 px-1 text-[9px] font-extrabold text-white">{{ $pendingOrdersCount > 99 ? '99+' : $pendingOrdersCount }}</span>@endif
+                    <button type="button" 
+                            data-notifications-toggle 
+                            aria-expanded="false" 
+                            aria-controls="admin-notifications" 
+                            aria-label="Notificaciones" 
+                            class="relative flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl border border-slate-200 sm:border-transparent text-slate-600 hover:border-blue-100 hover:bg-blue-50 hover:text-blue-600 transition">
+                        <i class="fa-regular fa-bell text-sm sm:text-base"></i>
+                        @if($pendingOrdersCount > 0)
+                            <span class="absolute -right-1 -top-1 flex h-4 min-w-4 sm:h-5 sm:min-w-5 items-center justify-center rounded-full border-2 border-white bg-rose-500 px-1 text-[9px] font-extrabold text-white">{{ $pendingOrdersCount > 99 ? '99+' : $pendingOrdersCount }}</span>
+                        @endif
                     </button>
                     <section id="admin-notifications" data-notifications-menu hidden class="absolute right-0 top-12 z-50 w-[min(90vw,360px)] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/15" aria-label="Pedidos pendientes">
                         <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3"><div><h2 class="text-xs font-extrabold text-slate-800">Notificaciones</h2><p class="mt-0.5 text-[10px] text-slate-500">Pedidos que requieren atención</p></div><span class="rounded-full bg-rose-50 px-2 py-1 text-[9px] font-bold text-rose-700">{{ $pendingOrdersCount }} pendientes</span></div>
@@ -748,40 +979,88 @@
                 </div>
 
                 <!-- Divider -->
-                <div class="w-px h-8 bg-slate-200 mx-1"></div>
+                <div class="w-px h-6 sm:h-8 bg-slate-200 mx-0.5 sm:mx-1"></div>
 
-                <!-- User -->
+                <!-- User Profile Dropdown -->
                 <div class="relative" x-data="{ open: false }">
-                    <div @click="open = !open" @click.away="open = false" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-50 transition-all cursor-pointer border border-transparent hover:border-slate-200 select-none">
-                        <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
+                    <div @click="open = !open" @click.away="open = false" class="flex items-center gap-2 p-1 sm:px-3 sm:py-2 rounded-xl hover:bg-slate-50 transition-all cursor-pointer border border-transparent hover:border-slate-200 select-none">
+                        <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs sm:text-sm shadow-sm flex-shrink-0">
                             {{ strtoupper(substr(Auth::user()->name ?? 'A', 0, 1)) }}
                         </div>
                         <div class="hidden md:flex flex-col text-left">
-                            <span class="text-sm font-bold text-slate-800 leading-none">{{ Auth::user()->name ?? 'Administrador' }}</span>
+                            <span class="text-xs sm:text-sm font-bold text-slate-800 leading-none truncate max-w-[120px]">{{ Auth::user()->name ?? 'Administrador' }}</span>
                             <span class="text-[10px] text-slate-400 mt-0.5">Administrador</span>
                         </div>
                         <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 hidden md:block" :class="{'rotate-180': open}"></i>
                     </div>
 
-                    <!-- Dropdown -->
-                    <div x-show="open" x-transition x-cloak class="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-lg z-50 py-2">
-                        <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-blue-600">
-                            <i class="fa-regular fa-user mr-2"></i> Mi Perfil
+                    <!-- Dropdown Menu -->
+                    <div x-show="open" x-transition x-cloak class="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-2">
+                        <div class="px-4 py-2 border-b border-slate-100 md:hidden">
+                            <p class="text-xs font-bold text-slate-800 truncate">{{ Auth::user()->name ?? 'Administrador' }}</p>
+                            <p class="text-[10px] text-slate-400">Administrador</p>
+                        </div>
+                        <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-xs sm:text-sm text-slate-700 hover:bg-slate-50 hover:text-blue-600">
+                            <i class="fa-regular fa-user mr-2 text-slate-400"></i> Mi Perfil
+                        </a>
+                        <a href="{{ route('admin.settings.index') }}" class="block px-4 py-2 text-xs sm:text-sm text-slate-700 hover:bg-slate-50 hover:text-blue-600">
+                            <i class="fa-solid fa-gear mr-2 text-slate-400"></i> Configuración
                         </a>
                         <div class="border-t border-slate-100 my-1"></div>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                            <button type="submit" class="w-full text-left px-4 py-2 text-xs sm:text-sm text-red-600 hover:bg-red-50 font-medium">
                                 <i class="fa-solid fa-right-from-bracket mr-2"></i> Cerrar Sesión
                             </button>
                         </form>
                     </div>
                 </div>
+
             </div>
         </header>
 
-        <!-- Main Content -->
-        <main class="flex-1 overflow-y-auto p-6 fade-in">
+        <!-- Mobile Expandable Search Bar Sub-Row (< 640px) -->
+        <div x-show="mobileSearchOpen" 
+             x-cloak 
+             x-transition 
+             class="sm:hidden bg-white border-b border-slate-200 p-3 shadow-inner">
+            <div class="relative w-full">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input type="text" 
+                       placeholder="Buscar categoría, marca, código..." 
+                       class="w-full h-10 bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-10 text-xs text-slate-800 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
+                       @keydown.enter="handleSearch($event.target.value)">
+                <button type="button" 
+                        @click="startScanner()" 
+                        class="absolute right-2 top-1/2 -translate-y-1/2 text-blue-600 hover:text-blue-800 p-1.5 rounded-lg hover:bg-blue-50 transition" 
+                        title="Escanear">
+                    <i class="fa-solid fa-barcode text-sm"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Global Scanner Modal -->
+        <div class="fixed inset-0 z-[200] bg-black/90 flex flex-col items-center justify-center p-4" x-show="showScanner" x-cloak x-transition.opacity>
+            <div class="w-full max-w-lg bg-white rounded-2xl overflow-hidden shadow-2xl relative">
+                <div class="px-4 py-3 bg-slate-900 text-white flex justify-between items-center">
+                    <h3 class="font-bold text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-barcode text-blue-400"></i> Buscador por Código de Barras / QR
+                    </h3>
+                    <button type="button" @click="stopScanner()" class="text-slate-400 hover:text-white p-1">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+                <div class="p-4 bg-black relative flex justify-center">
+                    <div id="global-reader" class="w-full overflow-hidden rounded-xl bg-black min-h-[260px] max-w-md"></div>
+                </div>
+                <div class="px-4 py-3 bg-slate-50 text-center text-xs text-slate-600 font-medium border-t border-slate-100">
+                    Apunta la cámara de tu celular al código de barras o QR para buscar el producto de inmediato.
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-y-auto p-3.5 sm:p-5 lg:p-6 fade-in">
             @yield('content')
         </main>
     </div>
@@ -841,7 +1120,7 @@
                                 icon: 'success',
                                 title: 'Producto Encontrado',
                                 html: `
-                                    <div class="text-left mt-4 text-sm">
+                                    <div class="text-left mt-4 text-sm space-y-1">
                                         <p><strong>Nombre:</strong> ${data.product.name}</p>
                                         <p><strong>Código:</strong> ${data.product.code}</p>
                                         <p><strong>Precio Normal:</strong> <span class="${data.product.is_offer ? 'line-through text-red-500' : ''}">S/ ${parseFloat(data.product.price).toFixed(2)}</span></p>

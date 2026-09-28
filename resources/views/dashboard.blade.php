@@ -21,14 +21,14 @@
 
         {{-- Welcome Header --}}
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-xl font-bold shadow-lg"
+            <div class="flex items-center gap-3 sm:gap-4">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-white text-lg sm:text-xl font-bold shadow-lg flex-shrink-0"
                      style="background:linear-gradient(135deg,#2563eb,#7c3aed);">
                     <i class="fa-solid fa-chart-pie"></i>
                 </div>
-                <div>
-                    <h1 class="page-title">Bienvenido, {{ Auth::user()->name ?? 'Administrador' }}</h1>
-                    <p class="page-subtitle">Resumen y métricas en tiempo real de tu tienda tecnológica.</p>
+                <div class="min-w-0">
+                    <h1 class="page-title text-lg sm:text-2xl truncate">Bienvenido, {{ Auth::user()->name ?? 'Administrador' }}</h1>
+                    <p class="page-subtitle text-xs text-slate-500 line-clamp-1">Resumen y métricas en tiempo real de tu tienda tecnológica.</p>
                 </div>
             </div>
             <div class="hidden lg:flex items-center gap-3 text-xs font-medium text-slate-600 bg-white border border-slate-200 px-4 py-2.5 rounded-xl shadow-sm">
@@ -41,7 +41,7 @@
         </div>
 
         {{-- KPI Cards --}}
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
 
             {{-- KPI 1: Products --}}
             <div class="kpi-card hover:border-blue-300">
