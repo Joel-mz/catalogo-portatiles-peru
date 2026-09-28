@@ -140,41 +140,41 @@
             <div class="mt-3 flex flex-col gap-3 lg:mt-0 lg:flex-row lg:items-center lg:justify-between">
                 
                 <!-- Desktop Brand (Hidden on Mobile) -->
-                <div class="hidden lg:flex lg:w-[230px] lg:shrink-0 lg:items-center lg:gap-3">
+                <div class="hidden lg:flex shrink-0 items-center gap-3">
                     <a href="{{ auth()->check() ? route('dashboard') : route('login') }}" class="focus-ring flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[{{ $primaryColor }}] to-[#713ee7] text-xl font-black italic text-white shadow-lg">{{ substr($storeName, 0, 1) }}</a>
                     <a href="{{ route('home') }}" class="focus-ring leading-tight"><span class="block font-display text-base font-extrabold tracking-tight text-[#111c36] uppercase">{{ $storeName }}</span></a>
                 </div>
 
                 <!-- Search Bar -->
-                <form action="{{ route('catalog') }}" method="GET" role="search" class="flex h-11 flex-1 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 focus-within:border-[#536be2] focus-within:ring-4 focus-within:ring-indigo-100 lg:max-w-2xl">
+                <form action="{{ route('catalog') }}" method="GET" role="search" class="flex h-11 flex-1 min-w-0 max-w-xl lg:mx-4 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 focus-within:border-[#536be2] focus-within:bg-white focus-within:ring-2 focus-within:ring-indigo-100 transition-all">
                     <label for="site-search" class="sr-only">Buscar productos</label>
-                    <input id="site-search" type="search" name="q" value="{{ request('q') }}" placeholder="Busca productos, marcas y modelos..." class="min-w-0 flex-1 bg-transparent px-4 text-sm outline-none placeholder:text-slate-400">
-                    <button type="submit" aria-label="Buscar" style="background-color: {{ $primaryColor }}" class="focus-ring flex w-12 items-center justify-center text-white"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></button>
+                    <input id="site-search" type="search" name="q" value="{{ request('q') }}" placeholder="Busca productos, marcas y modelos..." class="min-w-0 flex-1 bg-transparent px-4 text-xs sm:text-sm text-slate-800 outline-none placeholder:text-slate-400">
+                    <button type="submit" aria-label="Buscar" style="background-color: {{ $primaryColor }}" class="focus-ring flex w-12 shrink-0 items-center justify-center text-white transition hover:opacity-90"><i class="fa-solid fa-magnifying-glass text-sm" aria-hidden="true"></i></button>
                 </form>
 
                 <!-- Actions (Desktop & Extra Mobile buttons) -->
-                <div class="flex items-center justify-between gap-2 lg:w-[450px] lg:shrink-0 lg:justify-end">
-                    <button type="button" id="theme-toggle" class="focus-ring flex min-h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700" aria-label="Cambiar tema">
-                        <i class="fa-solid fa-moon dark:hidden"></i>
-                        <i class="fa-solid fa-sun hidden dark:inline"></i>
+                <div class="flex items-center gap-2 shrink-0 justify-between lg:justify-end">
+                    <button type="button" id="theme-toggle" class="focus-ring flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 shadow-xs" aria-label="Cambiar tema" title="Cambiar tema">
+                        <i class="fa-solid fa-moon dark:hidden text-sm"></i>
+                        <i class="fa-solid fa-sun hidden dark:inline text-sm"></i>
                     </button>
                     @auth
-                        <a href="{{ route('dashboard') }}" class="focus-ring flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-blue-700 lg:flex"><i class="fa-regular fa-user text-base"></i><span class="hidden sm:inline">Mi cuenta</span></a>
+                        <a href="{{ route('dashboard') }}" class="focus-ring flex h-10 shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-blue-700 shadow-xs"><i class="fa-regular fa-user text-sm"></i><span class="hidden sm:inline">Mi cuenta</span></a>
                     @endauth
 
                     <!-- Desktop Wishlist Button -->
-                    <button type="button" data-open-wishlist class="focus-ring relative hidden h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 lg:inline-flex" aria-label="Abrir favoritos" title="Mis Favoritos">
+                    <button type="button" data-open-wishlist class="focus-ring relative hidden h-10 shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 lg:inline-flex shadow-xs" aria-label="Abrir favoritos" title="Mis Favoritos">
                         <i class="fa-regular fa-heart text-base text-rose-500"></i>
                         <span>Favoritos</span>
                         <span id="wishlist-count-desktop" style="display: none;" class="flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-extrabold text-white shadow-sm">0</span>
                     </button>
                     
                     <!-- Desktop Cart -->
-                    <button type="button" data-open-cart class="focus-ring relative hidden h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 lg:inline-flex" aria-label="Abrir carrito">
+                    <button type="button" data-open-cart class="focus-ring relative hidden h-10 shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 lg:inline-flex shadow-xs" aria-label="Abrir carrito">
                         <i class="fa-solid fa-bag-shopping text-base"></i><span>Carrito</span><span id="cart-count-desktop" class="flex h-5 min-w-5 items-center justify-center rounded-full bg-indigo-600 px-1 text-[10px] font-extrabold text-white">0</span>
                     </button>
 
-                    <a href="https://wa.me/{{ $wpNum }}?text={{ urlencode('Hola, quisiera información sobre sus equipos.') }}" target="_blank" rel="noopener noreferrer" class="focus-ring inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#25d366] px-4 py-2.5 text-xs font-bold text-white shadow-md shadow-emerald-600/15 hover:bg-[#1fb85a] lg:w-auto"><i class="fa-brands fa-whatsapp text-base" aria-hidden="true"></i><span>Consultar</span></a>
+                    <a href="https://wa.me/{{ $wpNum }}?text={{ urlencode('Hola, quisiera información sobre sus equipos.') }}" target="_blank" rel="noopener noreferrer" class="focus-ring inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#25d366] px-4 text-xs font-bold text-white shadow-md shadow-emerald-600/15 hover:bg-[#1fb85a] transition"><i class="fa-brands fa-whatsapp text-base" aria-hidden="true"></i><span>Consultar</span></a>
                 </div>
             </div>
         </div>
