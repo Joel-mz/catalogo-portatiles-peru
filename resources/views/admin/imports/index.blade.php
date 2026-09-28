@@ -245,6 +245,14 @@
             </table>
         </div>
     </div>
+
+    <!-- Loading Overlay -->
+    <div x-show="isLoading" x-cloak class="bg-white rounded-3xl shadow-sm border border-slate-100 p-12 text-center">
+        <div class="inline-block w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <h4 class="text-base font-bold text-slate-800">Leyendo y procesando archivo Excel...</h4>
+        <p class="text-xs text-slate-500 mt-1">Detectando columnas, codificación y productos.</p>
+    </div>
+
 </div>
 
 @endsection
@@ -252,86 +260,176 @@
 @push('scripts')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('importForm', () => ({
+    function importForm() {
+        return {
             parsedData: [],
+            isLoading: false,
             
             handleFileSelect(event) {
-                this.processFile(event.target.files[0]);
+                const file = event.target.files && event.target.files[0];
+                if (file) this.processFile(file);
             },
             
             handleDrop(event) {
-                if (event.dataTransfer.files.length > 0) {
+                if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
                     this.processFile(event.dataTransfer.files[0]);
                 }
             },
             
+            cleanEncoding(str) {
+                if (!str) return '';
+                const replacements = {
+                    'Ã¡': 'á', 'Ã©': 'é', 'Ã­': 'í', 'Ã³': 'ó', 'Ãº': 'ú', 'Ã±': 'ñ',
+                    'Ã ': 'Á', 'Ã‰': 'É', 'Ã ': 'Í', 'Ã“': 'Ó', 'Ãš': 'Ú', 'Ã‘': 'Ñ',
+                    'Ã¼': 'ü', 'Ãœ': 'Ü',
+                    'Â¿': '¿', 'Â¡': '¡', 'Â°': '°', 'Âº': 'º', 'Âª': 'ª',
+                    'â€œ': '“', 'â€ ': '”', 'â€˜': '‘', 'â€™': '’', 'â€“': '–', 'â€”': '—',
+                    'Â ': ' '
+                };
+                let res = String(str);
+                for (const [bad, good] of Object.entries(replacements)) {
+                    res = res.split(bad).join(good);
+                }
+                return res.trim();
+            },
+
+            normalizeKey(key) {
+                if (!key) return '';
+                return String(key)
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "")
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]/g, "");
+            },
+            
             processFile(file) {
                 if (!file) return;
+                this.isLoading = true;
+                this.parsedData = [];
                 
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, {type: 'array'});
-                    
-                    const firstSheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[firstSheetName];
-                    
-                    const cleanEncoding = (str) => {
-                        if (!str) return '';
-                        const replacements = {
-                            'Ã¡': 'á', 'Ã©': 'é', 'Ã­': 'í', 'Ã³': 'ó', 'Ãº': 'ú', 'Ã±': 'ñ',
-                            'Ã ': 'Á', 'Ã‰': 'É', 'Ã ': 'Í', 'Ã“': 'Ó', 'Ãš': 'Ú', 'Ã‘': 'Ñ',
-                            'Ã¼': 'ü', 'Ãœ': 'Ü',
-                            'Â¿': '¿', 'Â¡': '¡', 'Â°': '°', 'Âº': 'º', 'Âª': 'ª',
-                            'â€œ': '“', 'â€ ': '”', 'â€˜': '‘', 'â€™': '’', 'â€“': '–', 'â€”': '—',
-                            'Â ': ' '
-                        };
-                        let res = String(str);
-                        for (const [bad, good] of Object.entries(replacements)) {
-                            res = res.split(bad).join(good);
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array', cellDates: true, cellText: false });
+                        
+                        if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+                            throw new Error('El archivo Excel no contiene hojas de cálculo.');
                         }
-                        return res;
-                    };
 
-                    this.parsedData = json.map(row => {
-                        const getVal = (possibleKeys) => {
-                            for (let key of possibleKeys) {
-                                const found = Object.keys(row).find(k => k.toLowerCase().trim() === key.toLowerCase().trim());
-                                if (found && row[found] !== undefined && row[found] !== null && String(row[found]).trim() !== '') {
-                                    return cleanEncoding(String(row[found]).trim());
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
+                        
+                        // Convert worksheet to JSON rows
+                        const json = XLSX.utils.sheet_to_json(worksheet, { defval: "", raw: false });
+                        
+                        if (!json || json.length === 0) {
+                            throw new Error('La hoja de cálculo está vacía.');
+                        }
+
+                        const clean = (val) => this.cleanEncoding(val);
+                        const norm = (k) => this.normalizeKey(k);
+
+                        const extracted = json.map(row => {
+                            // Map all normalized keys of this row
+                            const rowKeys = Object.keys(row);
+                            const keyMap = {};
+                            rowKeys.forEach(k => {
+                                keyMap[norm(k)] = row[k];
+                            });
+
+                            const getVal = (aliases) => {
+                                for (let alias of aliases) {
+                                    const normAlias = norm(alias);
+                                    if (keyMap[normAlias] !== undefined && keyMap[normAlias] !== null) {
+                                        const str = String(keyMap[normAlias]).trim();
+                                        if (str !== '') return clean(str);
+                                    }
+                                }
+                                return '';
+                            };
+
+                            // Fallbacks for code and name if exact headers differ
+                            let code = getVal(['code', 'codigo', 'cod', 'sku', 'id', 'item', 'referencia', 'ref', 'barcode', 'codigodebarras']);
+                            let name = getVal(['name', 'nombre', 'producto', 'nomproducto', 'nomprod', 'descripcionproducto', 'titulo', 'itemname', 'articulo', 'descripcion']);
+
+                            // If no code but name exists, generate temporary or use first non-empty column
+                            if (!code && !name && rowKeys.length >= 2) {
+                                const val0 = clean(String(row[rowKeys[0]] || '').trim());
+                                const val1 = clean(String(row[rowKeys[1]] || '').trim());
+                                if (val1) {
+                                    code = val0;
+                                    name = val1;
+                                } else if (val0) {
+                                    name = val0;
                                 }
                             }
-                            return '';
-                        };
-                        
-                        return {
-                            code: getVal(['code', 'codigo', 'cod', 'sku']),
-                            sku: getVal(['sku', 'sku_interno']),
-                            serial_number: getVal(['serial_number', 'serie', 'numero_serie', 'nro_serie']),
-                            name: getVal(['name', 'nombre', 'producto', 'titulo']),
-                            category: getVal(['category', 'categoria', 'category_id', 'categoria_id']) || 'Laptops',
-                            subcategory: getVal(['subcategory', 'subcategoria', 'subcategory_id', 'subcategoria_id']),
-                            brand: getVal(['brand', 'marca', 'brand_id', 'marca_id']) || 'Genérica',
-                            device_model: getVal(['device_model', 'modelo', 'device_model_id', 'modelo_id']),
-                            control_type: getVal(['control_type', 'tipo_control', 'control']) || 'Por Cantidad',
-                            description: getVal(['description', 'descripcion', 'detalle']),
-                            price: getVal(['price', 'precio', 'precio_venta', 'precio_normal']) || '0',
-                            min_price: getVal(['min_price', 'precio_minimo', 'p_minimo']),
-                            offer_price: getVal(['offer_price', 'precio_oferta', 'oferta']),
-                            stock: getVal(['stock', 'cantidad', 'existencias', 'cant']) || '10',
-                            state: getVal(['state', 'estado', 'estado_producto']) || 'Nuevo',
-                            warranty: getVal(['warranty', 'garantia']) || '1 año',
-                            processor: getVal(['processor', 'procesador', 'cpu']),
-                            ram: getVal(['ram', 'memoria_ram', 'memoria']),
-                            storage: getVal(['storage', 'almacenamiento', 'disco', 'ssd', 'hdd']),
-                            screen: getVal(['screen', 'pantalla', 'display']),
-                            graphics: getVal(['graphics', 'graficos', 'tarjeta_grafica', 'gpu']),
-                            operating_system: getVal(['operating_system', 'sistema_operativo', 'so', 'os']),
-                            image_url: getVal(['image_url', 'imagen', 'image', 'foto']),
-                            status: getVal(['status', 'activo', 'publicado']) !== '0' ? '1' : '0'
-                        };
-                    }).filter(row => row.code || row.name);
+
+                            if (!code && name) {
+                                code = 'PROD-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+                            }
+
+                            return {
+                                code: code,
+                                sku: getVal(['sku', 'skuinterno', 'skucodigo']),
+                                serial_number: getVal(['serialnumber', 'serie', 'numerodeserie', 'nroserie', 'sn']),
+                                name: name,
+                                category: getVal(['category', 'categoria', 'rubro', 'linea', 'familia', 'tipo']) || 'Laptops',
+                                subcategory: getVal(['subcategory', 'subcategoria', 'sublinea', 'subtipo']),
+                                brand: getVal(['brand', 'marca', 'fabricante']) || 'Genérica',
+                                device_model: getVal(['devicemodel', 'modelo', 'model']),
+                                control_type: getVal(['controltype', 'tipodecontrol', 'control', 'inventariopor']) || 'Por Cantidad',
+                                description: getVal(['description', 'descripcion', 'detalle', 'especificaciones']),
+                                price: getVal(['price', 'precio', 'preciodeventa', 'pventa', 'precionormal', 'pvp', 'costo']) || '0',
+                                min_price: getVal(['minprice', 'preciominimo', 'pminimo', 'min']),
+                                offer_price: getVal(['offerprice', 'preciooferta', 'oferta', 'poferta', 'descuento']),
+                                stock: getVal(['stock', 'cantidad', 'existencias', 'cant', 'unidades', 'saldo']) || '10',
+                                state: getVal(['state', 'estado', 'condicion', 'estadodelproducto']) || 'Nuevo',
+                                warranty: getVal(['warranty', 'garantia', 'tiempodegarantia']) || '1 año',
+                                processor: getVal(['processor', 'procesador', 'cpu', 'microprocesador']),
+                                ram: getVal(['ram', 'memoriaram', 'memoria', 'gbram']),
+                                storage: getVal(['storage', 'almacenamiento', 'disco', 'ssd', 'hdd', 'rom', 'capacidad']),
+                                screen: getVal(['screen', 'pantalla', 'display', 'pulgadas', 'monitor']),
+                                graphics: getVal(['graphics', 'graficos', 'tarjetagrafica', 'gpu', 'video']),
+                                operating_system: getVal(['operatingsystem', 'sistemaoperativo', 'so', 'os', 'sistema']),
+                                image_url: getVal(['imageurl', 'imagen', 'image', 'foto', 'linkimagen', 'urlfoto']),
+                                status: getVal(['status', 'activo', 'publicado', 'habilitado']) !== '0' ? '1' : '0'
+                            };
+                        }).filter(row => row.name || row.code);
+
+                        this.isLoading = false;
+
+                        if (extracted.length === 0) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'No se detectaron productos',
+                                text: 'El archivo no contiene filas válidas o las columnas no tienen nombres reconocibles como "name" o "nombre".',
+                                confirmButtonColor: '#4f46e5'
+                            });
+                        } else {
+                            this.parsedData = extracted;
+                        }
+
+                    } catch (err) {
+                        this.isLoading = false;
+                        console.error('Error parsing Excel:', err);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error al leer el archivo',
+                            text: err.message || 'Verifica que el archivo sea un Excel (.xlsx, .xls) o .CSV válido.',
+                            confirmButtonColor: '#4f46e5'
+                        });
+                    }
+                };
+
+                reader.onerror = () => {
+                    this.isLoading = false;
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error de Lectura',
+                        text: 'No se pudo leer el archivo seleccionado.',
+                        confirmButtonColor: '#4f46e5'
+                    });
                 };
                 
                 reader.readAsArrayBuffer(file);
@@ -339,11 +437,21 @@
             
             clearData() {
                 this.parsedData = [];
+                this.isLoading = false;
                 if (this.$refs.fileInput) {
                     this.$refs.fileInput.value = '';
                 }
             }
-        }))
-    });
+        };
+    }
+
+    window.importForm = importForm;
+    if (window.Alpine) {
+        Alpine.data('importForm', importForm);
+    } else {
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('importForm', importForm);
+        });
+    }
 </script>
 @endpush
