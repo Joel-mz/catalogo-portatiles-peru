@@ -27,6 +27,48 @@ class Product extends Model
         'is_offer' => 'boolean',
     ];
 
+    public function getNameAttribute($value): string
+    {
+        return self::fixUtf8((string) $value);
+    }
+
+    public function setNameAttribute($value): void
+    {
+        $this->attributes['name'] = self::fixUtf8((string) $value);
+    }
+
+    public function getDescriptionAttribute($value): ?string
+    {
+        return $value ? self::fixUtf8((string) $value) : null;
+    }
+
+    public static function fixUtf8(?string $str): string
+    {
+        if (empty($str)) {
+            return '';
+        }
+
+        $replacements = [
+            'Ã¡' => 'á', 'Ã©' => 'é', 'Ã­' => 'í', 'Ã³' => 'ó', 'Ãº' => 'ú', 'Ã±' => 'ñ',
+            'Ã ' => 'Á', 'Ã‰' => 'É', 'Ã ' => 'Í', 'Ã“' => 'Ó', 'Ãš' => 'Ú', 'Ã‘' => 'Ñ',
+            'Ã¼' => 'ü', 'Ãœ' => 'Ü',
+            'Â¿' => '¿', 'Â¡' => '¡', 'Â°' => '°', 'Âº' => 'º', 'Âª' => 'ª',
+            'â€œ' => '“', 'â€ ' => '”', 'â€˜' => '‘', 'â€™' => '’', 'â€“' => '–', 'â€”' => '—',
+            'Â ' => ' ',
+        ];
+
+        $cleaned = strtr($str, $replacements);
+
+        if (preg_match('/[\xC2-\xDF][\x80-\xBF]/', $cleaned) && function_exists('mb_convert_encoding')) {
+            $converted = @mb_convert_encoding($cleaned, 'ISO-8859-1', 'UTF-8');
+            if ($converted !== false && mb_check_encoding($converted, 'UTF-8') && !empty($converted)) {
+                $cleaned = $converted;
+            }
+        }
+
+        return $cleaned;
+    }
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);

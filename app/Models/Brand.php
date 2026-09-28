@@ -16,6 +16,16 @@ class Brand extends Model
         'status' => 'boolean',
     ];
 
+    public function getNameAttribute($value): string
+    {
+        return \App\Models\Product::fixUtf8((string) $value);
+    }
+
+    public function setNameAttribute($value): void
+    {
+        $this->attributes['name'] = \App\Models\Product::fixUtf8((string) $value);
+    }
+
     public function deviceModels(): HasMany
     {
         return $this->hasMany(DeviceModel::class);

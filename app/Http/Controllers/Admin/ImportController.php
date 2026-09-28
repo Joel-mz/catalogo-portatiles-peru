@@ -260,7 +260,7 @@ class ImportController extends Controller
             
             foreach ($products as $row) {
                 $code = trim($row['code'] ?? '');
-                $name = trim($row['name'] ?? '');
+                $name = Product::fixUtf8(trim($row['name'] ?? ''));
 
                 if (empty($code) && empty($name)) {
                     continue;
@@ -272,7 +272,7 @@ class ImportController extends Controller
 
                 // 1. Resolve Category
                 $categoryId = 1;
-                $catVal = trim($row['category'] ?? $row['category_id'] ?? $row['categoria'] ?? '');
+                $catVal = Product::fixUtf8(trim($row['category'] ?? $row['category_id'] ?? $row['categoria'] ?? ''));
                 if (!empty($catVal)) {
                     if (is_numeric($catVal)) {
                         $categoryId = intval($catVal);
@@ -290,7 +290,7 @@ class ImportController extends Controller
 
                 // 2. Resolve Brand
                 $brandId = 1;
-                $brandVal = trim($row['brand'] ?? $row['brand_id'] ?? $row['marca'] ?? '');
+                $brandVal = Product::fixUtf8(trim($row['brand'] ?? $row['brand_id'] ?? $row['marca'] ?? ''));
                 if (!empty($brandVal)) {
                     if (is_numeric($brandVal)) {
                         $brandId = intval($brandVal);
@@ -308,7 +308,7 @@ class ImportController extends Controller
 
                 // 3. Resolve Subcategory (optional)
                 $subcategoryId = null;
-                $subcatVal = trim($row['subcategory'] ?? $row['subcategory_id'] ?? $row['subcategoria'] ?? '');
+                $subcatVal = Product::fixUtf8(trim($row['subcategory'] ?? $row['subcategory_id'] ?? $row['subcategoria'] ?? ''));
                 if (!empty($subcatVal)) {
                     if (is_numeric($subcatVal)) {
                         $subcategoryId = intval($subcatVal);
@@ -323,7 +323,7 @@ class ImportController extends Controller
 
                 // 4. Resolve Device Model (optional)
                 $deviceModelId = null;
-                $modelVal = trim($row['device_model'] ?? $row['device_model_id'] ?? $row['modelo'] ?? '');
+                $modelVal = Product::fixUtf8(trim($row['device_model'] ?? $row['device_model_id'] ?? $row['modelo'] ?? ''));
                 if (!empty($modelVal)) {
                     if (is_numeric($modelVal)) {
                         $deviceModelId = intval($modelVal);
@@ -349,7 +349,7 @@ class ImportController extends Controller
 
                 foreach ($specFields as $specKey => $specVal) {
                     if (!empty(trim((string)$specVal))) {
-                        $specs[$specKey] = trim((string)$specVal);
+                        $specs[$specKey] = Product::fixUtf8(trim((string)$specVal));
                     }
                 }
 
@@ -371,6 +371,11 @@ class ImportController extends Controller
                 $offerPrice = isset($row['offer_price']) && !empty($row['offer_price']) ? floatval($row['offer_price']) : null;
                 $isOffer = !empty($offerPrice) && $offerPrice < $price;
 
+                $rawDescription = !empty($row['description']) ? trim($row['description']) : 'Equipo en excelente estado disponible para entrega inmediata.';
+                $description = Product::fixUtf8($rawDescription);
+                $warranty = !empty($row['warranty']) ? Product::fixUtf8(trim($row['warranty'])) : '1 año';
+                $state = !empty($row['state']) ? Product::fixUtf8(trim($row['state'])) : 'Nuevo';
+
                 $product = Product::updateOrCreate(
                     ['code' => $code],
                     [
@@ -383,15 +388,15 @@ class ImportController extends Controller
                         'brand_id' => $brandId,
                         'device_model_id' => $deviceModelId,
                         'control_type' => !empty($row['control_type']) ? trim($row['control_type']) : 'Por Cantidad',
-                        'description' => !empty($row['description']) ? trim($row['description']) : 'Equipo en excelente estado disponible para entrega inmediata.',
+                        'description' => $description,
                         'technical_specs' => $specs,
                         'price' => $price,
                         'min_price' => $minPrice,
                         'offer_price' => $offerPrice,
                         'is_offer' => $isOffer,
                         'stock' => isset($row['stock']) ? intval($row['stock']) : 10,
-                        'state' => !empty($row['state']) ? trim($row['state']) : 'Nuevo',
-                        'warranty' => !empty($row['warranty']) ? trim($row['warranty']) : '1 año',
+                        'state' => $state,
+                        'warranty' => $warranty,
                         'status' => isset($row['status']) ? (bool)$row['status'] : true,
                         'is_featured' => isset($row['is_featured']) ? (bool)$row['is_featured'] : false,
                         'is_new' => isset($row['is_new']) ? (bool)$row['is_new'] : true,

@@ -277,15 +277,29 @@
                     const firstSheetName = workbook.SheetNames[0];
                     const worksheet = workbook.Sheets[firstSheetName];
                     
-                    // Convert worksheet to JSON
-                    const json = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
-                    
+                    const cleanEncoding = (str) => {
+                        if (!str) return '';
+                        const replacements = {
+                            'Ã¡': 'á', 'Ã©': 'é', 'Ã­': 'í', 'Ã³': 'ó', 'Ãº': 'ú', 'Ã±': 'ñ',
+                            'Ã ': 'Á', 'Ã‰': 'É', 'Ã ': 'Í', 'Ã“': 'Ó', 'Ãš': 'Ú', 'Ã‘': 'Ñ',
+                            'Ã¼': 'ü', 'Ãœ': 'Ü',
+                            'Â¿': '¿', 'Â¡': '¡', 'Â°': '°', 'Âº': 'º', 'Âª': 'ª',
+                            'â€œ': '“', 'â€ ': '”', 'â€˜': '‘', 'â€™': '’', 'â€“': '–', 'â€”': '—',
+                            'Â ': ' '
+                        };
+                        let res = String(str);
+                        for (const [bad, good] of Object.entries(replacements)) {
+                            res = res.split(bad).join(good);
+                        }
+                        return res;
+                    };
+
                     this.parsedData = json.map(row => {
                         const getVal = (possibleKeys) => {
                             for (let key of possibleKeys) {
                                 const found = Object.keys(row).find(k => k.toLowerCase().trim() === key.toLowerCase().trim());
                                 if (found && row[found] !== undefined && row[found] !== null && String(row[found]).trim() !== '') {
-                                    return String(row[found]).trim();
+                                    return cleanEncoding(String(row[found]).trim());
                                 }
                             }
                             return '';
