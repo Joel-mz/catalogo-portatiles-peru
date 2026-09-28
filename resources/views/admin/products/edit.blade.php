@@ -143,14 +143,16 @@
 
                     <div class="md:col-span-2">
                         <div class="flex items-center justify-between mb-1">
-                            <label class="block text-xs font-bold text-slate-700">Descripción corta <span class="text-red-500">*</span></label>
-                            <button type="button" @click="openAiModal('description')" class="px-2.5 py-1 bg-purple-100 hover:bg-purple-200 text-purple-700 text-[10px] font-bold rounded-lg transition-colors flex items-center gap-1.5 shadow-xs">
-                                <i class="fa-solid fa-wand-magic-sparkles text-purple-600"></i> Generar con IA
-                            </button>
+                            <label class="block text-xs font-bold text-slate-700">Descripción del Producto <span class="text-red-500">*</span></label>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] text-slate-400 font-mono" x-text="(description ? description.length : 0) + ' caracteres'"></span>
+                                <button type="button" @click="openAiModal('description')" class="px-2.5 py-1 bg-purple-100 hover:bg-purple-200 text-purple-700 text-[10px] font-bold rounded-lg transition-colors flex items-center gap-1.5 shadow-xs">
+                                    <i class="fa-solid fa-wand-magic-sparkles text-purple-600"></i> Generar con IA
+                                </button>
+                            </div>
                         </div>
                         <div class="relative">
-                            <textarea name="description" x-model="description" rows="3" maxlength="200" class="w-full px-3.5 py-2.5 pb-8 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-colors resize-none" placeholder="Breve descripción del producto (máx. 200 caracteres)..." required></textarea>
-                            <div class="absolute bottom-2 right-3 text-[10px] text-slate-400 font-mono" x-text="(description ? description.length : 0) + '/200'"></div>
+                            <textarea name="description" x-model="description" rows="4" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-colors resize-y leading-relaxed" placeholder="Ingresa o pega la descripción completa y detallada del producto sin límite..." required></textarea>
                         </div>
                     </div>
                 </div>
@@ -714,9 +716,9 @@
 
             let desc = parts.length > 0 
                 ? parts.join(', ') + '.'
-                : `${raw.substring(0, 180)}...`;
+                : `${raw}`;
             
-            return desc.length > 200 ? desc.substring(0, 197) + '...' : desc;
+            return desc;
         }
 
         // 3. Fallback: Intelligent keyword-based engine
@@ -731,31 +733,24 @@
 
         if (targetField === 'description') {
             if (isCamera) {
-                let desc = `${raw || 'Cámara de Seguridad Inteligente'} con visión nocturna a color, detección IA de movimiento humano y vehículos, audio bidireccional y alta resistencia climática IP66.`;
-                return desc.length > 200 ? desc.substring(0, 197) + '...' : desc;
+                return `${raw || 'Cámara de Seguridad Inteligente'} con visión nocturna a color, detección IA de movimiento humano y vehículos, audio bidireccional y alta resistencia climática IP66.`;
             }
             if (isPrinter) {
-                let desc = `${raw || 'Impresora Multifuncional'} de alto rendimiento con sistema continuo de tinta original, conectividad inalámbrica Wi-Fi y ultrabajo costo de impresión por página.`;
-                return desc.length > 200 ? desc.substring(0, 197) + '...' : desc;
+                return `${raw || 'Impresora Multifuncional'} de alto rendimiento con sistema continuo de tinta original, conectividad inalámbrica Wi-Fi y ultrabajo costo de impresión por página.`;
             }
             if (isMonitor) {
-                let desc = `${raw || 'Monitor Profesional'} con alta tasa de refresco, colores vibrantes de amplio ángulo de visión y tecnología de protección ocular para gaming y oficina.`;
-                return desc.length > 200 ? desc.substring(0, 197) + '...' : desc;
+                return `${raw || 'Monitor Profesional'} con alta tasa de refresco, colores vibrantes de amplio ángulo de visión y tecnología de protección ocular para gaming y oficina.`;
             }
             if (isPhoneOrTablet) {
-                let desc = `${raw || 'Dispositivo Inteligente'} con pantalla ultranítida de 120Hz, potente procesador para multitarea fluida, cámaras avanzadas y batería de larga duración.`;
-                return desc.length > 200 ? desc.substring(0, 197) + '...' : desc;
+                return `${raw || 'Dispositivo Inteligente'} con pantalla ultranítida de 120Hz, potente procesador para multitarea fluida, cámaras avanzadas y batería de larga duración.`;
             }
             if (isStorageOrComponent) {
-                let desc = `${raw || 'Componente de Alto Rendimiento'} con máxima velocidad de transferencia, estabilidad y durabilidad para repotenciar tu equipo al instante.`;
-                return desc.length > 200 ? desc.substring(0, 197) + '...' : desc;
+                return `${raw || 'Componente de Alto Rendimiento'} con máxima velocidad de transferencia, estabilidad y durabilidad para repotenciar tu equipo al instante.`;
             }
             if (isAccessory) {
-                let desc = `${raw || 'Accesorio Premium'} con diseño ergonómico de alta durabilidad, respuesta inmediata y conectividad versátil para trabajo o gaming.`;
-                return desc.length > 200 ? desc.substring(0, 197) + '...' : desc;
+                return `${raw || 'Accesorio Premium'} con diseño ergonómico de alta durabilidad, respuesta inmediata y conectividad versátil para trabajo o gaming.`;
             }
-            let desc = `${raw || 'Laptop'} de alto rendimiento ideal para trabajo profesional, multitarea exigente y estudio, con tecnología de última generación y gran autonomía.`;
-            return desc.length > 200 ? desc.substring(0, 197) + '...' : desc;
+            return `${raw || 'Laptop'} de alto rendimiento ideal para trabajo profesional, multitarea exigente y estudio, con tecnología de última generación y gran autonomía.`;
         }
 
         if (targetField === 'specs') {
