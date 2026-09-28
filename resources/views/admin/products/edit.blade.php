@@ -546,54 +546,56 @@
     </div>
 </form>
 
-<!-- AI Generation Modal (Inside Alpine scope) -->
-<div x-show="aiModalOpen" 
-     x-cloak 
-     class="fixed inset-0 z-[150] flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4"
-     @keydown.window.escape="aiModalOpen = false">
-    <div @click.away="aiModalOpen = false" class="bg-white rounded-3xl shadow-2xl w-full max-w-xl p-6 border border-slate-100 relative">
-        <div class="flex items-center justify-between mb-3">
-            <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2.5">
-                <div class="w-9 h-9 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center shadow-sm">
-                    <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
-                </div>
-                <span x-text="aiTargetField === 'specs' ? 'Autocompletar / Pegar Ficha Técnica con IA' : 'Generar Descripción con IA'"></span>
-            </h3>
-            <button type="button" @click="aiModalOpen = false" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition">
-                <i class="fa-solid fa-xmark text-sm"></i>
-            </button>
-        </div>
-        
-        <p class="text-xs text-slate-500 mb-3 leading-relaxed">
-            <span class="font-semibold text-purple-700">💡 Pega directamente la ficha técnica copiada</span> (de Excel, PDF o página web) o escribe el nombre del producto para que la IA extraiga y organice todas las filas exactas.
-        </p>
+<!-- AI Generation Modal (Inside Alpine scope, teleported to body) -->
+<template x-teleport="body">
+    <div x-show="aiModalOpen" 
+         x-cloak 
+         class="fixed inset-0 z-[250] flex items-center justify-center bg-slate-950/75 backdrop-blur-sm p-4 overflow-y-auto"
+         @keydown.window.escape="aiModalOpen = false">
+        <div @click.away="aiModalOpen = false" class="bg-white rounded-3xl shadow-2xl w-full max-w-xl p-6 border border-slate-100 relative my-auto">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center shadow-sm">
+                        <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
+                    </div>
+                    <span x-text="aiTargetField === 'specs' ? 'Autocompletar / Pegar Ficha Técnica con IA' : 'Generar Descripción con IA'"></span>
+                </h3>
+                <button type="button" @click="aiModalOpen = false" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+            
+            <p class="text-xs text-slate-500 mb-3 leading-relaxed">
+                <span class="font-semibold text-purple-700">💡 Pega directamente la ficha técnica copiada</span> (de Excel, PDF o página web) o escribe el nombre del producto para que la IA extraiga y organice todas las filas exactas.
+            </p>
 
-        <!-- Category Presets / Tags -->
-        <div class="mb-3 flex flex-wrap gap-1.5 items-center">
-            <span class="text-[10px] font-bold text-slate-400 self-center mr-1">Atajos:</span>
-            <button type="button" @click="setAiPreset('Laptop Gamer')" class="px-2 py-1 bg-slate-100 hover:bg-purple-100 hover:text-purple-700 text-slate-600 rounded-lg text-[10px] font-semibold transition">💻 Laptop Gamer</button>
-            <button type="button" @click="setAiPreset('Laptop Oficina')" class="px-2 py-1 bg-slate-100 hover:bg-purple-100 hover:text-purple-700 text-slate-600 rounded-lg text-[10px] font-semibold transition">💼 Laptop Oficina</button>
-            <button type="button" @click="setAiPreset('Cámara de Seguridad')" class="px-2 py-1 bg-slate-100 hover:bg-purple-100 hover:text-purple-700 text-slate-600 rounded-lg text-[10px] font-semibold transition">📷 Cámara</button>
-            <button type="button" @click="setAiPreset('Impresora EcoTank')" class="px-2 py-1 bg-slate-100 hover:bg-purple-100 hover:text-purple-700 text-slate-600 rounded-lg text-[10px] font-semibold transition">🖨️ Impresora</button>
-            <button type="button" @click="setAiPreset('Monitor Gaming')" class="px-2 py-1 bg-slate-100 hover:bg-purple-100 hover:text-purple-700 text-slate-600 rounded-lg text-[10px] font-semibold transition">🖥️ Monitor</button>
-            <button type="button" @click="aiPrompt = ''" class="ml-auto text-[10px] font-bold text-red-500 hover:underline">Limpiar texto</button>
-        </div>
+            <!-- Category Presets / Tags -->
+            <div class="mb-3 flex flex-wrap gap-1.5 items-center">
+                <span class="text-[10px] font-bold text-slate-400 self-center mr-1">Atajos:</span>
+                <button type="button" @click="setAiPreset('Laptop Gamer')" class="px-2 py-1 bg-slate-100 hover:bg-purple-100 hover:text-purple-700 text-slate-600 rounded-lg text-[10px] font-semibold transition">💻 Laptop Gamer</button>
+                <button type="button" @click="setAiPreset('Laptop Oficina')" class="px-2 py-1 bg-slate-100 hover:bg-purple-100 hover:text-purple-700 text-slate-600 rounded-lg text-[10px] font-semibold transition">💼 Laptop Oficina</button>
+                <button type="button" @click="setAiPreset('Cámara de Seguridad')" class="px-2 py-1 bg-slate-100 hover:bg-purple-100 hover:text-purple-700 text-slate-600 rounded-lg text-[10px] font-semibold transition">📷 Cámara</button>
+                <button type="button" @click="setAiPreset('Impresora EcoTank')" class="px-2 py-1 bg-slate-100 hover:bg-purple-100 hover:text-purple-700 text-slate-600 rounded-lg text-[10px] font-semibold transition">🖨️ Impresora</button>
+                <button type="button" @click="setAiPreset('Monitor Gaming')" class="px-2 py-1 bg-slate-100 hover:bg-purple-100 hover:text-purple-700 text-slate-600 rounded-lg text-[10px] font-semibold transition">🖥️ Monitor</button>
+                <button type="button" @click="aiPrompt = ''" class="ml-auto text-[10px] font-bold text-red-500 hover:underline">Limpiar texto</button>
+            </div>
 
-        <label class="block text-xs font-bold text-slate-700 mb-1">Pega aquí el texto, tabla de especificaciones o nombre:</label>
-        <textarea x-model="aiPrompt" rows="6" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-800 focus:ring-2 focus:ring-purple-500 focus:bg-white transition-colors mb-4 resize-y font-mono" placeholder="Pega aquí la tabla copiada de especificaciones (ej: Sensor de imagen: CMOS..., Resolución: 2880*1620, Alarma inteligente: Detección IA...) o el nombre del equipo..."></textarea>
-        
-        <div class="flex items-center justify-between">
-            <button type="button" @click="aiModalOpen = false" class="px-4 py-2 text-xs text-slate-600 hover:bg-slate-100 rounded-xl font-bold transition">
-                Cancelar
-            </button>
-            <button type="button" @click="processAiGeneration()" :disabled="isAiLoading" class="px-5 py-2.5 text-xs bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold shadow-md shadow-purple-600/30 flex items-center gap-2 transition cursor-pointer">
-                <i class="fa-solid fa-bolt" x-show="!isAiLoading"></i>
-                <i class="fa-solid fa-spinner fa-spin" x-show="isAiLoading"></i>
-                <span x-text="isAiLoading ? 'Procesando...' : (aiTargetField === 'specs' ? 'Procesar y Llenar Especificaciones' : 'Generar Descripción Comercial')"></span>
-            </button>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Pega aquí el texto, tabla de especificaciones o nombre:</label>
+            <textarea x-model="aiPrompt" rows="6" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-800 focus:ring-2 focus:ring-purple-500 focus:bg-white transition-colors mb-4 resize-y font-mono" placeholder="Pega aquí la tabla copiada de especificaciones (ej: Sensor de imagen: CMOS..., Resolución: 2880*1620, Alarma inteligente: Detección IA...) o el nombre del equipo..."></textarea>
+            
+            <div class="flex items-center justify-between">
+                <button type="button" @click="aiModalOpen = false" class="px-4 py-2 text-xs text-slate-600 hover:bg-slate-100 rounded-xl font-bold transition">
+                    Cancelar
+                </button>
+                <button type="button" @click="processAiGeneration()" :disabled="isAiLoading" class="px-5 py-2.5 text-xs bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold shadow-md shadow-purple-600/30 flex items-center gap-2 transition cursor-pointer">
+                    <i class="fa-solid fa-bolt" x-show="!isAiLoading"></i>
+                    <i class="fa-solid fa-spinner fa-spin" x-show="isAiLoading"></i>
+                    <span x-text="isAiLoading ? 'Procesando...' : (aiTargetField === 'specs' ? 'Procesar y Llenar Especificaciones' : 'Generar Descripción Comercial')"></span>
+                </button>
+            </div>
         </div>
     </div>
-</div>
+</template>
 </div>
 @endsection
 
