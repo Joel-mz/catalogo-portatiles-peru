@@ -92,7 +92,34 @@ class ProductController extends Controller
         $brands = Brand::where('status', true)->get();
         $models = DeviceModel::where('status', true)->get();
 
-        return view('admin.products.edit', compact('product', 'categories', 'subcategories', 'brands', 'models'));
+        $formattedSpecs = [];
+        if (is_array($product->technical_specs)) {
+            foreach ($product->technical_specs as $key => $value) {
+                if (is_array($value) && isset($value['name'])) {
+                    $formattedSpecs[] = [
+                        'name' => (string)$value['name'],
+                        'value' => (string)($value['value'] ?? '')
+                    ];
+                } else {
+                    $formattedSpecs[] = [
+                        'name' => (string)$key,
+                        'value' => (string)$value
+                    ];
+                }
+            }
+        }
+
+        if (empty($formattedSpecs)) {
+            $formattedSpecs = [
+                ['name' => 'Procesador', 'value' => ''],
+                ['name' => 'Memoria RAM', 'value' => ''],
+                ['name' => 'Almacenamiento', 'value' => ''],
+                ['name' => 'Pantalla', 'value' => ''],
+                ['name' => 'Sistema Operativo', 'value' => '']
+            ];
+        }
+
+        return view('admin.products.edit', compact('product', 'categories', 'subcategories', 'brands', 'models', 'formattedSpecs'));
     }
 
     public function update(Request $request, Product $product)
@@ -126,12 +153,24 @@ class ProductController extends Controller
             $validated['sku'] = 'SKU-' . strtoupper(Str::random(6)) . time();
         }
 
-        // Procesar especificaciones
+        // Procesar especificaciones (soporta specs[] array y spec_keys/spec_values)
         $specs = [];
-        if ($request->has('specs')) {
+        if ($request->has('specs') && is_array($request->input('specs'))) {
             foreach ($request->input('specs') as $spec) {
-                if (!empty($spec['name']) && !empty($spec['value'])) {
-                    $specs[$spec['name']] = $spec['value'];
+                $k = trim($spec['name'] ?? $spec['key'] ?? '');
+                $v = trim($spec['value'] ?? '');
+                if (!empty($k) && !empty($v)) {
+                    $specs[$k] = $v;
+                }
+            }
+        } elseif ($request->has('spec_keys') && is_array($request->input('spec_keys'))) {
+            $keys = $request->input('spec_keys');
+            $values = (array)$request->input('spec_values', []);
+            foreach ($keys as $idx => $k) {
+                $k = trim((string)$k);
+                $v = trim((string)($values[$idx] ?? ''));
+                if (!empty($k) && !empty($v)) {
+                    $specs[$k] = $v;
                 }
             }
         }

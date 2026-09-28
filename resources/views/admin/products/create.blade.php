@@ -552,31 +552,81 @@
             
             openAiModal(target) {
                 this.aiTargetField = target;
-                this.aiPrompt = '';
+                const pName = this.name || '';
+                if (target === 'description') {
+                    this.aiPrompt = pName ? `Generar descripción comercial para: ${pName}` : '';
+                } else {
+                    this.aiPrompt = pName || '';
+                }
                 this.aiModalOpen = true;
             },
             
             processAiGeneration() {
-                if (!this.aiPrompt.trim()) return;
                 this.isAiLoading = true;
-                
-                // Simulate AI API call
+                const promptText = (this.aiPrompt || this.name || '').trim();
+                const lower = promptText.toLowerCase();
+
                 setTimeout(() => {
                     if (this.aiTargetField === 'description') {
-                        this.description = "Generado por IA: " + this.aiPrompt + " - Una potente laptop diseñada para brindar el mejor rendimiento en tareas exigentes, ideal para profesionales y gamers.";
+                        if (lower.includes('camara') || lower.includes('cámara') || lower.includes('ezviz') || lower.includes('imou') || lower.includes('seguridad')) {
+                            this.description = `${promptText} con visión nocturna a color, detección inteligente de movimiento, audio bidireccional y alta resistencia para exteriores o interiores.`;
+                        } else if (lower.includes('impresora') || lower.includes('epson') || lower.includes('canon') || lower.includes('hp smart')) {
+                            this.description = `Impresora multifuncional de alto rendimiento con sistema continuo de tinta, conexión inalámbrica Wi-Fi y máxima velocidad de impresión con bajo costo por página.`;
+                        } else {
+                            this.description = `Laptop de alto rendimiento ideal para trabajo profesional, multitarea y entretenimiento, equipada con tecnología de última generación para máxima velocidad y autonomía.`;
+                        }
+                        if (this.description.length > 200) {
+                            this.description = this.description.substring(0, 197) + '...';
+                        }
                     } else if (this.aiTargetField === 'specs') {
-                        this.specs = [
-                            { name: 'Procesador', value: 'Intel Core i7 13700H (Simulado)' },
-                            { name: 'Memoria RAM', value: '16GB DDR5 4800MHz' },
-                            { name: 'Almacenamiento', value: '1TB SSD NVMe M.2' },
-                            { name: 'Pantalla', value: '15.6" FHD 144Hz IPS' },
-                            { name: 'Gráficos', value: 'NVIDIA RTX 4060 8GB' }
-                        ];
+                        if (lower.includes('camara') || lower.includes('cámara') || lower.includes('ezviz') || lower.includes('imou') || lower.includes('seguridad')) {
+                            this.specs = [
+                                { name: 'Resolución', value: lower.includes('3k') ? '3K (5 Megapíxeles)' : (lower.includes('2k') ? '2K (3 Megapíxeles)' : 'Full HD 1080p') },
+                                { name: 'Visión Nocturna', value: 'A color inteligente con focos LED y luz infrarroja' },
+                                { name: 'Ángulo de Cobertura', value: 'Panorámica 360° motorizada con seguimiento' },
+                                { name: 'Conectividad', value: 'Wi-Fi 2.4 GHz y puerto Ethernet RJ45' },
+                                { name: 'Almacenamiento', value: 'Ranura MicroSD hasta 512GB y EZVIZ CloudPlay' },
+                                { name: 'Detección Inteligente', value: 'IA para personas y vehículos' },
+                                { name: 'Protección', value: 'IP66 resistente a lluvia y polvo' }
+                            ];
+                        } else if (lower.includes('impresora') || lower.includes('multifuncional')) {
+                            this.specs = [
+                                { name: 'Tipo de Impresión', value: 'Inyección de tinta continua EcoTank' },
+                                { name: 'Funciones', value: 'Imprime, Copia, Escanea' },
+                                { name: 'Conectividad', value: 'Wi-Fi Direct, USB de alta velocidad' },
+                                { name: 'Resolución de Impresión', value: 'Hasta 5760 x 1440 dpi' },
+                                { name: 'Velocidad de Impresión', value: '33 ppm en negro y 15 ppm en color' },
+                                { name: 'Capacidad de Bandeja', value: '100 hojas de papel común' }
+                            ];
+                        } else {
+                            let cpu = 'Intel Core i5 / AMD Ryzen 5';
+                            if (lower.includes('i7') || lower.includes('ryzen 7')) cpu = 'Intel Core i7 / AMD Ryzen 7';
+                            if (lower.includes('i9') || lower.includes('ryzen 9')) cpu = 'Intel Core i9 / AMD Ryzen 9';
+                            if (lower.includes('i3') || lower.includes('ryzen 3')) cpu = 'Intel Core i3 / AMD Ryzen 3';
+
+                            let ram = '16GB DDR5 4800MHz';
+                            if (lower.includes('8gb')) ram = '8GB DDR4 3200MHz';
+                            if (lower.includes('32gb')) ram = '32GB DDR5 5600MHz';
+
+                            let disk = '512GB SSD M.2 NVMe PCIe 4.0';
+                            if (lower.includes('1tb')) disk = '1TB SSD M.2 NVMe PCIe 4.0';
+                            if (lower.includes('256gb')) disk = '256GB SSD M.2 NVMe';
+
+                            let gpu = lower.includes('rtx') ? 'NVIDIA GeForce RTX 4060 8GB GDDR6' : 'Gráficos Integrados de Alta Definición';
+
+                            this.specs = [
+                                { name: 'Procesador', value: cpu },
+                                { name: 'Memoria RAM', value: ram },
+                                { name: 'Almacenamiento', value: disk },
+                                { name: 'Pantalla', value: '15.6" Full HD (1920x1080) Antirreflejo' },
+                                { name: 'Gráficos', value: gpu },
+                                { name: 'Sistema Operativo', value: 'Windows 11 Home 64-bit' }
+                            ];
+                        }
                     }
                     this.isAiLoading = false;
                     this.aiModalOpen = false;
-                    // Note: Here you would normally fetch from your Laravel backend API
-                }, 1500);
+                }, 600);
             },
             
             openQuickAddModal(type, label) {
@@ -623,9 +673,20 @@
             removeSpec(index) {
                 this.specs.splice(index, 1);
             }
-        }));
+        };
+    }
 
-        Alpine.data('imageUploadManager', () => ({
+    window.productForm = productForm;
+    if (window.Alpine) {
+        Alpine.data('productForm', productForm);
+    } else {
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('productForm', productForm);
+        });
+    }
+
+    function imageUploadManager() {
+        return {
             images: [],
             dragOver: false,
             imageUrl: '',
@@ -734,8 +795,17 @@
                     this.images = this.images.filter(i => i.id !== img.id);
                 }
             }
-        }));
-    });
+        };
+    }
+
+    window.imageUploadManager = imageUploadManager;
+    if (window.Alpine) {
+        Alpine.data('imageUploadManager', imageUploadManager);
+    } else {
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('imageUploadManager', imageUploadManager);
+        });
+    }
 </script>
 
 @endsection

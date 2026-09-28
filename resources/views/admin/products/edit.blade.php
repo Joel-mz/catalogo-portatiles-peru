@@ -119,7 +119,15 @@
 
                     <div class="md:col-span-2">
                         <label class="block text-xs font-bold text-slate-700 mb-1">Descripción corta <span class="text-red-500">*</span></label>
-                        <textarea name="description" rows="2" class="w-full px-3 py-2 bg-slate-50 border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" placeholder="Breve descripción del producto...">{{ old('description', $product->description) }}</textarea>
+                        <div class="relative">
+                            <textarea name="description" x-model="description" rows="3" maxlength="200" class="w-full px-3.5 py-2.5 pb-9 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-colors resize-none" placeholder="Breve descripción del producto (máx. 200 caracteres)..." required></textarea>
+                            <div class="absolute bottom-2 left-2">
+                                <button type="button" @click="openAiModal('description')" class="px-2.5 py-1 bg-purple-100 hover:bg-purple-200 text-purple-700 text-[10px] font-bold rounded-lg transition-colors flex items-center gap-1.5 shadow-xs">
+                                    <i class="fa-solid fa-wand-magic-sparkles text-purple-600"></i> Llenar con IA
+                                </button>
+                            </div>
+                            <div class="absolute bottom-2 right-3 text-[10px] text-slate-400 font-mono" x-text="(description ? description.length : 0) + '/200'"></div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -151,9 +159,9 @@
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">Tipo de Control <span class="text-red-500">*</span></label>
                         <select name="control_type" class="w-full px-3 py-2 bg-slate-50 border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
-                            <option value="quantity" {{ old('control_type', $product->control_type) == 'quantity' ? 'selected' : '' }}>Solo por Cantidad</option>
-                            <option value="serial" {{ old('control_type', $product->control_type) == 'serial' ? 'selected' : '' }}>Por Número de Serie (Unitario)</option>
-                            <option value="lot" {{ old('control_type', $product->control_type) == 'lot' ? 'selected' : '' }}>Por Lote</option>
+                            <option value="Por Cantidad" {{ old('control_type', $product->control_type) == 'Por Cantidad' || old('control_type', $product->control_type) == 'quantity' ? 'selected' : '' }}>Por Cantidad</option>
+                            <option value="Por Serie" {{ old('control_type', $product->control_type) == 'Por Serie' || old('control_type', $product->control_type) == 'serial' ? 'selected' : '' }}>Por Serie (Unitario)</option>
+                            <option value="Por Lote" {{ old('control_type', $product->control_type) == 'Por Lote' || old('control_type', $product->control_type) == 'lot' ? 'selected' : '' }}>Por Lote</option>
                         </select>
                     </div>
 
@@ -197,6 +205,14 @@
                     </div>
                     
                     <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Precio Mínimo <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500 font-bold">S/</span>
+                            <input type="number" step="0.01" name="min_price" value="{{ old('min_price', $product->min_price ?? $product->price) }}" class="w-full pl-9 pr-3 py-2 bg-slate-50 border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                        </div>
+                    </div>
+
+                    <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">Precio Oferta</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-red-500 font-bold">S/</span>
@@ -213,10 +229,20 @@
                     </div>
 
                     <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Estado del Producto <span class="text-red-500">*</span></label>
+                        <select name="state" class="w-full px-3 py-2 bg-slate-50 border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                            <option value="Nuevo" {{ old('state', $product->state) == 'Nuevo' ? 'selected' : '' }}>Nuevo</option>
+                            <option value="Seminuevo" {{ old('state', $product->state) == 'Seminuevo' ? 'selected' : '' }}>Seminuevo</option>
+                            <option value="Open Box" {{ old('state', $product->state) == 'Open Box' ? 'selected' : '' }}>Open Box</option>
+                            <option value="Reacondicionado" {{ old('state', $product->state) == 'Reacondicionado' ? 'selected' : '' }}>Reacondicionado</option>
+                        </select>
+                    </div>
+
+                    <div class="md:col-span-2">
                         <label class="block text-xs font-bold text-slate-700 mb-1">Garantía</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400"><i class="fa-solid fa-shield-halved"></i></span>
-                            <input type="text" name="warranty" value="{{ old('warranty', $product->warranty) }}" class="w-full pl-9 pr-3 py-2 bg-slate-50 border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <input type="text" name="warranty" value="{{ old('warranty', $product->warranty) }}" class="w-full pl-9 pr-3 py-2 bg-slate-50 border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Ej. 1 año de garantía directa">
                         </div>
                     </div>
                 </div>
@@ -235,21 +261,42 @@
                         <template x-for="(spec, index) in specs" :key="index">
                             <div class="flex items-center gap-2">
                                 <div class="relative w-1/3">
-                                    <span class="absolute inset-y-0 left-0 flex items-center pl-2 text-slate-400 text-[10px]"><i class="fa-solid fa-grip-vertical"></i></span>
-                                    <input type="text" :name="'spec_keys['+index+']'" x-model="spec.key" placeholder="Característica" class="w-full pl-6 pr-2 py-2 bg-slate-50 border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 text-slate-400 text-xs"><i class="fa-solid fa-grip-vertical"></i></span>
+                                    <input type="text" :name="'specs['+index+'][name]'" x-model="spec.name" :placeholder="getSpecPlaceholder(spec.name, 'name')" class="w-full pl-7 pr-2 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
                                 </div>
                                 <div class="relative flex-1">
-                                    <input type="text" :name="'spec_values['+index+']'" x-model="spec.value" placeholder="Valor" class="w-full px-3 py-2 bg-slate-50 border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500">
+                                    <input type="text" :name="'specs['+index+'][value]'" x-model="spec.value" :placeholder="getSpecPlaceholder(spec.name, 'value')" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
                                 </div>
-                                <button type="button" @click="removeSpec(index)" class="w-8 h-8 flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                                    <i class="fa-solid fa-trash-can text-sm"></i>
+                                <button type="button" @click="removeSpec(index)" class="w-8 h-8 flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0" title="Eliminar fila">
+                                    <i class="fa-solid fa-trash-can text-xs"></i>
                                 </button>
                             </div>
                         </template>
                         
-                        <button type="button" @click="addSpec()" class="mt-2 inline-flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-2 bg-indigo-50 text-indigo-700 rounded-xl text-xs font-bold hover:bg-indigo-100 transition-colors">
-                            <i class="fa-solid fa-plus"></i> Agregar especificación
-                        </button>
+                        <div class="mt-4 flex flex-wrap items-center gap-2">
+                            <button type="button" @click="addSpec()" class="px-3.5 py-2 bg-indigo-50 text-indigo-700 rounded-xl text-xs font-bold hover:bg-indigo-100 transition-colors flex items-center gap-1.5">
+                                <i class="fa-solid fa-plus text-[10px]"></i> Agregar especificación
+                            </button>
+                            <button type="button" @click="openAiModal('specs')" class="px-3.5 py-2 bg-purple-600 text-white rounded-xl text-xs font-bold hover:bg-purple-700 transition-colors flex items-center gap-1.5 shadow-md shadow-purple-600/25">
+                                <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i> Llenar con IA
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="md:w-72">
+                        <div class="bg-indigo-50/60 rounded-2xl p-4 border border-indigo-100/80">
+                            <h4 class="text-xs font-bold text-indigo-900 flex items-center gap-1.5 mb-2.5">
+                                <i class="fa-regular fa-lightbulb text-indigo-600"></i> Ejemplos sugeridos
+                            </h4>
+                            <ul class="text-[11px] text-slate-600 space-y-1.5 leading-relaxed">
+                                <li><strong class="text-slate-800">Procesador:</strong> Intel Core i5 / Ryzen 7</li>
+                                <li><strong class="text-slate-800">Memoria RAM:</strong> 16GB DDR5 5200MHz</li>
+                                <li><strong class="text-slate-800">Almacenamiento:</strong> 512GB SSD NVMe</li>
+                                <li><strong class="text-slate-800">Pantalla:</strong> 15.6" FHD 144Hz IPS</li>
+                                <li><strong class="text-slate-800">Gráficos:</strong> NVIDIA RTX 4060 8GB</li>
+                                <li><strong class="text-slate-800">Cámaras:</strong> Resolución 2K, Visión Nocturna</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -448,14 +495,52 @@
     </div>
 </form>
 
+<!-- AI Generation Modal -->
+<div x-show="aiModalOpen" 
+     x-cloak 
+     class="fixed inset-0 z-[150] flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4"
+     @keydown.window.escape="aiModalOpen = false">
+    <div @click.away="aiModalOpen = false" class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 border border-slate-100 relative">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                <div class="w-8 h-8 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center">
+                    <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
+                </div>
+                Generar con Inteligencia Artificial
+            </h3>
+            <button type="button" @click="aiModalOpen = false" class="text-slate-400 hover:text-slate-600 p-1">
+                <i class="fa-solid fa-xmark text-base"></i>
+            </button>
+        </div>
+        
+        <p class="text-xs text-slate-500 mb-3 leading-relaxed">
+            Escribe o ajusta el nombre del modelo del producto para que la IA complete automáticamente las especificaciones o descripción comercial.
+        </p>
+
+        <textarea x-model="aiPrompt" rows="3" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-800 focus:ring-2 focus:ring-purple-500 focus:bg-white transition-colors mb-4 resize-none" placeholder="Ej. Cámara de Seguridad EZVIZ H9c Dual 2K..."></textarea>
+        
+        <div class="flex justify-end gap-2">
+            <button type="button" @click="aiModalOpen = false" class="px-4 py-2 text-xs text-slate-600 hover:bg-slate-100 rounded-xl font-bold transition">
+                Cancelar
+            </button>
+            <button type="button" @click="processAiGeneration()" :disabled="isAiLoading" class="px-5 py-2 text-xs bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold shadow-md shadow-purple-600/30 flex items-center gap-2 transition">
+                <i class="fa-solid fa-bolt" x-show="!isAiLoading"></i>
+                <i class="fa-solid fa-spinner fa-spin" x-show="isAiLoading"></i>
+                <span x-text="isAiLoading ? 'Generando...' : 'Autocompletar con IA'"></span>
+            </button>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('productForm', () => ({
+    function productForm() {
+        return {
             name: `{!! addslashes($product->name) !!}`,
+            description: {!! json_encode(old('description', $product->description ?? '')) !!},
             categoryId: `{{ $product->category_id }}`,
             brandId: `{{ $product->brand_id }}`,
             brandName: `{!! $product->brand ? addslashes($product->brand->name) : '' !!}`,
@@ -468,6 +553,106 @@
             isFeatured: {{ $product->is_featured ? 'true' : 'false' }},
             specs: @json($formattedSpecs),
 
+            // AI Modal state
+            aiModalOpen: false,
+            aiTargetField: '',
+            aiPrompt: '',
+            isAiLoading: false,
+
+            openAiModal(target) {
+                this.aiTargetField = target;
+                const pName = this.name || `{!! addslashes($product->name) !!}`;
+                if (target === 'description') {
+                    this.aiPrompt = `Generar descripción comercial para: ${pName}`;
+                } else {
+                    this.aiPrompt = `${pName}`;
+                }
+                this.aiModalOpen = true;
+            },
+
+            processAiGeneration() {
+                this.isAiLoading = true;
+                const promptText = (this.aiPrompt || this.name || `{!! addslashes($product->name) !!}`).trim();
+                const lower = promptText.toLowerCase();
+
+                setTimeout(() => {
+                    if (this.aiTargetField === 'description') {
+                        if (lower.includes('camara') || lower.includes('cámara') || lower.includes('ezviz') || lower.includes('imou') || lower.includes('seguridad')) {
+                            this.description = `${promptText} con visión nocturna a color, detección inteligente de movimiento, audio bidireccional y alta resistencia para exteriores o interiores.`;
+                        } else if (lower.includes('impresora') || lower.includes('epson') || lower.includes('canon') || lower.includes('hp smart')) {
+                            this.description = `Impresora multifuncional de alto rendimiento con sistema continuo de tinta, conexión inalámbrica Wi-Fi y máxima velocidad de impresión con bajo costo por página.`;
+                        } else {
+                            this.description = `Laptop de alto rendimiento ideal para trabajo profesional, multitarea y entretenimiento, equipada con tecnología de última generación para máxima velocidad y autonomía.`;
+                        }
+                        if (this.description.length > 200) {
+                            this.description = this.description.substring(0, 197) + '...';
+                        }
+                    } else if (this.aiTargetField === 'specs') {
+                        if (lower.includes('camara') || lower.includes('cámara') || lower.includes('ezviz') || lower.includes('imou') || lower.includes('seguridad')) {
+                            this.specs = [
+                                { name: 'Resolución', value: lower.includes('3k') ? '3K (5 Megapíxeles)' : (lower.includes('2k') ? '2K (3 Megapíxeles)' : 'Full HD 1080p') },
+                                { name: 'Visión Nocturna', value: 'A color inteligente con focos LED y luz infrarroja' },
+                                { name: 'Ángulo de Cobertura', value: 'Panorámica 360° motorizada con seguimiento' },
+                                { name: 'Conectividad', value: 'Wi-Fi 2.4 GHz y puerto Ethernet RJ45' },
+                                { name: 'Almacenamiento', value: 'Ranura MicroSD hasta 512GB y EZVIZ CloudPlay' },
+                                { name: 'Detección Inteligente', value: 'IA para personas y vehículos' },
+                                { name: 'Protección', value: 'IP66 resistente a lluvia y polvo' }
+                            ];
+                        } else if (lower.includes('impresora') || lower.includes('multifuncional')) {
+                            this.specs = [
+                                { name: 'Tipo de Impresión', value: 'Inyección de tinta continua EcoTank' },
+                                { name: 'Funciones', value: 'Imprime, Copia, Escanea' },
+                                { name: 'Conectividad', value: 'Wi-Fi Direct, USB de alta velocidad' },
+                                { name: 'Resolución de Impresión', value: 'Hasta 5760 x 1440 dpi' },
+                                { name: 'Velocidad de Impresión', value: '33 ppm en negro y 15 ppm en color' },
+                                { name: 'Capacidad de Bandeja', value: '100 hojas de papel común' }
+                            ];
+                        } else {
+                            let cpu = 'Intel Core i5 / AMD Ryzen 5';
+                            if (lower.includes('i7') || lower.includes('ryzen 7')) cpu = 'Intel Core i7 / AMD Ryzen 7';
+                            if (lower.includes('i9') || lower.includes('ryzen 9')) cpu = 'Intel Core i9 / AMD Ryzen 9';
+                            if (lower.includes('i3') || lower.includes('ryzen 3')) cpu = 'Intel Core i3 / AMD Ryzen 3';
+
+                            let ram = '16GB DDR5 4800MHz';
+                            if (lower.includes('8gb')) ram = '8GB DDR4 3200MHz';
+                            if (lower.includes('32gb')) ram = '32GB DDR5 5600MHz';
+
+                            let disk = '512GB SSD M.2 NVMe PCIe 4.0';
+                            if (lower.includes('1tb')) disk = '1TB SSD M.2 NVMe PCIe 4.0';
+                            if (lower.includes('256gb')) disk = '256GB SSD M.2 NVMe';
+
+                            let gpu = lower.includes('rtx') ? 'NVIDIA GeForce RTX 4060 8GB GDDR6' : 'Gráficos Integrados de Alta Definición';
+
+                            this.specs = [
+                                { name: 'Procesador', value: cpu },
+                                { name: 'Memoria RAM', value: ram },
+                                { name: 'Almacenamiento', value: disk },
+                                { name: 'Pantalla', value: '15.6" Full HD (1920x1080) Antirreflejo' },
+                                { name: 'Gráficos', value: gpu },
+                                { name: 'Sistema Operativo', value: 'Windows 11 Home 64-bit' }
+                            ];
+                        }
+                    }
+                    this.isAiLoading = false;
+                    this.aiModalOpen = false;
+                }, 600);
+            },
+
+            getSpecPlaceholder(name, type) {
+                if (type === 'name') return 'Ej. Procesador, RAM...';
+                const lower = (name || '').toLowerCase();
+                if (lower.includes('procesador') || lower.includes('cpu')) return 'Ej. Intel Core i7 / AMD Ryzen 7';
+                if (lower.includes('ram') || lower.includes('memoria')) return 'Ej. 16GB DDR5 5200MHz';
+                if (lower.includes('almacenamiento') || lower.includes('disco') || lower.includes('ssd')) return 'Ej. 512GB SSD M.2 NVMe';
+                if (lower.includes('pantalla') || lower.includes('display')) return 'Ej. 15.6" FHD 144Hz IPS';
+                if (lower.includes('gráfico') || lower.includes('grafico') || lower.includes('gpu') || lower.includes('video')) return 'Ej. NVIDIA RTX 4060 8GB';
+                if (lower.includes('sistema') || lower.includes('so') || lower.includes('os')) return 'Ej. Windows 11 Home';
+                if (lower.includes('resolución') || lower.includes('resolucion')) return 'Ej. 2K (3 MP) / 1080p';
+                if (lower.includes('visión') || lower.includes('vision') || lower.includes('noche')) return 'Ej. A color hasta 30m';
+                if (lower.includes('conectividad') || lower.includes('wifi') || lower.includes('red')) return 'Ej. Wi-Fi 2.4GHz / RJ45';
+                return 'Ej. Valor o detalle técnico';
+            },
+
             updateBrandName(e) {
                 this.brandName = e.target.options[e.target.selectedIndex].dataset.name || '';
             },
@@ -475,7 +660,7 @@
                 this.categoryName = e.target.options[e.target.selectedIndex].dataset.name || '';
             },
             addSpec() {
-                this.specs.push({ key: '', value: '' });
+                this.specs.push({ name: '', value: '' });
             },
             removeSpec(index) {
                 this.specs.splice(index, 1);
@@ -483,9 +668,20 @@
             getSpecsSummary() {
                 return this.specs.filter(s => s.value).slice(0, 3).map(s => s.value).join(' | ');
             }
-        }));
+        };
+    }
 
-        Alpine.data('imageUploadManager', () => ({
+    window.productForm = productForm;
+    if (window.Alpine) {
+        Alpine.data('productForm', productForm);
+    } else {
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('productForm', productForm);
+        });
+    }
+
+    function imageUploadManager() {
+        return {
             images: [],
             tempUrl: '',
             currentImages: @json($product->images->map(function($img) {
@@ -546,8 +742,17 @@
             removeImage(index) {
                 this.images.splice(index, 1);
             }
-        }));
-    });
+        };
+    }
+
+    window.imageUploadManager = imageUploadManager;
+    if (window.Alpine) {
+        Alpine.data('imageUploadManager', imageUploadManager);
+    } else {
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('imageUploadManager', imageUploadManager);
+        });
+    }
 
     // Scanner
     let html5QrcodeScanner = null;
