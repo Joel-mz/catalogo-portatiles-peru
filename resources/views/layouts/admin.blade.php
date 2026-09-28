@@ -1040,21 +1040,116 @@
         </div>
 
         <!-- Global Scanner Modal -->
-        <div class="fixed inset-0 z-[200] bg-black/90 flex flex-col items-center justify-center p-4" x-show="showScanner" x-cloak x-transition.opacity>
-            <div class="w-full max-w-lg bg-white rounded-2xl overflow-hidden shadow-2xl relative">
-                <div class="px-4 py-3 bg-slate-900 text-white flex justify-between items-center">
-                    <h3 class="font-bold text-sm flex items-center gap-2">
-                        <i class="fa-solid fa-barcode text-blue-400"></i> Buscador por Código de Barras / QR
-                    </h3>
-                    <button type="button" @click="stopScanner()" class="text-slate-400 hover:text-white p-1">
+        <div class="fixed inset-0 z-[200] bg-slate-950/85 backdrop-blur-md flex flex-col items-center justify-center p-3 sm:p-4" 
+             x-show="showScanner" 
+             x-cloak 
+             x-transition.opacity
+             @keydown.window.escape="stopScanner()">
+            <div class="w-full max-w-lg bg-slate-900 border border-slate-700/70 rounded-3xl overflow-hidden shadow-2xl relative text-white">
+                
+                <!-- Modal Header -->
+                <div class="px-5 py-3.5 bg-slate-800/80 border-b border-slate-700 flex justify-between items-center">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center">
+                            <i class="fa-solid fa-barcode text-base"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-sm text-slate-100">Escáner de Código de Barras / QR</h3>
+                            <p class="text-[11px] text-slate-400">Búsqueda rápida en tiempo real</p>
+                        </div>
+                    </div>
+                    <button type="button" @click="stopScanner()" class="w-8 h-8 rounded-xl text-slate-400 hover:text-white hover:bg-slate-700 flex items-center justify-center transition">
                         <i class="fa-solid fa-xmark text-lg"></i>
                     </button>
                 </div>
-                <div class="p-4 bg-black relative flex justify-center">
-                    <div id="global-reader" class="w-full overflow-hidden rounded-xl bg-black min-h-[260px] max-w-md"></div>
+
+                <!-- Scanner Viewport Area -->
+                <div class="p-4 sm:p-5 bg-black relative flex flex-col items-center justify-center min-h-[300px]">
+                    
+                    <!-- Loading State -->
+                    <div x-show="isLoading" class="absolute inset-0 bg-black/80 z-20 flex flex-col items-center justify-center gap-3">
+                        <div class="w-10 h-10 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        <span class="text-xs text-slate-300 font-medium">Iniciando cámara...</span>
+                    </div>
+
+                    <!-- Permission Denied / Camera Error Screen -->
+                    <div x-show="cameraError" x-cloak class="w-full max-w-md bg-slate-800/90 border border-rose-500/30 rounded-2xl p-5 text-center my-auto z-10">
+                        <div class="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-400 flex items-center justify-center mx-auto mb-3">
+                            <i class="fa-solid fa-camera-slash text-xl"></i>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-100 mb-1">
+                            <template x-if="cameraError === 'permission_denied'">Permiso de cámara bloqueado</template>
+                            <template x-if="cameraError === 'no_camera'">No se detectó cámara</template>
+                            <template x-if="cameraError === 'generic_error'">No se pudo iniciar la cámara</template>
+                        </h4>
+                        <p class="text-xs text-slate-300 mb-4 leading-relaxed">
+                            <template x-if="cameraError === 'permission_denied'">
+                                <span>Para escanear, toca el <strong>ícono de candado 🔒</strong> o ajustes en la barra de direcciones de tu navegador y activa el permiso de <strong>Cámara</strong>.</span>
+                            </template>
+                            <template x-if="cameraError !== 'permission_denied'">
+                                <span>No pudimos acceder a tu cámara. Puedes subir una imagen o foto con el código o escribirlo manualmente.</span>
+                            </template>
+                        </p>
+
+                        <div class="flex flex-col sm:flex-row gap-2 justify-center">
+                            <button type="button" 
+                                    @click="startCamera()" 
+                                    class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs transition shadow-lg shadow-blue-500/20">
+                                <i class="fa-solid fa-rotate-right"></i> Reintentar Cámara
+                            </button>
+                            <label class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold text-xs transition cursor-pointer">
+                                <i class="fa-solid fa-image"></i> Subir Foto / Imagen
+                                <input type="file" accept="image/*" class="hidden" @change="scanFromFile($event)">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Live Viewport Container -->
+                    <div id="global-reader" 
+                         x-show="!cameraError" 
+                         class="w-full overflow-hidden rounded-2xl bg-black min-h-[260px] max-w-sm"></div>
+
+                    <!-- Camera Switcher (If multiple cameras available) -->
+                    <div x-show="cameras.length > 1 && !cameraError && isScanning" class="mt-3 flex items-center gap-2 z-10">
+                        <i class="fa-solid fa-video text-xs text-slate-400"></i>
+                        <select @change="changeCamera($event.target.value)" 
+                                class="bg-slate-800 text-xs text-slate-200 border border-slate-700 rounded-lg px-2.5 py-1 focus:outline-none focus:border-blue-500">
+                            <template x-for="cam in cameras" :key="cam.id">
+                                <option :value="cam.id" :selected="cam.id === selectedCameraId" x-text="cam.label || 'Cámara ' + cam.id"></option>
+                            </template>
+                        </select>
+                    </div>
+
                 </div>
-                <div class="px-4 py-3 bg-slate-50 text-center text-xs text-slate-600 font-medium border-t border-slate-100">
-                    Apunta la cámara de tu celular al código de barras o QR para buscar el producto de inmediato.
+
+                <!-- Footer & Alternatives -->
+                <div class="px-5 py-4 bg-slate-900 border-t border-slate-800 space-y-3">
+                    
+                    <!-- File upload & action bar -->
+                    <div class="flex items-center justify-between gap-2 text-xs">
+                        <span class="text-slate-400 flex items-center gap-1.5">
+                            <i class="fa-solid fa-qrcode text-blue-400"></i> EAN-13, QR, CODE-128
+                        </span>
+                        <label class="text-blue-400 hover:text-blue-300 font-medium cursor-pointer inline-flex items-center gap-1">
+                            <i class="fa-solid fa-file-arrow-up"></i>
+                            <span>Escanear desde archivo</span>
+                            <input type="file" accept="image/*" class="hidden" @change="scanFromFile($event)">
+                        </label>
+                    </div>
+
+                    <!-- Manual code lookup fallback -->
+                    <div class="pt-2 border-t border-slate-800/80">
+                        <form @submit.prevent="if(manualInput.trim()) { stopScanner(); lookupProduct(manualInput.trim()); }" class="flex gap-2">
+                            <input type="text" 
+                                   x-model="manualInput" 
+                                   placeholder="O escribe el código / serie manualmente..." 
+                                   class="flex-1 bg-slate-800/90 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                            <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs rounded-xl transition">
+                                Buscar
+                            </button>
+                        </form>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -1072,31 +1167,143 @@
         function globalScanner() {
             return {
                 showScanner: false,
-                html5QrcodeScanner: null,
+                html5QrCode: null,
+                isScanning: false,
+                isLoading: false,
+                cameraError: null,
+                cameras: [],
+                selectedCameraId: null,
+                manualInput: '',
 
                 startScanner() {
                     this.showScanner = true;
-                    if (!this.html5QrcodeScanner) {
-                        this.html5QrcodeScanner = new Html5QrcodeScanner("global-reader", { 
-                            fps: 10, 
-                            qrbox: {width: 250, height: 150},
-                            supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
-                        }, false);
+                    this.manualInput = '';
+                    this.cameraError = null;
+                    setTimeout(() => {
+                        this.startCamera();
+                    }, 150);
+                },
+
+                async startCamera() {
+                    this.isLoading = true;
+                    this.cameraError = null;
+
+                    if (!this.html5QrCode) {
+                        this.html5QrCode = new Html5Qrcode("global-reader");
                     }
 
-                    setTimeout(() => {
-                        this.html5QrcodeScanner.render((decodedText) => {
-                            this.stopScanner();
-                            this.lookupProduct(decodedText);
-                        }, (err) => {});
-                    }, 100);
+                    // If already scanning, stop first
+                    if (this.isScanning) {
+                        try {
+                            await this.html5QrCode.stop();
+                            this.isScanning = false;
+                        } catch (e) {}
+                    }
+
+                    const config = {
+                        fps: 10,
+                        qrbox: { width: 250, height: 160 },
+                        aspectRatio: 1.333334
+                    };
+
+                    try {
+                        const cameraConfig = this.selectedCameraId 
+                            ? { deviceId: { exact: this.selectedCameraId } }
+                            : { facingMode: "environment" };
+
+                        await this.html5QrCode.start(
+                            cameraConfig,
+                            config,
+                            (decodedText) => {
+                                this.stopScanner();
+                                this.lookupProduct(decodedText);
+                            },
+                            (errorMessage) => {
+                                // Ignore frame scan misses
+                            }
+                        );
+
+                        this.isScanning = true;
+                        this.isLoading = false;
+                        this.cameraError = null;
+
+                        // Fetch camera list for selector
+                        try {
+                            const devices = await Html5Qrcode.getCameras();
+                            if (devices && devices.length > 0) {
+                                this.cameras = devices;
+                                if (!this.selectedCameraId) {
+                                    this.selectedCameraId = devices[0].id;
+                                }
+                            }
+                        } catch (e) {}
+
+                    } catch (err) {
+                        this.isLoading = false;
+                        this.isScanning = false;
+                        console.warn("Scanner error:", err);
+                        const errStr = String(err).toLowerCase();
+                        if (errStr.includes('notallowederror') || errStr.includes('permission') || errStr.includes('denied')) {
+                            this.cameraError = 'permission_denied';
+                        } else if (errStr.includes('notfounderror') || errStr.includes('no camera') || errStr.includes('devicesnotfound')) {
+                            this.cameraError = 'no_camera';
+                        } else {
+                            this.cameraError = 'generic_error';
+                        }
+                    }
+                },
+
+                async changeCamera(cameraId) {
+                    this.selectedCameraId = cameraId;
+                    await this.startCamera();
+                },
+
+                async scanFromFile(event) {
+                    const file = event.target.files && event.target.files[0];
+                    if (!file) return;
+
+                    if (!this.html5QrCode) {
+                        this.html5QrCode = new Html5Qrcode("global-reader");
+                    }
+
+                    this.isLoading = true;
+
+                    if (this.isScanning) {
+                        try {
+                            await this.html5QrCode.stop();
+                            this.isScanning = false;
+                        } catch (e) {}
+                    }
+
+                    try {
+                        const decodedText = await this.html5QrCode.scanFile(file, true);
+                        this.isLoading = false;
+                        this.stopScanner();
+                        this.lookupProduct(decodedText);
+                    } catch (err) {
+                        this.isLoading = false;
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'No se detectó código',
+                            text: 'No se pudo leer ningún código de barras o QR en la imagen seleccionada. Asegúrate de que el código esté nítido y bien iluminado.',
+                            confirmButtonColor: '#2563eb'
+                        });
+                    } finally {
+                        event.target.value = '';
+                    }
                 },
 
                 stopScanner() {
-                    if (this.html5QrcodeScanner) {
-                        this.html5QrcodeScanner.clear().catch(e => console.error(e));
+                    if (this.html5QrCode && this.isScanning) {
+                        this.html5QrCode.stop().then(() => {
+                            this.isScanning = false;
+                        }).catch(e => {
+                            this.isScanning = false;
+                        });
                     }
                     this.showScanner = false;
+                    this.cameraError = null;
+                    this.isLoading = false;
                 },
 
                 handleSearch(val) {

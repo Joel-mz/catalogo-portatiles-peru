@@ -230,13 +230,29 @@ class ProductController extends Controller
 
     public function searchByCode(Request $request)
     {
-        $code = $request->query('code');
+        $code = trim($request->query('code', ''));
         
         if (!$code) {
             return response()->json(['error' => 'Código no proporcionado'], 400);
         }
 
-        $product = Product::with(['category', 'brand'])->where('code', $code)->orWhere('sku', $code)->orWhere('serial_number', $code)->first();
+        // If a full URL was scanned (e.g. QR code pointing to website URL)
+        if (filter_var($code, FILTER_VALIDATE_URL)) {
+            $path = parse_url($code, PHP_URL_PATH);
+            $segments = array_values(array_filter(explode('/', $path)));
+            $lastSegment = end($segments);
+            if ($lastSegment) {
+                $code = $lastSegment;
+            }
+        }
+
+        $product = Product::with(['category', 'brand'])
+            ->where('code', $code)
+            ->orWhere('sku', $code)
+            ->orWhere('serial_number', $code)
+            ->orWhere('slug', $code)
+            ->orWhere('id', is_numeric($code) ? (int) $code : 0)
+            ->first();
 
         if ($product) {
             return response()->json([

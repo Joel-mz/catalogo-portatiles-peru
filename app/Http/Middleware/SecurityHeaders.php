@@ -48,7 +48,7 @@ class SecurityHeaders
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
         // 6. Restrict Sensitive Browser Permissions (Allow camera for QR/Barcode scanner)
-        $response->headers->set('Permissions-Policy', 'camera=(self), microphone=(), geolocation=(), payment=(), usb=()');
+        $response->headers->set('Permissions-Policy', 'camera=*, microphone=(), geolocation=(), payment=(), usb=()');
 
         // 7. HTTP Strict Transport Security (HSTS)
         $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
