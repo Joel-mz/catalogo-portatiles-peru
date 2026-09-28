@@ -155,14 +155,14 @@
                     </div>
 
                     <div class="md:col-span-3">
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Descripción corta <span class="text-red-500">*</span></label>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-xs font-bold text-slate-700">Descripción corta <span class="text-red-500">*</span></label>
+                            <button type="button" @click="openAiModal('description')" class="px-2.5 py-1 bg-purple-100 hover:bg-purple-200 text-purple-700 text-[10px] font-bold rounded-lg transition-colors flex items-center gap-1.5 shadow-xs">
+                                <i class="fa-solid fa-wand-magic-sparkles text-purple-600"></i> Generar con IA
+                            </button>
+                        </div>
                         <div class="relative">
                             <textarea name="description" x-model="description" rows="3" maxlength="200" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-black focus:border-black transition-colors resize-none" placeholder="Ej. Breve descripción del producto (máx. 200 caracteres)." required></textarea>
-                            <div class="absolute bottom-2 left-2">
-                                <button type="button" @click="openAiModal('description')" class="px-2 py-1 bg-purple-100 text-purple-700 text-[9px] font-bold rounded hover:bg-purple-200 transition-colors flex items-center gap-1">
-                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Llenar con IA
-                                </button>
-                            </div>
                             <div class="absolute bottom-2 right-3 text-[9px] text-slate-400" x-text="(description ? description.length : 0) + '/200'"></div>
                         </div>
                     </div>
@@ -490,19 +490,46 @@
 </form>
 
 <!-- AI Modal -->
-<div x-show="aiModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm" style="display: none;">
-    <div @click.away="aiModalOpen = false" class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-        <h3 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">
-            <i class="fa-solid fa-wand-magic-sparkles text-purple-600"></i> Generar con Inteligencia Artificial
-        </h3>
-        <p class="text-xs text-slate-500 mb-4">Describe qué información deseas generar y la IA lo completará por ti.</p>
-        <textarea x-model="aiPrompt" rows="4" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-1 focus:ring-purple-500 focus:border-purple-500 mb-4" placeholder="Ej. Genera las especificaciones técnicas para una laptop HP Envy x360..."></textarea>
-        <div class="flex justify-end gap-2">
-            <button type="button" @click="aiModalOpen = false" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg font-bold">Cancelar</button>
-            <button type="button" @click="processAiGeneration()" class="px-4 py-2 text-sm bg-purple-600 text-white rounded-lg font-bold hover:bg-purple-700 flex items-center gap-2">
+<div x-show="aiModalOpen" 
+     x-cloak 
+     class="fixed inset-0 z-[150] flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4"
+     @keydown.window.escape="aiModalOpen = false">
+    <div @click.away="aiModalOpen = false" class="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-6 border border-slate-100 relative">
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center shadow-sm">
+                    <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
+                </div>
+                <span x-text="aiTargetField === 'specs' ? 'Autocompletar Especificaciones con IA' : 'Generar Descripción con IA'"></span>
+            </h3>
+            <button type="button" @click="aiModalOpen = false" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
+        
+        <p class="text-xs text-slate-500 mb-3 leading-relaxed" x-text="aiTargetField === 'specs' ? 'Ingresa o ajusta el nombre/modelo del producto para extraer y organizar automáticamente todas sus especificaciones técnicas de hardware.' : 'Genera una descripción comercial, llamativa y persuasiva ideal para atraer clientes en tu catálogo.'"></p>
+
+        <!-- Category Presets / Tags -->
+        <div class="mb-3 flex flex-wrap gap-1.5">
+            <span class="text-[10px] font-bold text-slate-400 self-center mr-1">Atajos:</span>
+            <button type="button" @click="setAiPreset('Laptop Gamer')" class="px-2 py-1 bg-slate-100 hover:bg-purple-100 hover:text-purple-700 text-slate-600 rounded-lg text-[10px] font-semibold transition">💻 Laptop Gamer</button>
+            <button type="button" @click="setAiPreset('Laptop Oficina')" class="px-2 py-1 bg-slate-100 hover:bg-purple-100 hover:text-purple-700 text-slate-600 rounded-lg text-[10px] font-semibold transition">💼 Laptop Oficina</button>
+            <button type="button" @click="setAiPreset('Cámara de Seguridad')" class="px-2 py-1 bg-slate-100 hover:bg-purple-100 hover:text-purple-700 text-slate-600 rounded-lg text-[10px] font-semibold transition">📷 Cámara</button>
+            <button type="button" @click="setAiPreset('Impresora EcoTank')" class="px-2 py-1 bg-slate-100 hover:bg-purple-100 hover:text-purple-700 text-slate-600 rounded-lg text-[10px] font-semibold transition">🖨️ Impresora</button>
+            <button type="button" @click="setAiPreset('Monitor Gaming')" class="px-2 py-1 bg-slate-100 hover:bg-purple-100 hover:text-purple-700 text-slate-600 rounded-lg text-[10px] font-semibold transition">🖥️ Monitor</button>
+        </div>
+
+        <label class="block text-xs font-bold text-slate-700 mb-1">Nombre o detalles del producto:</label>
+        <textarea x-model="aiPrompt" rows="3" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-800 focus:ring-2 focus:ring-purple-500 focus:bg-white transition-colors mb-4 resize-none" placeholder="Ej. Laptop HP Pavilion 15 Core i7 1355U 16GB 512GB SSD RTX 3050..."></textarea>
+        
+        <div class="flex items-center justify-between">
+            <button type="button" @click="aiModalOpen = false" class="px-4 py-2 text-xs text-slate-600 hover:bg-slate-100 rounded-xl font-bold transition">
+                Cancelar
+            </button>
+            <button type="button" @click="processAiGeneration()" :disabled="isAiLoading" class="px-5 py-2 text-xs bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold shadow-md shadow-purple-600/30 flex items-center gap-2 transition cursor-pointer">
                 <i class="fa-solid fa-bolt" x-show="!isAiLoading"></i>
                 <i class="fa-solid fa-spinner fa-spin" x-show="isAiLoading"></i>
-                <span x-text="isAiLoading ? 'Generando...' : 'Generar'"></span>
+                <span x-text="isAiLoading ? 'Completando...' : 'Completar con IA'"></span>
             </button>
         </div>
     </div>
@@ -530,6 +557,222 @@
 
 @push('scripts')
 <script>
+    // Smart AI Generator Helper
+    function runSmartAiEngine(promptText, targetField, categoryHint = '', brandHint = '') {
+        const raw = (promptText || '').trim();
+        const lower = (raw + ' ' + categoryHint + ' ' + brandHint).toLowerCase();
+
+        const isCamera = lower.includes('camara') || lower.includes('cámara') || lower.includes('ezviz') || lower.includes('imou') || lower.includes('seguridad') || lower.includes('dahua') || lower.includes('hikvision') || lower.includes('tapo') || lower.includes('cctv') || lower.includes('domo') || lower.includes('bullet') || lower.includes('vigilancia');
+        const isPrinter = lower.includes('impresora') || lower.includes('multifuncional') || lower.includes('ecotank') || lower.includes('megatank') || lower.includes('smart tank') || lower.includes('epson') || lower.includes('canon') || lower.includes('brother') || lower.includes('laserjet') || lower.includes('láser') || lower.includes('laser') || lower.includes('tinta');
+        const isMonitor = lower.includes('monitor') || lower.includes('pantalla') || lower.includes('display') || lower.includes('curvo') || lower.includes('gaming monitor') || lower.includes('curved');
+        const isPhoneOrTablet = lower.includes('celular') || lower.includes('smartphone') || lower.includes('telefono') || lower.includes('teléfono') || lower.includes('galaxy') || lower.includes('iphone') || lower.includes('redmi') || lower.includes('xiaomi') || lower.includes('poco') || lower.includes('tablet') || lower.includes('ipad') || lower.includes('tab');
+        const isStorageOrComponent = lower.includes('disco') || lower.includes('ssd') || lower.includes('nvme') || lower.includes('memoria ram') || lower.includes('ddr4') || lower.includes('ddr5') || lower.includes('fuente de poder') || lower.includes('placa madre') || lower.includes('motherboard') || lower.includes('kingston') || lower.includes('crucial') || lower.includes('western digital');
+        const isAccessory = lower.includes('teclado') || lower.includes('mouse') || lower.includes('audifono') || lower.includes('audífono') || lower.includes('headset') || lower.includes('auricular') || lower.includes('auriculares') || lower.includes('parlante') || lower.includes('altavoz') || lower.includes('silla') || lower.includes('mochila') || lower.includes('funda') || lower.includes('cooler') || lower.includes('webcam') || lower.includes('camara web') || lower.includes('cámara web');
+
+        if (targetField === 'description') {
+            if (isCamera) {
+                let desc = `${raw || 'Cámara de Seguridad Inteligente'} con visión nocturna a color, detección IA de movimiento humano y vehículos, audio bidireccional y alta resistencia climática IP66.`;
+                return desc.length > 200 ? desc.substring(0, 197) + '...' : desc;
+            }
+            if (isPrinter) {
+                let desc = `${raw || 'Impresora Multifuncional'} de alto rendimiento con sistema continuo de tinta original, conectividad inalámbrica Wi-Fi y ultrabajo costo de impresión por página.`;
+                return desc.length > 200 ? desc.substring(0, 197) + '...' : desc;
+            }
+            if (isMonitor) {
+                let desc = `${raw || 'Monitor Profesional'} con alta tasa de refresco, colores vibrantes de amplio ángulo de visión y tecnología de protección ocular para gaming y oficina.`;
+                return desc.length > 200 ? desc.substring(0, 197) + '...' : desc;
+            }
+            if (isPhoneOrTablet) {
+                let desc = `${raw || 'Dispositivo Inteligente'} con pantalla ultranítida de 120Hz, potente procesador para multitarea fluida, cámaras avanzadas y batería de larga duración.`;
+                return desc.length > 200 ? desc.substring(0, 197) + '...' : desc;
+            }
+            if (isStorageOrComponent) {
+                let desc = `${raw || 'Componente de Alto Rendimiento'} con máxima velocidad de transferencia, estabilidad y durabilidad para repotenciar tu equipo al instante.`;
+                return desc.length > 200 ? desc.substring(0, 197) + '...' : desc;
+            }
+            if (isAccessory) {
+                let desc = `${raw || 'Accesorio Premium'} con diseño ergonómico de alta durabilidad, respuesta inmediata y conectividad versátil para trabajo o gaming.`;
+                return desc.length > 200 ? desc.substring(0, 197) + '...' : desc;
+            }
+            let desc = `${raw || 'Laptop'} de alto rendimiento ideal para trabajo profesional, multitarea exigente y estudio, con tecnología de última generación y gran autonomía.`;
+            return desc.length > 200 ? desc.substring(0, 197) + '...' : desc;
+        }
+
+        if (targetField === 'specs') {
+            if (isCamera) {
+                let resol = 'Full HD 1080p (2MP)';
+                if (lower.includes('4k') || lower.includes('8mp')) resol = '4K Ultra HD (8 Megapíxeles)';
+                else if (lower.includes('3k') || lower.includes('5mp')) resol = '3K (5 Megapíxeles)';
+                else if (lower.includes('2k') || lower.includes('4mp') || lower.includes('3mp')) resol = '2K (4 Megapíxeles)';
+
+                return [
+                    { name: 'Resolución', value: resol },
+                    { name: 'Visión Nocturna', value: 'A color inteligente con focos LED e infrarrojo' },
+                    { name: 'Ángulo de Cobertura', value: 'Panorámica 360° motorizada con autoseguimiento' },
+                    { name: 'Conectividad', value: 'Wi-Fi 2.4 GHz y puerto Ethernet RJ45' },
+                    { name: 'Almacenamiento', value: 'Ranura MicroSD hasta 512GB y Nube' },
+                    { name: 'Detección Inteligente', value: 'IA avanzada para personas y vehículos' },
+                    { name: 'Audio', value: 'Bidireccional (Micrófono y altavoz integrados)' },
+                    { name: 'Protección', value: 'IP66 resistente a intemperie, lluvia y polvo' }
+                ];
+            }
+
+            if (isPrinter) {
+                return [
+                    { name: 'Tipo de Impresión', value: lower.includes('laser') || lower.includes('láser') ? 'Láser monocromática / color de alta velocidad' : 'Inyección de tinta continua original EcoTank' },
+                    { name: 'Funciones', value: 'Imprime, Copia, Escanea' },
+                    { name: 'Conectividad', value: 'Wi-Fi Direct, USB 2.0 de alta velocidad' },
+                    { name: 'Resolución de Impresión', value: 'Hasta 5760 x 1440 dpi de alta definición' },
+                    { name: 'Velocidad de Impresión', value: 'Hasta 33 ppm en negro y 15 ppm a color' },
+                    { name: 'Capacidad de Bandeja', value: '100 hojas de papel común / 20 fotográficas' },
+                    { name: 'Rendimiento', value: 'Hasta 4,500 páginas negro / 7,500 páginas color' }
+                ];
+            }
+
+            if (isMonitor) {
+                let size = '27 pulgadas';
+                if (lower.includes('24') || lower.includes('23.8')) size = '24 pulgadas (23.8")';
+                else if (lower.includes('32')) size = '32 pulgadas';
+                else if (lower.includes('34')) size = '34 pulgadas UltraWide';
+
+                let res = 'Full HD (1920x1080)';
+                if (lower.includes('4k')) res = '4K UHD (3840x2160)';
+                else if (lower.includes('2k') || lower.includes('qhd') || lower.includes('1440p')) res = '2K QHD (2560x1440)';
+
+                let hz = '100Hz';
+                if (lower.includes('240hz')) hz = '240Hz ultra fluido';
+                else if (lower.includes('180hz')) hz = '180Hz gaming';
+                else if (lower.includes('165hz')) hz = '165Hz gaming';
+                else if (lower.includes('144hz')) hz = '144Hz gaming';
+                else if (lower.includes('75hz')) hz = '75Hz';
+
+                return [
+                    { name: 'Tamaño de Pantalla', value: size },
+                    { name: 'Resolución', value: res },
+                    { name: 'Tasa de Refresco', value: hz },
+                    { name: 'Tipo de Panel', value: lower.includes('curvo') || lower.includes('curved') ? 'VA Curvo 1500R' : 'IPS con 178° de visión' },
+                    { name: 'Tiempo de Respuesta', value: '1ms (MPRT / GTG)' },
+                    { name: 'Conectividad', value: 'HDMI 2.0, DisplayPort 1.4, Audio Jack' },
+                    { name: 'Tecnologías', value: 'AMD FreeSync Premium, HDR10, Low Blue Light' }
+                ];
+            }
+
+            if (isPhoneOrTablet) {
+                let ram = '8GB RAM (+ expansión virtual)';
+                if (lower.includes('12gb')) ram = '12GB RAM LPDDR5';
+                else if (lower.includes('6gb')) ram = '6GB RAM';
+                else if (lower.includes('4gb')) ram = '4GB RAM';
+
+                let storage = '256GB UFS de alta velocidad';
+                if (lower.includes('512gb')) storage = '512GB UFS de alta velocidad';
+                else if (lower.includes('128gb')) storage = '128GB UFS';
+                else if (lower.includes('1tb')) storage = '1TB Almacenamiento';
+
+                return [
+                    { name: 'Pantalla', value: 'AMOLED 6.67" FHD+ con tasa de refresco a 120Hz' },
+                    { name: 'Memoria RAM', value: ram },
+                    { name: 'Almacenamiento', value: storage },
+                    { name: 'Cámara Principal', value: '50 MP con OIS y Modo Noche' },
+                    { name: 'Cámara Frontal', value: '16 MP con HDR y modo retrato' },
+                    { name: 'Batería', value: '5000 mAh con Carga Rápida 67W' },
+                    { name: 'Conectividad', value: '5G, Wi-Fi 6, Bluetooth 5.3, NFC' }
+                ];
+            }
+
+            if (isStorageOrComponent) {
+                let cap = '512GB';
+                if (lower.includes('1tb')) cap = '1TB (1000GB)';
+                else if (lower.includes('2tb')) cap = '2TB (2000GB)';
+                else if (lower.includes('256gb')) cap = '256GB';
+                else if (lower.includes('16gb')) cap = '16GB';
+                else if (lower.includes('32gb')) cap = '32GB';
+
+                return [
+                    { name: 'Capacidad', value: cap },
+                    { name: 'Factor de Forma / Tipo', value: lower.includes('nvme') || lower.includes('m.2') ? 'M.2 2280 NVMe PCIe 4.0' : (lower.includes('ddr5') ? 'DDR5 5600MHz' : (lower.includes('ddr4') ? 'DDR4 3200MHz' : 'SATA III 2.5"')) },
+                    { name: 'Velocidad de Lectura', value: 'Hasta 3500 MB/s / 5000 MB/s' },
+                    { name: 'Velocidad de Escritura', value: 'Hasta 3000 MB/s / 4500 MB/s' },
+                    { name: 'Compatibilidad', value: 'PC de escritorio, Laptops y Consolas' },
+                    { name: 'Garantía / Durabilidad', value: 'Alta resistencia TBW con disipación térmica' }
+                ];
+            }
+
+            if (isAccessory) {
+                return [
+                    { name: 'Tipo de Conexión', value: lower.includes('inalambrico') || lower.includes('wireless') || lower.includes('bluetooth') ? 'Inalámbrico 2.4GHz + Bluetooth 5.3' : 'Cable USB trenzado de alta resistencia' },
+                    { name: 'Sensor / Switches', value: lower.includes('teclado') ? 'Switches mecánicos táctiles de larga duración' : (lower.includes('mouse') ? 'Sensor óptico de alta precisión hasta 12,000 DPI' : 'Drivers de audio de 50mm con sonido envolvente') },
+                    { name: 'Iluminación', value: 'RGB Chroma configurable con efectos dinámicos' },
+                    { name: 'Compatibilidad', value: 'Windows 11/10, macOS, PS5, Xbox y smartphones' },
+                    { name: 'Material / Acabado', value: 'Diseño ergonómico premium antideslizante' }
+                ];
+            }
+
+            // Laptops / Computers (Deep extraction)
+            let cpu = 'Intel Core i5 / AMD Ryzen 5 de última generación';
+            if (lower.includes('ultra 7') || lower.includes('ultra7')) cpu = 'Intel Core Ultra 7 155H con NPU IA integrada';
+            else if (lower.includes('ultra 9') || lower.includes('ultra9')) cpu = 'Intel Core Ultra 9 185H con NPU IA integrada';
+            else if (lower.includes('ultra 5') || lower.includes('ultra5')) cpu = 'Intel Core Ultra 5 125H con NPU IA integrada';
+            else if (lower.includes('i9') || lower.includes('core i9')) cpu = 'Intel Core i9 14900HX / 13900H (24 núcleos)';
+            else if (lower.includes('i7') || lower.includes('core i7')) cpu = 'Intel Core i7 13700H / 1355U Turbo Boost';
+            else if (lower.includes('i5') || lower.includes('core i5')) cpu = 'Intel Core i5 13420H / 1335U Turbo Boost';
+            else if (lower.includes('i3') || lower.includes('core i3')) cpu = 'Intel Core i3 1215U / 1315U de 6 núcleos';
+            else if (lower.includes('ryzen 9')) cpu = 'AMD Ryzen 9 7940HS / 8945HS con Ryzen AI';
+            else if (lower.includes('ryzen 7')) cpu = 'AMD Ryzen 7 7735HS / 7730U (8 núcleos, 16 hilos)';
+            else if (lower.includes('ryzen 5')) cpu = 'AMD Ryzen 5 7535HS / 7520U (6 núcleos, 12 hilos)';
+            else if (lower.includes('ryzen 3')) cpu = 'AMD Ryzen 3 7320U (4 núcleos, 8 hilos)';
+            else if (lower.includes('m3')) cpu = 'Chip Apple M3 con CPU de 8 núcleos y GPU de 10 núcleos';
+            else if (lower.includes('m2')) cpu = 'Chip Apple M2 con CPU de 8 núcleos';
+            else if (lower.includes('m1')) cpu = 'Chip Apple M1 de 8 núcleos';
+
+            let ram = '16GB DDR5 5200MHz de alta velocidad';
+            if (lower.includes('32gb')) ram = '32GB DDR5 5600MHz Dual Channel';
+            else if (lower.includes('64gb')) ram = '64GB DDR5 5600MHz';
+            else if (lower.includes('8gb')) ram = '8GB DDR4 3200MHz (Expandible)';
+            else if (lower.includes('12gb')) ram = '12GB DDR4/DDR5';
+            else if (lower.includes('24gb')) ram = '24GB DDR5';
+
+            let disk = '512GB SSD M.2 NVMe PCIe 4.0 ultra rápido';
+            if (lower.includes('1tb') || lower.includes('1 tb')) disk = '1TB SSD M.2 NVMe PCIe 4.0 ultra rápido';
+            else if (lower.includes('2tb') || lower.includes('2 tb')) disk = '2TB SSD M.2 NVMe PCIe 4.0 ultra rápido';
+            else if (lower.includes('256gb')) disk = '256GB SSD M.2 NVMe PCIe';
+
+            let screen = '15.6" Full HD (1920x1080) Antirreflejo IPS';
+            if (lower.includes('144hz')) screen = '15.6" Full HD (1920x1080) 144Hz IPS Antirreflejo';
+            else if (lower.includes('165hz')) screen = '16.0" WQXGA (2560x1600) 165Hz 100% sRGB';
+            else if (lower.includes('16') || lower.includes('16"')) screen = '16.0" WUXGA (1920x1200) IPS 16:10';
+            else if (lower.includes('14') || lower.includes('14"')) screen = '14.0" Full HD (1920x1080) IPS NanoEdge';
+            else if (lower.includes('13.3') || lower.includes('13.3"')) screen = '13.3" OLED 2.8K (2880x1800) Dolby Vision';
+            else if (lower.includes('17.3') || lower.includes('17.3"')) screen = '17.3" Full HD 144Hz IPS Gaming';
+
+            let gpu = 'Gráficos Integrados de Alta Definición';
+            if (lower.includes('rtx 4090')) gpu = 'NVIDIA GeForce RTX 4090 16GB GDDR6';
+            else if (lower.includes('rtx 4080')) gpu = 'NVIDIA GeForce RTX 4080 12GB GDDR6';
+            else if (lower.includes('rtx 4070')) gpu = 'NVIDIA GeForce RTX 4070 8GB GDDR6';
+            else if (lower.includes('rtx 4060')) gpu = 'NVIDIA GeForce RTX 4060 8GB GDDR6';
+            else if (lower.includes('rtx 4050')) gpu = 'NVIDIA GeForce RTX 4050 6GB GDDR6';
+            else if (lower.includes('rtx 3050')) gpu = 'NVIDIA GeForce RTX 3050 6GB/4GB GDDR6';
+            else if (lower.includes('rtx 2050')) gpu = 'NVIDIA GeForce RTX 2050 4GB GDDR6';
+            else if (lower.includes('gtx 1650')) gpu = 'NVIDIA GeForce GTX 1650 4GB GDDR6';
+            else if (lower.includes('iris')) gpu = 'Intel Iris Xe Graphics';
+            else if (lower.includes('radeon')) gpu = 'AMD Radeon 780M / 680M Graphics';
+
+            let os = 'Windows 11 Home 64-bit Original';
+            if (lower.includes('macbook') || lower.includes('apple') || lower.includes('m1') || lower.includes('m2') || lower.includes('m3')) os = 'macOS Sonoma / Ventura';
+            else if (lower.includes('pro')) os = 'Windows 11 Pro 64-bit';
+
+            return [
+                { name: 'Procesador', value: cpu },
+                { name: 'Memoria RAM', value: ram },
+                { name: 'Almacenamiento', value: disk },
+                { name: 'Pantalla', value: screen },
+                { name: 'Gráficos', value: gpu },
+                { name: 'Sistema Operativo', value: os },
+                { name: 'Conectividad', value: 'Wi-Fi 6 (802.11ax), Bluetooth 5.2, USB-C, HDMI' },
+                { name: 'Cámara y Audio', value: 'Cámara HD con obturador de privacidad y altavoces estéreo' }
+            ];
+        }
+    }
+
     function productForm() {
         return {
             name: '',
@@ -553,7 +796,7 @@
             
             // AI Modal state
             aiModalOpen: false,
-            aiTargetField: '',
+            aiTargetField: 'specs',
             aiPrompt: '',
             isAiLoading: false,
             
@@ -567,91 +810,32 @@
             openAiModal(target) {
                 this.aiTargetField = target;
                 const pName = (this.name || '').trim();
-                if (target === 'description') {
-                    this.aiPrompt = pName ? `Generar descripción comercial para: ${pName}` : '';
-                } else {
-                    this.aiPrompt = pName || '';
-                }
+                this.aiPrompt = pName;
                 this.aiModalOpen = true;
+            },
+
+            setAiPreset(presetName) {
+                if (this.aiPrompt.trim()) {
+                    this.aiPrompt = `${presetName} - ${this.aiPrompt}`;
+                } else {
+                    this.aiPrompt = presetName;
+                }
             },
             
             processAiGeneration() {
                 this.isAiLoading = true;
                 const promptText = (this.aiPrompt || this.name || '').trim();
-                const lower = promptText.toLowerCase();
 
                 setTimeout(() => {
+                    const generated = runSmartAiEngine(promptText, this.aiTargetField, this.categoryName, this.brandName);
                     if (this.aiTargetField === 'description') {
-                        if (lower.includes('camara') || lower.includes('cámara') || lower.includes('ezviz') || lower.includes('imou') || lower.includes('seguridad') || lower.includes('dahua') || lower.includes('hikvision')) {
-                            this.description = `${promptText || 'Cámara de Seguridad Inteligente'} con visión nocturna a color, detección IA de movimiento, audio bidireccional y alta resistencia para exteriores o interiores.`;
-                        } else if (lower.includes('impresora') || lower.includes('epson') || lower.includes('canon') || lower.includes('hp smart') || lower.includes('multifuncional') || lower.includes('ecotank')) {
-                            this.description = `${promptText || 'Impresora Multifuncional'} de alto rendimiento con sistema continuo de tinta, conexión inalámbrica Wi-Fi y máxima velocidad de impresión con bajo costo por página.`;
-                        } else if (lower.includes('monitor') || lower.includes('pantalla') || lower.includes('display')) {
-                            this.description = `${promptText || 'Monitor Profesional'} con alta tasa de refresco, panel de colores vivos y tecnología de protección ocular para gaming y productividad.`;
-                        } else {
-                            this.description = `${promptText || 'Laptop'} de alto rendimiento ideal para trabajo profesional, multitarea y entretenimiento, con tecnología de última generación para máxima velocidad y autonomía.`;
-                        }
-                        if (this.description.length > 200) {
-                            this.description = this.description.substring(0, 197) + '...';
-                        }
+                        this.description = generated;
                     } else if (this.aiTargetField === 'specs') {
-                        if (lower.includes('camara') || lower.includes('cámara') || lower.includes('ezviz') || lower.includes('imou') || lower.includes('seguridad') || lower.includes('dahua') || lower.includes('hikvision')) {
-                            this.specs = [
-                                { name: 'Resolución', value: lower.includes('3k') ? '3K (5 Megapíxeles)' : (lower.includes('2k') ? '2K (3 Megapíxeles)' : 'Full HD 1080p') },
-                                { name: 'Visión Nocturna', value: 'A color inteligente con focos LED y luz infrarroja' },
-                                { name: 'Ángulo de Cobertura', value: 'Panorámica 360° motorizada con seguimiento' },
-                                { name: 'Conectividad', value: 'Wi-Fi 2.4 GHz y puerto Ethernet RJ45' },
-                                { name: 'Almacenamiento', value: 'Ranura MicroSD hasta 512GB y EZVIZ CloudPlay' },
-                                { name: 'Detección Inteligente', value: 'IA para personas y vehículos' },
-                                { name: 'Protección', value: 'IP66 resistente a lluvia y polvo' }
-                            ];
-                        } else if (lower.includes('impresora') || lower.includes('multifuncional') || lower.includes('ecotank') || lower.includes('epson') || lower.includes('canon')) {
-                            this.specs = [
-                                { name: 'Tipo de Impresión', value: 'Inyección de tinta continua EcoTank' },
-                                { name: 'Funciones', value: 'Imprime, Copia, Escanea' },
-                                { name: 'Conectividad', value: 'Wi-Fi Direct, USB de alta velocidad' },
-                                { name: 'Resolución de Impresión', value: 'Hasta 5760 x 1440 dpi' },
-                                { name: 'Velocidad de Impresión', value: '33 ppm en negro y 15 ppm en color' },
-                                { name: 'Capacidad de Bandeja', value: '100 hojas de papel común' }
-                            ];
-                        } else if (lower.includes('monitor') || lower.includes('pantalla')) {
-                            this.specs = [
-                                { name: 'Tamaño de Pantalla', value: lower.includes('27') ? '27 pulgadas' : (lower.includes('24') ? '24 pulgadas' : '27 pulgadas') },
-                                { name: 'Resolución', value: lower.includes('4k') ? '4K UHD (3840x2160)' : (lower.includes('2k') || lower.includes('qhd') ? '2K QHD (2560x1440)' : 'Full HD (1920x1080)') },
-                                { name: 'Tasa de Refresco', value: lower.includes('165') ? '165Hz' : (lower.includes('144') ? '144Hz' : (lower.includes('240') ? '240Hz' : '100Hz')) },
-                                { name: 'Tipo de Panel', value: 'IPS con amplios ángulos de visión' },
-                                { name: 'Tiempo de Respuesta', value: '1ms (MPRT / GtG)' },
-                                { name: 'Conectividad', value: 'HDMI 2.0, DisplayPort 1.4, Audio Out' }
-                            ];
-                        } else {
-                            let cpu = 'Intel Core i5 / AMD Ryzen 5';
-                            if (lower.includes('i7') || lower.includes('ryzen 7')) cpu = 'Intel Core i7 / AMD Ryzen 7';
-                            if (lower.includes('i9') || lower.includes('ryzen 9')) cpu = 'Intel Core i9 / AMD Ryzen 9';
-                            if (lower.includes('i3') || lower.includes('ryzen 3')) cpu = 'Intel Core i3 / AMD Ryzen 3';
-
-                            let ram = '16GB DDR5 4800MHz';
-                            if (lower.includes('8gb')) ram = '8GB DDR4 3200MHz';
-                            if (lower.includes('32gb')) ram = '32GB DDR5 5600MHz';
-
-                            let disk = '512GB SSD M.2 NVMe PCIe 4.0';
-                            if (lower.includes('1tb')) disk = '1TB SSD M.2 NVMe PCIe 4.0';
-                            if (lower.includes('256gb')) disk = '256GB SSD M.2 NVMe';
-
-                            let gpu = lower.includes('rtx') ? 'NVIDIA GeForce RTX 4060 8GB GDDR6' : 'Gráficos Integrados de Alta Definición';
-
-                            this.specs = [
-                                { name: 'Procesador', value: cpu },
-                                { name: 'Memoria RAM', value: ram },
-                                { name: 'Almacenamiento', value: disk },
-                                { name: 'Pantalla', value: '15.6" Full HD (1920x1080) Antirreflejo' },
-                                { name: 'Gráficos', value: gpu },
-                                { name: 'Sistema Operativo', value: 'Windows 11 Home 64-bit' }
-                            ];
-                        }
+                        this.specs = Array.isArray(generated) ? generated : [];
                     }
                     this.isAiLoading = false;
                     this.aiModalOpen = false;
-                }, 100);
+                }, 250);
             },
             
             openQuickAddModal(type, label) {
@@ -697,6 +881,7 @@
             }
         };
     }
+
 
     function imageUploadManager() {
         return {
