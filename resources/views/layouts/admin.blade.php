@@ -667,12 +667,79 @@
                     <span>Configuración</span>
                 </a>
 
-                <a href="{{ route('admin.security.index') }}"
-                   class="nav-item {{ request()->routeIs('admin.security.*') ? 'active' : '' }}" @click="mobileSidebarOpen = false">
-                    <i class="fa-solid fa-shield-halved nav-icon" style="{{ request()->routeIs('admin.security.*') ? '' : 'color:#10b981' }}"></i>
-                    <span>Seguridad del Sistema</span>
-                    <span class="ml-auto text-[9px] font-black bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-full border border-emerald-500/30">WAF</span>
-                </a>
+                <!-- Módulo Seguridad Expandible (Mobile) -->
+                <div x-data="{ expanded: {{ request()->routeIs('admin.security.*') ? 'true' : 'false' }} }">
+                    <button type="button" @click="expanded = !expanded" class="w-full nav-item {{ request()->routeIs('admin.security.*') ? 'active' : '' }}">
+                        <div class="flex items-center gap-2.5 flex-1">
+                            <i class="fa-solid fa-lock nav-icon" style="{{ request()->routeIs('admin.security.*') ? '' : 'color:#10b981' }}"></i>
+                            <span>Seguridad</span>
+                            <span class="ml-auto text-[9px] font-black bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-full border border-emerald-500/30">PRO</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-down text-[10px] transition-transform ml-2" :class="expanded ? 'rotate-180' : ''"></i>
+                    </button>
+                    <div x-show="expanded" class="pl-4 mt-1 space-y-0.5" x-cloak>
+                        <a href="{{ route('admin.security.index') }}" class="nav-item text-xs {{ request()->routeIs('admin.security.index') ? 'bg-white/10 text-white font-bold' : '' }}" @click="mobileSidebarOpen = false">
+                            <i class="fa-solid fa-gauge-high nav-icon text-xs"></i>
+                            <span>Dashboard de Seguridad</span>
+                        </a>
+                        <a href="{{ route('admin.security.attacks') }}" class="nav-item text-xs {{ request()->routeIs('admin.security.attacks') ? 'bg-white/10 text-white font-bold' : '' }}" @click="mobileSidebarOpen = false">
+                            <i class="fa-solid fa-shield-virus nav-icon text-xs"></i>
+                            <span>Protección contra Ataques</span>
+                        </a>
+                        <a href="{{ route('admin.security.firewall') }}" class="nav-item text-xs {{ request()->routeIs('admin.security.firewall') ? 'bg-white/10 text-white font-bold' : '' }}" @click="mobileSidebarOpen = false">
+                            <i class="fa-solid fa-fire-flame-curved nav-icon text-xs"></i>
+                            <span>Firewall del Sistema</span>
+                        </a>
+                        <a href="{{ route('admin.users.index') }}" class="nav-item text-xs {{ request()->routeIs('admin.users.*') ? 'bg-white/10 text-white font-bold' : '' }}" @click="mobileSidebarOpen = false">
+                            <i class="fa-solid fa-users-gear nav-icon text-xs"></i>
+                            <span>Gestión de Usuarios</span>
+                        </a>
+                        <a href="{{ route('admin.security.logs') }}" class="nav-item text-xs {{ request()->routeIs('admin.security.logs') ? 'bg-white/10 text-white font-bold' : '' }}" @click="mobileSidebarOpen = false">
+                            <i class="fa-solid fa-file-lines nav-icon text-xs"></i>
+                            <span>Registro de Actividad (Logs)</span>
+                        </a>
+                        <a href="{{ route('admin.security.login_attempts') }}" class="nav-item text-xs {{ request()->routeIs('admin.security.login_attempts') ? 'bg-white/10 text-white font-bold' : '' }}" @click="mobileSidebarOpen = false">
+                            <i class="fa-solid fa-user-check nav-icon text-xs"></i>
+                            <span>Intentos de Inicio de Sesión</span>
+                        </a>
+                        <a href="{{ route('admin.security.passwords') }}" class="nav-item text-xs {{ request()->routeIs('admin.security.passwords') ? 'bg-white/10 text-white font-bold' : '' }}" @click="mobileSidebarOpen = false">
+                            <i class="fa-solid fa-key nav-icon text-xs"></i>
+                            <span>Gestión de Contraseñas</span>
+                        </a>
+                        <a href="{{ route('admin.security.mfa') }}" class="nav-item text-xs {{ request()->routeIs('admin.security.mfa') ? 'bg-white/10 text-white font-bold' : '' }}" @click="mobileSidebarOpen = false">
+                            <i class="fa-solid fa-mobile-screen-button nav-icon text-xs"></i>
+                            <span>Autenticación Multifactor (MFA)</span>
+                        </a>
+                        <a href="{{ route('admin.security.sessions') }}" class="nav-item text-xs {{ request()->routeIs('admin.security.sessions') ? 'bg-white/10 text-white font-bold' : '' }}" @click="mobileSidebarOpen = false">
+                            <i class="fa-solid fa-fingerprint nav-icon text-xs"></i>
+                            <span>Seguridad de Sesiones</span>
+                        </a>
+                        <a href="{{ route('admin.security.database') }}" class="nav-item text-xs {{ request()->routeIs('admin.security.database') ? 'bg-white/10 text-white font-bold' : '' }}" @click="mobileSidebarOpen = false">
+                            <i class="fa-solid fa-database nav-icon text-xs"></i>
+                            <span>Seguridad de Base de Datos</span>
+                        </a>
+                        <a href="{{ route('admin.security.files') }}" class="nav-item text-xs {{ request()->routeIs('admin.security.files') ? 'bg-white/10 text-white font-bold' : '' }}" @click="mobileSidebarOpen = false">
+                            <i class="fa-solid fa-folder-shield nav-icon text-xs"></i>
+                            <span>Protección de Archivos</span>
+                        </a>
+                        <a href="{{ route('admin.security.https') }}" class="nav-item text-xs {{ request()->routeIs('admin.security.https') ? 'bg-white/10 text-white font-bold' : '' }}" @click="mobileSidebarOpen = false">
+                            <i class="fa-solid fa-certificate nav-icon text-xs"></i>
+                            <span>Certificado HTTPS</span>
+                        </a>
+                        <a href="{{ route('admin.security.threats') }}" class="nav-item text-xs {{ request()->routeIs('admin.security.threats') ? 'bg-white/10 text-white font-bold' : '' }}" @click="mobileSidebarOpen = false">
+                            <i class="fa-solid fa-satellite-dish nav-icon text-xs"></i>
+                            <span>Monitor de Amenazas</span>
+                        </a>
+                        <a href="{{ route('admin.security.alerts') }}" class="nav-item text-xs {{ request()->routeIs('admin.security.alerts') ? 'bg-white/10 text-white font-bold' : '' }}" @click="mobileSidebarOpen = false">
+                            <i class="fa-solid fa-bell nav-icon text-xs"></i>
+                            <span>Alertas</span>
+                        </a>
+                        <a href="{{ route('admin.security.audit') }}" class="nav-item text-xs {{ request()->routeIs('admin.security.audit') ? 'bg-white/10 text-white font-bold' : '' }}" @click="mobileSidebarOpen = false">
+                            <i class="fa-solid fa-clipboard-check nav-icon text-xs"></i>
+                            <span>Auditoría</span>
+                        </a>
+                    </div>
+                </div>
 
                 <a href="{{ route('admin.backups.index') }}"
                    class="nav-item {{ request()->routeIs('admin.backups.*') ? 'active' : '' }}" @click="mobileSidebarOpen = false">
@@ -835,12 +902,79 @@
                 <span x-show="sidebarOpen" class="whitespace-nowrap">Configuración</span>
             </a>
 
-            <a href="{{ route('admin.security.index') }}"
-               class="nav-item {{ request()->routeIs('admin.security.*') ? 'active' : '' }}" :class="!sidebarOpen ? 'justify-center px-0' : ''" title="Seguridad del Sistema">
-                <i class="fa-solid fa-shield-halved nav-icon" style="{{ request()->routeIs('admin.security.*') ? '' : 'color:#10b981' }}"></i>
-                <span x-show="sidebarOpen" class="whitespace-nowrap">Seguridad</span>
-                <span x-show="sidebarOpen" class="ml-auto text-[9px] font-black bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-full border border-emerald-500/30">WAF</span>
-            </a>
+            <!-- Módulo Seguridad Expandible (Desktop) -->
+            <div x-data="{ expanded: {{ request()->routeIs('admin.security.*') ? 'true' : 'false' }} }">
+                <button type="button" @click="expanded = !expanded;" class="w-full nav-item {{ request()->routeIs('admin.security.*') ? 'active' : '' }}" :class="!sidebarOpen ? 'justify-center px-0' : ''" title="Seguridad">
+                    <div class="flex items-center gap-2.5 flex-1" :class="!sidebarOpen ? 'justify-center' : ''">
+                        <i class="fa-solid fa-lock nav-icon" style="{{ request()->routeIs('admin.security.*') ? '' : 'color:#10b981' }}"></i>
+                        <span x-show="sidebarOpen" class="whitespace-nowrap font-medium">Seguridad</span>
+                        <span x-show="sidebarOpen" class="ml-auto text-[9px] font-black bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-full border border-emerald-500/30">PRO</span>
+                    </div>
+                    <i x-show="sidebarOpen" class="fa-solid fa-chevron-down text-[10px] transition-transform ml-1" :class="expanded ? 'rotate-180' : ''"></i>
+                </button>
+                <div x-show="expanded && sidebarOpen" class="pl-3 mt-1 space-y-0.5" x-cloak>
+                    <a href="{{ route('admin.security.index') }}" class="nav-item text-xs {{ request()->routeIs('admin.security.index') ? 'bg-white/10 text-white font-semibold' : '' }}" title="Dashboard de Seguridad">
+                        <i class="fa-solid fa-gauge-high nav-icon text-xs"></i>
+                        <span class="whitespace-nowrap">Dashboard</span>
+                    </a>
+                    <a href="{{ route('admin.security.attacks') }}" class="nav-item text-xs {{ request()->routeIs('admin.security.attacks') ? 'bg-white/10 text-white font-semibold' : '' }}" title="Protección contra Ataques">
+                        <i class="fa-solid fa-shield-virus nav-icon text-xs"></i>
+                        <span class="whitespace-nowrap">Protección Ataques</span>
+                    </a>
+                    <a href="{{ route('admin.security.firewall') }}" class="nav-item text-xs {{ request()->routeIs('admin.security.firewall') ? 'bg-white/10 text-white font-semibold' : '' }}" title="Firewall del Sistema">
+                        <i class="fa-solid fa-fire-flame-curved nav-icon text-xs"></i>
+                        <span class="whitespace-nowrap">Firewall del Sistema</span>
+                    </a>
+                    <a href="{{ route('admin.users.index') }}" class="nav-item text-xs {{ request()->routeIs('admin.users.*') ? 'bg-white/10 text-white font-semibold' : '' }}" title="Gestión de Usuarios">
+                        <i class="fa-solid fa-users-gear nav-icon text-xs"></i>
+                        <span class="whitespace-nowrap">Gestión de Usuarios</span>
+                    </a>
+                    <a href="{{ route('admin.security.logs') }}" class="nav-item text-xs {{ request()->routeIs('admin.security.logs') ? 'bg-white/10 text-white font-semibold' : '' }}" title="Registro de Actividad (Logs)">
+                        <i class="fa-solid fa-file-lines nav-icon text-xs"></i>
+                        <span class="whitespace-nowrap">Registro de Logs</span>
+                    </a>
+                    <a href="{{ route('admin.security.login_attempts') }}" class="nav-item text-xs {{ request()->routeIs('admin.security.login_attempts') ? 'bg-white/10 text-white font-semibold' : '' }}" title="Intentos de Inicio de Sesión">
+                        <i class="fa-solid fa-user-check nav-icon text-xs"></i>
+                        <span class="whitespace-nowrap">Intentos de Login</span>
+                    </a>
+                    <a href="{{ route('admin.security.passwords') }}" class="nav-item text-xs {{ request()->routeIs('admin.security.passwords') ? 'bg-white/10 text-white font-semibold' : '' }}" title="Gestión de Contraseñas">
+                        <i class="fa-solid fa-key nav-icon text-xs"></i>
+                        <span class="whitespace-nowrap">Contraseñas</span>
+                    </a>
+                    <a href="{{ route('admin.security.mfa') }}" class="nav-item text-xs {{ request()->routeIs('admin.security.mfa') ? 'bg-white/10 text-white font-semibold' : '' }}" title="Autenticación Multifactor (MFA)">
+                        <i class="fa-solid fa-mobile-screen-button nav-icon text-xs"></i>
+                        <span class="whitespace-nowrap">MFA (2FA)</span>
+                    </a>
+                    <a href="{{ route('admin.security.sessions') }}" class="nav-item text-xs {{ request()->routeIs('admin.security.sessions') ? 'bg-white/10 text-white font-semibold' : '' }}" title="Seguridad de Sesiones">
+                        <i class="fa-solid fa-fingerprint nav-icon text-xs"></i>
+                        <span class="whitespace-nowrap">Seguridad Sesiones</span>
+                    </a>
+                    <a href="{{ route('admin.security.database') }}" class="nav-item text-xs {{ request()->routeIs('admin.security.database') ? 'bg-white/10 text-white font-semibold' : '' }}" title="Seguridad de Base de Datos">
+                        <i class="fa-solid fa-database nav-icon text-xs"></i>
+                        <span class="whitespace-nowrap">Base de Datos</span>
+                    </a>
+                    <a href="{{ route('admin.security.files') }}" class="nav-item text-xs {{ request()->routeIs('admin.security.files') ? 'bg-white/10 text-white font-semibold' : '' }}" title="Protección de Archivos">
+                        <i class="fa-solid fa-folder-shield nav-icon text-xs"></i>
+                        <span class="whitespace-nowrap">Protección Archivos</span>
+                    </a>
+                    <a href="{{ route('admin.security.https') }}" class="nav-item text-xs {{ request()->routeIs('admin.security.https') ? 'bg-white/10 text-white font-semibold' : '' }}" title="Certificado HTTPS">
+                        <i class="fa-solid fa-certificate nav-icon text-xs"></i>
+                        <span class="whitespace-nowrap">Certificado HTTPS</span>
+                    </a>
+                    <a href="{{ route('admin.security.threats') }}" class="nav-item text-xs {{ request()->routeIs('admin.security.threats') ? 'bg-white/10 text-white font-semibold' : '' }}" title="Monitor de Amenazas">
+                        <i class="fa-solid fa-satellite-dish nav-icon text-xs"></i>
+                        <span class="whitespace-nowrap">Monitor Amenazas</span>
+                    </a>
+                    <a href="{{ route('admin.security.alerts') }}" class="nav-item text-xs {{ request()->routeIs('admin.security.alerts') ? 'bg-white/10 text-white font-semibold' : '' }}" title="Alertas">
+                        <i class="fa-solid fa-bell nav-icon text-xs"></i>
+                        <span class="whitespace-nowrap">Alertas</span>
+                    </a>
+                    <a href="{{ route('admin.security.audit') }}" class="nav-item text-xs {{ request()->routeIs('admin.security.audit') ? 'bg-white/10 text-white font-semibold' : '' }}" title="Auditoría">
+                        <i class="fa-solid fa-clipboard-check nav-icon text-xs"></i>
+                        <span class="whitespace-nowrap">Auditoría</span>
+                    </a>
+                </div>
+            </div>
 
             <a href="{{ route('admin.backups.index') }}"
                class="nav-item {{ request()->routeIs('admin.backups.*') ? 'active' : '' }}" :class="!sidebarOpen ? 'justify-center px-0' : ''" title="Backups">

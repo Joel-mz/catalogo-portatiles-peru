@@ -101,10 +101,26 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
     Route::put('settings', [SettingController::class, 'update'])->name('settings.update');
 
-    Route::get('security', [\App\Http\Controllers\Admin\SecurityController::class, 'index'])->name('security.index');
-    Route::put('security', [\App\Http\Controllers\Admin\SecurityController::class, 'update'])->name('security.update');
-    Route::post('security/scan', [\App\Http\Controllers\Admin\SecurityController::class, 'scan'])->name('security.scan');
-    Route::post('security/clear-sessions', [\App\Http\Controllers\Admin\SecurityController::class, 'clearSessions'])->name('security.clear_sessions');
+    Route::prefix('security')->name('security.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\SecurityController::class, 'index'])->name('index');
+        Route::get('/attacks', [\App\Http\Controllers\Admin\SecurityController::class, 'attacks'])->name('attacks');
+        Route::get('/firewall', [\App\Http\Controllers\Admin\SecurityController::class, 'firewall'])->name('firewall');
+        Route::get('/logs', [\App\Http\Controllers\Admin\SecurityController::class, 'logs'])->name('logs');
+        Route::get('/login-attempts', [\App\Http\Controllers\Admin\SecurityController::class, 'loginAttempts'])->name('login_attempts');
+        Route::get('/passwords', [\App\Http\Controllers\Admin\SecurityController::class, 'passwords'])->name('passwords');
+        Route::get('/mfa', [\App\Http\Controllers\Admin\SecurityController::class, 'mfa'])->name('mfa');
+        Route::get('/sessions', [\App\Http\Controllers\Admin\SecurityController::class, 'sessions'])->name('sessions');
+        Route::get('/database', [\App\Http\Controllers\Admin\SecurityController::class, 'database'])->name('database');
+        Route::get('/files', [\App\Http\Controllers\Admin\SecurityController::class, 'files'])->name('files');
+        Route::get('/https', [\App\Http\Controllers\Admin\SecurityController::class, 'https'])->name('https');
+        Route::get('/threats', [\App\Http\Controllers\Admin\SecurityController::class, 'threats'])->name('threats');
+        Route::get('/alerts', [\App\Http\Controllers\Admin\SecurityController::class, 'alerts'])->name('alerts');
+        Route::get('/audit', [\App\Http\Controllers\Admin\SecurityController::class, 'audit'])->name('audit');
+
+        Route::put('/update', [\App\Http\Controllers\Admin\SecurityController::class, 'update'])->name('update');
+        Route::post('/scan', [\App\Http\Controllers\Admin\SecurityController::class, 'scan'])->name('scan');
+        Route::post('/clear-sessions', [\App\Http\Controllers\Admin\SecurityController::class, 'clearSessions'])->name('clear_sessions');
+    });
 
     Route::get('imports', [ImportController::class, 'index'])->name('imports.index');
     Route::post('imports', [ImportController::class, 'store'])->name('imports.store');

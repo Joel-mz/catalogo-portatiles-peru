@@ -114,6 +114,151 @@ class SecurityController extends Controller
         return redirect()->route('admin.security.index')->with('success', 'Sesión actual regenerada y protegida contra secuestro de sesiones (Session Fixation).');
     }
 
+    public function attacks()
+    {
+        $settings = Setting::all()->pluck('value', 'key');
+        $diagnostics = $this->runSystemDiagnostics();
+        $blockedAttacks = AuditLog::where('action', 'like', '%bloqueado%')
+            ->orWhere('action', 'like', '%amenaza%')
+            ->orWhere('action', 'like', '%SQL%')
+            ->orderBy('created_at', 'desc')
+            ->take(20)
+            ->get();
+
+        return view('admin.security.attacks', compact('settings', 'diagnostics', 'blockedAttacks'));
+    }
+
+    public function firewall()
+    {
+        $settings = Setting::all()->pluck('value', 'key');
+        $blockedIps = array_filter(array_map('trim', explode(',', $settings['security_blocked_ips'] ?? '')));
+
+        return view('admin.security.firewall', compact('settings', 'blockedIps'));
+    }
+
+    public function logs(Request $request)
+    {
+        $query = AuditLog::with('user')->orderBy('created_at', 'desc');
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('action', 'like', "%{$search}%")
+                  ->orWhere('ip_address', 'like', "%{$search}%")
+                  ->orWhere('model', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('type')) {
+            if ($request->input('type') === 'threat') {
+                $query->where(function ($q) {
+                    $q->where('action', 'like', '%bloqueado%')
+                      ->orWhere('action', 'like', '%amenaza%')
+                      ->orWhere('action', 'like', '%SQL%');
+                });
+            }
+        }
+
+        $logs = $query->paginate(20)->withQueryString();
+
+        return view('admin.security.logs', compact('logs'));
+    }
+
+    public function loginAttempts()
+    {
+        $settings = Setting::all()->pluck('value', 'key');
+        $recentLogins = AuditLog::where('action', 'like', '%login%')
+            ->orWhere('action', 'like', '%sesión%')
+            ->orWhere('action', 'like', '%autenticación%')
+            ->orderBy('created_at', 'desc')
+            ->take(25)
+            ->get();
+
+        return view('admin.security.login_attempts', compact('settings', 'recentLogins'));
+    }
+
+    public function passwords()
+    {
+        $settings = Setting::all()->pluck('value', 'key');
+        $usersCount = \App\Models\User::count();
+
+        return view('admin.security.passwords', compact('settings', 'usersCount'));
+    }
+
+    public function mfa()
+    {
+        $settings = Setting::all()->pluck('value', 'key');
+        $users = \App\Models\User::all();
+
+        return view('admin.security.mfa', compact('settings', 'users'));
+    }
+
+    public function sessions(Request $request)
+    {
+        $settings = Setting::all()->pluck('value', 'key');
+        $sessionDriver = config('session.driver', 'file');
+        $lifetime = config('session.lifetime', 120);
+
+        return view('admin.security.sessions', compact('settings', 'sessionDriver', 'lifetime'));
+    }
+
+    public function database()
+    {
+        $settings = Setting::all()->pluck('value', 'key');
+        $dbConnection = config('database.default');
+        $pdoVersion = DB::connection()->getPdo()->getAttribute(\PDO::ATTR_SERVER_VERSION);
+        $tables = DB::select('SHOW TABLE STATUS');
+
+        return view('admin.security.database', compact('settings', 'dbConnection', 'pdoVersion', 'tables'));
+    }
+
+    public function files()
+    {
+        $settings = Setting::all()->pluck('value', 'key');
+        
+        $filesCheck = [
+            'env_in_root' => File::exists(base_path('.env')),
+            'env_in_public' => File::exists(public_path('.env')),
+            'storage_link' => File::exists(public_path('storage')),
+            'storage_writable' => is_writable(storage_path()),
+            'bootstrap_cache_writable' => is_writable(base_path('bootstrap/cache')),
+        ];
+
+        return view('admin.security.files', compact('settings', 'filesCheck'));
+    }
+
+    public function https()
+    {
+        $settings = Setting::all()->pluck('value', 'key');
+        $isHttps = request()->isSecure() || request()->header('X-Forwarded-Proto') === 'https';
+
+        return view('admin.security.https', compact('settings', 'isHttps'));
+    }
+
+    public function threats()
+    {
+        $settings = Setting::all()->pluck('value', 'key');
+        $diagnostics = $this->runSystemDiagnostics();
+
+        return view('admin.security.threats', compact('settings', 'diagnostics'));
+    }
+
+    public function alerts()
+    {
+        $settings = Setting::all()->pluck('value', 'key');
+
+        return view('admin.security.alerts', compact('settings'));
+    }
+
+    public function audit()
+    {
+        $settings = Setting::all()->pluck('value', 'key');
+        $diagnostics = $this->runSystemDiagnostics();
+        $adminUsers = \App\Models\User::all();
+
+        return view('admin.security.audit', compact('settings', 'diagnostics', 'adminUsers'));
+    }
+
     private function runSystemDiagnostics(): array
     {
         $checks = [];
