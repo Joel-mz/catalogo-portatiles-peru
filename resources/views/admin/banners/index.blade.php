@@ -144,20 +144,20 @@
                         </div>
                         <div>
                             <label class="block text-[11px] font-semibold text-slate-600 mb-1">Tag</label>
-                            <input type="text" name="promo_gaming_tag" value="{{ $settings['promo_gaming_tag'] ?? 'PLAYSTATION & GAMING' }}" class="block w-full rounded-lg border-slate-200 bg-white text-xs px-3 py-2 shadow-sm">
+                            <input type="text" name="promo_gaming_tag" value="{{ $settings['promo_gaming_tag'] ?? 'ZONA GAMER Y CONSOLAS' }}" class="block w-full rounded-lg border-slate-200 bg-white text-xs px-3 py-2 shadow-sm">
                         </div>
                         <div>
                             <label class="block text-[11px] font-semibold text-slate-600 mb-1">Título</label>
-                            <input type="text" name="promo_gaming_title" value="{{ $settings['promo_gaming_title'] ?? 'Next Level Gaming Experience' }}" class="block w-full rounded-lg border-slate-200 bg-white text-xs px-3 py-2 shadow-sm">
+                            <input type="text" name="promo_gaming_title" value="{{ $settings['promo_gaming_title'] ?? 'Lleva tu Juego al Siguiente Nivel' }}" class="block w-full rounded-lg border-slate-200 bg-white text-xs px-3 py-2 shadow-sm">
                         </div>
                         <div>
                             <label class="block text-[11px] font-semibold text-slate-600 mb-1">Subtítulo</label>
-                            <input type="text" name="promo_gaming_subtitle" value="{{ $settings['promo_gaming_subtitle'] ?? 'Immersive. Powerful. Unstoppable.' }}" class="block w-full rounded-lg border-slate-200 bg-white text-xs px-3 py-2 shadow-sm">
+                            <input type="text" name="promo_gaming_subtitle" value="{{ $settings['promo_gaming_subtitle'] ?? 'Rendimiento extremo, gráficos potentes y velocidad total.' }}" class="block w-full rounded-lg border-slate-200 bg-white text-xs px-3 py-2 shadow-sm">
                         </div>
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-600 mb-1">Texto Botón</label>
-                                <input type="text" name="promo_gaming_button" value="{{ $settings['promo_gaming_button'] ?? 'Shop Now' }}" class="block w-full rounded-lg border-slate-200 bg-white text-xs px-3 py-2 shadow-sm">
+                                <input type="text" name="promo_gaming_button" value="{{ $settings['promo_gaming_button'] ?? 'Ver Equipos Gamer' }}" class="block w-full rounded-lg border-slate-200 bg-white text-xs px-3 py-2 shadow-sm">
                             </div>
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-600 mb-1">Enlace</label>
@@ -169,7 +169,7 @@
                     <!-- Banner Audio -->
                     <div class="space-y-3 rounded-xl border border-slate-100 bg-slate-50/70 p-4">
                         <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold text-purple-700">Banner 2 (Premium Audio)</span>
+                            <span class="text-xs font-bold text-purple-700">Banner 2 (Audio Premium)</span>
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="hidden" name="promo_audio_active" value="0">
                                 <input type="checkbox" name="promo_audio_active" value="1" class="sr-only peer" {{ ($settings['promo_audio_active'] ?? '1') == '1' ? 'checked' : '' }}>
@@ -178,20 +178,20 @@
                         </div>
                         <div>
                             <label class="block text-[11px] font-semibold text-slate-600 mb-1">Tag</label>
-                            <input type="text" name="promo_audio_tag" value="{{ $settings['promo_audio_tag'] ?? 'PREMIUM AUDIO' }}" class="block w-full rounded-lg border-slate-200 bg-white text-xs px-3 py-2 shadow-sm">
+                            <input type="text" name="promo_audio_tag" value="{{ $settings['promo_audio_tag'] ?? 'AUDIO DE ALTA FIDELIDAD' }}" class="block w-full rounded-lg border-slate-200 bg-white text-xs px-3 py-2 shadow-sm">
                         </div>
                         <div>
                             <label class="block text-[11px] font-semibold text-slate-600 mb-1">Título</label>
-                            <input type="text" name="promo_audio_title" value="{{ $settings['promo_audio_title'] ?? 'Premium Audio Collection' }}" class="block w-full rounded-lg border-slate-200 bg-white text-xs px-3 py-2 shadow-sm">
+                            <input type="text" name="promo_audio_title" value="{{ $settings['promo_audio_title'] ?? 'Colección de Audio Premium' }}" class="block w-full rounded-lg border-slate-200 bg-white text-xs px-3 py-2 shadow-sm">
                         </div>
                         <div>
                             <label class="block text-[11px] font-semibold text-slate-600 mb-1">Subtítulo</label>
-                            <input type="text" name="promo_audio_subtitle" value="{{ $settings['promo_audio_subtitle'] ?? 'Feel Every Beat with High-Res Sound' }}" class="block w-full rounded-lg border-slate-200 bg-white text-xs px-3 py-2 shadow-sm">
+                            <input type="text" name="promo_audio_subtitle" value="{{ $settings['promo_audio_subtitle'] ?? 'Siente cada detalle con sonido envolvente y nítido.' }}" class="block w-full rounded-lg border-slate-200 bg-white text-xs px-3 py-2 shadow-sm">
                         </div>
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-600 mb-1">Texto Botón</label>
-                                <input type="text" name="promo_audio_button" value="{{ $settings['promo_audio_button'] ?? 'Shop Now' }}" class="block w-full rounded-lg border-slate-200 bg-white text-xs px-3 py-2 shadow-sm">
+                                <input type="text" name="promo_audio_button" value="{{ $settings['promo_audio_button'] ?? 'Ver Colección' }}" class="block w-full rounded-lg border-slate-200 bg-white text-xs px-3 py-2 shadow-sm">
                             </div>
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-600 mb-1">Enlace</label>
@@ -222,19 +222,19 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-[11px] font-semibold text-slate-600 mb-1">Tag / Etiqueta</label>
-                        <input type="text" name="promo_special_tag" value="{{ $settings['promo_special_tag'] ?? 'SPECIAL OFFER' }}" class="block w-full rounded-lg border-slate-200 bg-white text-xs px-3 py-2 shadow-sm">
+                        <input type="text" name="promo_special_tag" value="{{ $settings['promo_special_tag'] ?? 'OFERTA ESPECIAL' }}" class="block w-full rounded-lg border-slate-200 bg-white text-xs px-3 py-2 shadow-sm">
                     </div>
                     <div>
                         <label class="block text-[11px] font-semibold text-slate-600 mb-1">Título</label>
-                        <input type="text" name="promo_special_title" value="{{ $settings['promo_special_title'] ?? 'Up to 50% Off Selected Models' }}" class="block w-full rounded-lg border-slate-200 bg-white text-xs px-3 py-2 shadow-sm">
+                        <input type="text" name="promo_special_title" value="{{ $settings['promo_special_title'] ?? 'Hasta 50% de Descuento en Modelos Seleccionados' }}" class="block w-full rounded-lg border-slate-200 bg-white text-xs px-3 py-2 shadow-sm">
                     </div>
                     <div class="md:col-span-2">
                         <label class="block text-[11px] font-semibold text-slate-600 mb-1">Subtítulo / Descripción</label>
-                        <input type="text" name="promo_special_subtitle" value="{{ $settings['promo_special_subtitle'] ?? 'Limited time deals on high-performance laptops and accessories. Grab your favorite tech now before stock runs out!' }}" class="block w-full rounded-lg border-slate-200 bg-white text-xs px-3 py-2 shadow-sm">
+                        <input type="text" name="promo_special_subtitle" value="{{ $settings['promo_special_subtitle'] ?? 'Promociones por tiempo limitado en laptops de alto rendimiento y accesorios. ¡Lleva tu equipo favorito antes de que termine el stock!' }}" class="block w-full rounded-lg border-slate-200 bg-white text-xs px-3 py-2 shadow-sm">
                     </div>
                     <div>
                         <label class="block text-[11px] font-semibold text-slate-600 mb-1">Texto del Botón</label>
-                        <input type="text" name="promo_special_button" value="{{ $settings['promo_special_button'] ?? 'Shop Now' }}" class="block w-full rounded-lg border-slate-200 bg-white text-xs px-3 py-2 shadow-sm">
+                        <input type="text" name="promo_special_button" value="{{ $settings['promo_special_button'] ?? 'Ver Ofertas Especiales' }}" class="block w-full rounded-lg border-slate-200 bg-white text-xs px-3 py-2 shadow-sm">
                     </div>
                     <div>
                         <label class="block text-[11px] font-semibold text-slate-600 mb-1">Enlace (URL)</label>

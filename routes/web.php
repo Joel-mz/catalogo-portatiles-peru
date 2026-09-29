@@ -22,6 +22,9 @@ Route::get('/producto/{slug}', [FrontController::class, 'show'])->name('product.
 Route::get('/producto/{slug}/pdf', [FrontController::class, 'downloadPdf'])->name('product.pdf');
 Route::get('/sitemap.xml', [FrontController::class, 'sitemap'])->name('sitemap');
 Route::get('/robots.txt', [FrontController::class, 'robots'])->name('robots');
+Route::get('/google{code}.html', function (string $code) {
+    return response("google-site-verification: google{$code}.html\n", 200, ['Content-Type' => 'text/html; charset=UTF-8']);
+})->where('code', '[a-zA-Z0-9_-]+')->name('google.verify');
 Route::post('/api/checkout', [FrontController::class, 'checkout'])->middleware('throttle:10,1')->name('api.checkout');
 Route::post('/producto/{slug}/opiniones', [FrontController::class, 'review'])->middleware('throttle:5,1')->name('product.review');
 

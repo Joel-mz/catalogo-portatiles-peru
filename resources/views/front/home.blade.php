@@ -65,18 +65,18 @@
                 <div class="flex flex-col items-start justify-center">
                     <span class="inline-flex items-center gap-1.5 rounded-full border border-indigo-400/30 bg-indigo-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-indigo-300">
                         <span class="h-1.5 w-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
-                        LATEST COLLECTION
+                        ÚLTIMA COLECCIÓN
                     </span>
                     <h1 class="mt-4 font-display text-3xl font-extrabold leading-[1.08] tracking-tight text-white sm:text-4xl lg:text-5xl">
-                        Upgrade Your Everyday <span class="bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300 bg-clip-text text-transparent">Tech Life</span>
+                        Potencia tu Día a Día con la Mejor <span class="bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300 bg-clip-text text-transparent">Tecnología</span>
                     </h1>
                     <p class="mt-3 text-xs leading-relaxed text-slate-300 sm:text-sm max-w-sm">
-                        Premium devices. Better performance. A smarter tomorrow with official warranty and direct WhatsApp support.
+                        Equipos premium de alto rendimiento con garantía oficial y asesoría inmediata por WhatsApp.
                     </p>
                     
                     <div class="mt-6 flex flex-wrap items-center gap-3">
                         <a href="{{ route('catalog') }}" class="focus-ring inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 transition hover:bg-indigo-500 hover:scale-105 active:scale-95">
-                            Shop Now <i class="fa-solid fa-arrow-right text-[11px]"></i>
+                            Comprar Ahora <i class="fa-solid fa-arrow-right text-[11px]"></i>
                         </a>
                         @if($leadProduct)
                         <a href="{{ route('product.show', $leadProduct->slug) }}" class="focus-ring inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-xs font-bold text-white backdrop-blur transition hover:bg-white/10">
@@ -90,9 +90,9 @@
                 <div class="relative flex items-center justify-center">
                     <!-- 40% OFF Sticker Badge -->
                     <div class="absolute -top-2 right-2 z-20 flex h-16 w-16 sm:h-20 sm:w-20 rotate-12 flex-col items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 text-white shadow-xl ring-4 ring-indigo-500/20">
-                        <span class="text-[8px] font-black uppercase tracking-wider opacity-80">Up to</span>
+                        <span class="text-[8px] font-black uppercase tracking-wider opacity-80">Hasta</span>
                         <span class="font-display text-lg sm:text-xl font-black leading-none">40%</span>
-                        <span class="text-[8px] font-black uppercase tracking-wider opacity-80">OFF</span>
+                        <span class="text-[8px] font-black uppercase tracking-wider opacity-80">DCTO</span>
                     </div>
 
                     @if($leadImage)
@@ -155,8 +155,8 @@
                 <i class="fa-regular fa-circle-check"></i>
             </span>
             <div>
-                <span class="block text-xs font-extrabold text-slate-900">100% Original Products</span>
-                <span class="block text-[10px] text-slate-400 font-medium">Genuine & Trusted</span>
+                <span class="block text-xs font-extrabold text-slate-900">100% Originales</span>
+                <span class="block text-[10px] text-slate-400 font-medium">Garantizados y de confianza</span>
             </div>
         </div>
         
@@ -165,8 +165,8 @@
                 <i class="fa-solid fa-shield-halved"></i>
             </span>
             <div>
-                <span class="block text-xs font-extrabold text-slate-900">Secure Payment</span>
-                <span class="block text-[10px] text-slate-400 font-medium">SSL Encrypted</span>
+                <span class="block text-xs font-extrabold text-slate-900">Compra Segura</span>
+                <span class="block text-[10px] text-slate-400 font-medium">Asesoría transparente</span>
             </div>
         </div>
 
@@ -175,8 +175,8 @@
                 <i class="fa-solid fa-arrow-rotate-left"></i>
             </span>
             <div>
-                <span class="block text-xs font-extrabold text-slate-900">Easy Return</span>
-                <span class="block text-[10px] text-slate-400 font-medium">7 Days Return Policy</span>
+                <span class="block text-xs font-extrabold text-slate-900">Garantía Oficial</span>
+                <span class="block text-[10px] text-slate-400 font-medium">Soporte asegurado</span>
             </div>
         </div>
 
@@ -185,8 +185,8 @@
                 <i class="fa-solid fa-headset"></i>
             </span>
             <div>
-                <span class="block text-xs font-extrabold text-slate-900">24/7 Support</span>
-                <span class="block text-[10px] text-slate-400 font-medium">We're Here to Help</span>
+                <span class="block text-xs font-extrabold text-slate-900">Atención Continua</span>
+                <span class="block text-[10px] text-slate-400 font-medium">Listos para ayudarte</span>
             </div>
         </div>
     </section>
@@ -220,12 +220,12 @@
         <section aria-labelledby="offers-title">
             <div class="mb-5 flex items-end justify-between gap-3">
                 <div>
-                    <span class="text-[10px] font-black uppercase tracking-widest text-rose-500">HOT DEALS</span>
-                    <h2 id="offers-title" class="mt-1 font-display text-2xl font-black text-slate-900 sm:text-3xl">Best Deals This Week</h2>
-                    <p class="mt-1 text-xs text-slate-500">Top-rated products at unbeatable prices. Don't miss out!</p>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-rose-500">OFERTAS DESTACADAS</span>
+                    <h2 id="offers-title" class="mt-1 font-display text-2xl font-black text-slate-900 sm:text-3xl">Las Mejores Ofertas de la Semana</h2>
+                    <p class="mt-1 text-xs text-slate-500">Equipos seleccionados a precios insuperables. ¡Aprovecha antes de que se agoten!</p>
                 </div>
                 <a href="{{ route('catalog', ['offers' => 1]) }}" class="focus-ring rounded-xl bg-[#0f172a] px-4 py-2.5 text-xs font-bold text-white hover:bg-slate-800 transition">
-                    View All Deals <span aria-hidden="true">→</span>
+                    Ver Todas las Ofertas <span aria-hidden="true">→</span>
                 </a>
             </div>
             <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
@@ -243,13 +243,13 @@
         @if(($settings['promo_gaming_active'] ?? '1') == '1')
         <div class="relative min-h-[220px] overflow-hidden rounded-2xl bg-gradient-to-r from-[#07131b] via-[#0b1d28] to-[#122e3f] p-6 text-white sm:min-h-[250px] sm:p-8 flex flex-col justify-between shadow-sm">
             <div class="relative z-10 max-w-xs">
-                <span class="text-[9px] font-black uppercase tracking-widest text-teal-400">{{ $settings['promo_gaming_tag'] ?? 'PLAYSTATION & GAMING' }}</span>
+                <span class="text-[9px] font-black uppercase tracking-widest text-teal-400">{{ $settings['promo_gaming_tag'] ?? 'ZONA GAMER Y CONSOLAS' }}</span>
                 <h2 class="mt-2 font-display text-2xl font-black leading-tight sm:text-3xl text-white">
-                    {{ $settings['promo_gaming_title'] ?? 'Next Level Gaming Experience' }}
+                    {{ $settings['promo_gaming_title'] ?? 'Lleva tu Juego al Siguiente Nivel' }}
                 </h2>
-                <p class="mt-2 text-xs text-slate-400">{{ $settings['promo_gaming_subtitle'] ?? 'Immersive. Powerful. Unstoppable.' }}</p>
+                <p class="mt-2 text-xs text-slate-400">{{ $settings['promo_gaming_subtitle'] ?? 'Rendimiento extremo, gráficos potentes y velocidad total.' }}</p>
                 <a href="{{ $settings['promo_gaming_link'] ?? route('catalog') }}" class="focus-ring mt-5 inline-flex items-center gap-2 rounded-xl bg-teal-400 px-5 py-2.5 text-xs font-extrabold text-slate-950 hover:bg-teal-300 transition shadow-lg shadow-teal-500/20">
-                    {{ $settings['promo_gaming_button'] ?? 'Shop Now' }} <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    {{ $settings['promo_gaming_button'] ?? 'Ver Equipos Gamer' }} <i class="fa-solid fa-arrow-right text-[10px]"></i>
                 </a>
             </div>
             <i class="fa-solid fa-gamepad absolute bottom-[-15px] right-4 text-[140px] text-white/5 pointer-events-none" aria-hidden="true"></i>
@@ -260,13 +260,13 @@
         @if(($settings['promo_audio_active'] ?? '1') == '1')
         <div class="relative min-h-[220px] overflow-hidden rounded-2xl bg-gradient-to-r from-[#170e28] via-[#24133f] to-[#311b54] p-6 text-white sm:min-h-[250px] sm:p-8 flex flex-col justify-between shadow-sm">
             <div class="relative z-10 max-w-xs">
-                <span class="text-[9px] font-black uppercase tracking-widest text-purple-300">{{ $settings['promo_audio_tag'] ?? 'PREMIUM AUDIO' }}</span>
+                <span class="text-[9px] font-black uppercase tracking-widest text-purple-300">{{ $settings['promo_audio_tag'] ?? 'AUDIO DE ALTA FIDELIDAD' }}</span>
                 <h2 class="mt-2 font-display text-2xl font-black leading-tight sm:text-3xl text-white">
-                    {{ $settings['promo_audio_title'] ?? 'Premium Audio Collection' }}
+                    {{ $settings['promo_audio_title'] ?? 'Colección de Audio Premium' }}
                 </h2>
-                <p class="mt-2 text-xs text-slate-400">{{ $settings['promo_audio_subtitle'] ?? 'Feel Every Beat with High-Res Sound' }}</p>
+                <p class="mt-2 text-xs text-slate-400">{{ $settings['promo_audio_subtitle'] ?? 'Siente cada detalle con sonido envolvente y nítido.' }}</p>
                 <a href="{{ $settings['promo_audio_link'] ?? route('catalog') }}" class="focus-ring mt-5 inline-flex items-center gap-2 rounded-xl bg-indigo-500 px-5 py-2.5 text-xs font-extrabold text-white hover:bg-indigo-400 transition shadow-lg shadow-indigo-600/30">
-                    {{ $settings['promo_audio_button'] ?? 'Shop Now' }} <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    {{ $settings['promo_audio_button'] ?? 'Ver Colección' }} <i class="fa-solid fa-arrow-right text-[10px]"></i>
                 </a>
             </div>
             <i class="fa-solid fa-headphones absolute bottom-[-18px] right-4 text-[140px] text-white/5 pointer-events-none" aria-hidden="true"></i>
@@ -280,9 +280,9 @@
         <section aria-labelledby="featured-title">
             <div class="mb-5 flex items-end justify-between gap-3">
                 <div>
-                    <span class="text-[10px] font-black uppercase tracking-widest text-indigo-600">TRENDING</span>
-                    <h2 id="featured-title" class="mt-1 font-display text-2xl font-black text-slate-900 sm:text-3xl">Featured Products</h2>
-                    <p class="mt-1 text-xs text-slate-500">Handpicked just for you. Explore our most popular tech items.</p>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-indigo-600">TENDENCIAS</span>
+                    <h2 id="featured-title" class="mt-1 font-display text-2xl font-black text-slate-900 sm:text-3xl">Productos Destacados</h2>
+                    <p class="mt-1 text-xs text-slate-500">Seleccionados especialmente para ti. Descubre los equipos más buscados.</p>
                 </div>
                 <a href="{{ route('catalog') }}" class="focus-ring rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 hover:border-indigo-300 hover:text-indigo-600 transition">
                     Ver catálogo completo <span aria-hidden="true">→</span>
@@ -302,17 +302,17 @@
         <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
             <div class="max-w-xl text-center md:text-left">
                 <span class="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-purple-200">
-                    {{ $settings['promo_special_tag'] ?? 'SPECIAL OFFER' }}
+                    {{ $settings['promo_special_tag'] ?? 'OFERTA ESPECIAL' }}
                 </span>
                 <h2 class="mt-3 font-display text-3xl font-black text-white sm:text-4xl">
-                    {{ $settings['promo_special_title'] ?? 'Up to 50% Off Selected Models' }}
+                    {{ $settings['promo_special_title'] ?? 'Hasta 50% de Descuento en Modelos Seleccionados' }}
                 </h2>
                 <p class="mt-2 text-xs text-purple-200 sm:text-sm">
-                    {{ $settings['promo_special_subtitle'] ?? 'Limited time deals on high-performance laptops and accessories. Grab your favorite tech now before stock runs out!' }}
+                    {{ $settings['promo_special_subtitle'] ?? 'Promociones por tiempo limitado en laptops de alto rendimiento y accesorios. ¡Lleva tu equipo favorito antes de que termine el stock!' }}
                 </p>
                 <div class="mt-5">
                     <a href="{{ $settings['promo_special_link'] ?? route('catalog', ['offers' => 1]) }}" class="focus-ring inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-xs font-black text-indigo-900 shadow-lg transition hover:bg-purple-50">
-                        {{ $settings['promo_special_button'] ?? 'Shop Now' }} <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        {{ $settings['promo_special_button'] ?? 'Ver Ofertas Especiales' }} <i class="fa-solid fa-arrow-right text-[10px]"></i>
                     </a>
                 </div>
             </div>
@@ -329,7 +329,7 @@
             <div class="mb-5 flex items-end justify-between">
                 <div>
                     <span class="text-[10px] font-black uppercase tracking-widest text-indigo-600">{{ $settings['brands_tag'] ?? 'MARCAS OFICIALES' }}</span>
-                    <h2 id="brands-title" class="mt-1 font-display text-xl font-extrabold text-slate-900 sm:text-2xl">{{ $settings['brands_title'] ?? 'Top Brands' }}</h2>
+                    <h2 id="brands-title" class="mt-1 font-display text-xl font-extrabold text-slate-900 sm:text-2xl">{{ $settings['brands_title'] ?? 'Nuestras Marcas Oficiales' }}</h2>
                 </div>
                 <i class="fa-solid fa-award text-2xl text-indigo-400"></i>
             </div>
@@ -354,9 +354,9 @@
     <section aria-labelledby="testimonials-title" class="rounded-2xl bg-[#0b1730] p-6 sm:p-10 text-white shadow-xl">
         <div class="mb-8 flex items-end justify-between gap-3">
             <div>
-                <span class="text-[10px] font-black uppercase tracking-widest text-indigo-400">TESTIMONIALS</span>
-                <h2 id="testimonials-title" class="mt-1 font-display text-2xl font-extrabold sm:text-3xl text-white">What Our Customers Say</h2>
-                <p class="mt-2 text-xs text-slate-400">Real people. Real experiences. Here's why thousands trust us in Peru.</p>
+                <span class="text-[10px] font-black uppercase tracking-widest text-indigo-400">TESTIMONIOS</span>
+                <h2 id="testimonials-title" class="mt-1 font-display text-2xl font-extrabold sm:text-3xl text-white">Lo que Dicen Nuestros Clientes</h2>
+                <p class="mt-2 text-xs text-slate-400">Experiencias reales. Conoce por qué cientos de clientes confían en nosotros en todo el Perú.</p>
             </div>
         </div>
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -368,7 +368,7 @@
                         <div class="text-xs text-amber-400 flex gap-0.5"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
                     </div>
                 </div>
-                <p class="text-xs leading-relaxed text-slate-300">"Amazing products and super fast delivery. Excellent customer service via WhatsApp!"</p>
+                <p class="text-xs leading-relaxed text-slate-300">"¡Excelente atención por WhatsApp y entrega rápida! Mi laptop llegó sellada, con boleta y en perfecto estado."</p>
             </div>
             <div class="rounded-2xl bg-white/5 border border-white/10 p-5 text-white backdrop-blur">
                 <div class="mb-3 flex items-center gap-3">
@@ -378,7 +378,7 @@
                         <div class="text-xs text-amber-400 flex gap-0.5"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
                     </div>
                 </div>
-                <p class="text-xs leading-relaxed text-slate-300">"Best online store I've used so far. Genuine products with warranty and fast guidance."</p>
+                <p class="text-xs leading-relaxed text-slate-300">"La mejor experiencia de compra. Me asesoraron con mucha paciencia para elegir el equipo perfecto para mi trabajo y estudios."</p>
             </div>
             <div class="rounded-2xl bg-white/5 border border-white/10 p-5 text-white backdrop-blur">
                 <div class="mb-3 flex items-center gap-3">
@@ -388,7 +388,7 @@
                         <div class="text-xs text-amber-400 flex gap-0.5"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
                     </div>
                 </div>
-                <p class="text-xs leading-relaxed text-slate-300">"The customer service is excellent. Will shop again for gaming gear!"</p>
+                <p class="text-xs leading-relaxed text-slate-300">"Gran catálogo y precios competitivos. Compré una laptop gamer y accesorios, todo 100% original con garantía."</p>
             </div>
         </div>
     </section>
@@ -399,11 +399,11 @@
         <div class="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 shadow-sm border border-indigo-100">
             <i class="fa-regular fa-envelope-open text-2xl"></i>
         </div>
-        <h2 class="font-display text-2xl font-black text-slate-900 sm:text-3xl">{{ $settings['newsletter_title'] ?? 'Join Our Newsletter' }}</h2>
-        <p class="mb-6 mt-2 max-w-md text-xs sm:text-sm text-slate-500">{{ $settings['newsletter_subtitle'] ?? 'Get the latest updates, deals and exclusive offers straight to your inbox.' }}</p>
+        <h2 class="font-display text-2xl font-black text-slate-900 sm:text-3xl">{{ $settings['newsletter_title'] ?? 'Suscríbete a Nuestras Novedades' }}</h2>
+        <p class="mb-6 mt-2 max-w-md text-xs sm:text-sm text-slate-500">{{ $settings['newsletter_subtitle'] ?? 'Recibe promociones exclusivas, nuevos ingresos y descuentos especiales directamente.' }}</p>
         <form class="flex w-full max-w-md flex-col sm:flex-row gap-2" onsubmit="event.preventDefault();">
-            <input type="email" placeholder="Enter your email address" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-100">
-            <button type="button" class="whitespace-nowrap rounded-xl bg-indigo-600 px-6 py-3 text-xs font-black text-white transition hover:bg-indigo-700 shadow-md shadow-indigo-600/20">Subscribe</button>
+            <input type="email" placeholder="Ingresa tu correo electrónico" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-100">
+            <button type="button" class="whitespace-nowrap rounded-xl bg-indigo-600 px-6 py-3 text-xs font-black text-white transition hover:bg-indigo-700 shadow-md shadow-indigo-600/20">Suscribirme</button>
         </form>
     </section>
     @endif
@@ -413,22 +413,22 @@
         <div class="flex items-center gap-4">
             <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/10 text-xl text-indigo-300"><i class="fa-solid fa-shield-check"></i></div>
             <div>
-                <h3 class="font-bold text-white text-sm">Shop with Confidence</h3>
-                <p class="mt-0.5 text-[11px] text-slate-400">Your satisfaction is our priority. Safe & reliable shopping.</p>
+                <h3 class="font-bold text-white text-sm">Compra con Confianza</h3>
+                <p class="mt-0.5 text-[11px] text-slate-400">Tu satisfacción es nuestra prioridad. Compra fácil, segura y garantizada.</p>
             </div>
         </div>
         <div class="flex items-center gap-4">
             <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/10 text-xl text-teal-300"><i class="fa-solid fa-medal"></i></div>
             <div>
-                <h3 class="font-bold text-white text-sm">Trusted Brand</h3>
-                <p class="mt-0.5 text-[11px] text-slate-400">Official products with guaranteed technical warranty.</p>
+                <h3 class="font-bold text-white text-sm">Marcas Confiables</h3>
+                <p class="mt-0.5 text-[11px] text-slate-400">Productos 100% originales con respaldo de garantía técnica oficial.</p>
             </div>
         </div>
         <div class="flex items-center gap-4">
             <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/10 text-xl text-purple-300"><i class="fa-solid fa-truck-fast"></i></div>
             <div>
-                <h3 class="font-bold text-white text-sm">Fast & Secure Delivery</h3>
-                <p class="mt-0.5 text-[11px] text-slate-400">Safe delivery throughout all regions in Peru.</p>
+                <h3 class="font-bold text-white text-sm">Envíos Rápidos y Seguros</h3>
+                <p class="mt-0.5 text-[11px] text-slate-400">Entregas puntuales y seguras a todas las regiones del Perú.</p>
             </div>
         </div>
     </section>

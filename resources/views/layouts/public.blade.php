@@ -54,9 +54,7 @@
     <meta name="twitter:image" content="@yield('og_image', $defaultOgImage)">
 
     <!-- Search Console Verifications (Google, Bing, Yahoo) -->
-    @if(!empty($settings['google_site_verification']))
-        <meta name="google-site-verification" content="{{ $settings['google_site_verification'] }}">
-    @endif
+    <meta name="google-site-verification" content="{{ !empty($settings['google_site_verification']) ? $settings['google_site_verification'] : 'google0020d66592336fd4' }}">
     @if(!empty($settings['bing_site_verification']))
         <meta name="msvalidate.01" content="{{ $settings['bing_site_verification'] }}">
     @endif
