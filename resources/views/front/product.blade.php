@@ -1,17 +1,127 @@
 @extends('layouts.public')
 
-@section('title', $product->name)
-@section('meta_description', Str::limit(strip_tags($product->description ?: $product->name), 155))
-
-@section('content')
 @php
     $whatsappNumber = preg_replace('/[^0-9]/', '', \App\Models\Setting::where('key', 'whatsapp_number')->value('value') ?? '');
+    $storeName = \App\Models\Setting::where('key', 'store_name')->value('value') ?? 'PORTÁTILES PERÚ';
     $price = $product->is_offer && $product->offer_price ? $product->offer_price : $product->price;
     $gallery = $product->images->sortByDesc('is_main')->values();
     $mainImage = $gallery->first()?->image_path;
     $mainImageUrl = $mainImage ? (filter_var($mainImage, FILTER_VALIDATE_URL) ? $mainImage : asset('storage/' . $mainImage)) : null;
     $whatsappMessage = 'Hola, quiero COMPRAR POR WHATSAPP: ' . $product->name . ' — S/ ' . number_format((float) $price, 2) . '. ' . route('product.show', $product->slug);
+    $seoDescription = Str::limit(strip_tags($product->description ?: ($product->name . ' con garantía y envíos a todo el Perú en ' . $storeName . '. Consulta precio y disponibilidad.')), 155);
+    $seoKeywords = implode(', ', array_filter([$product->name, $product->brand?->name, $product->category?->name, 'precio peru', 'comprar en lima', 'garantia']));
 @endphp
+
+@section('title', $product->name)
+@section('meta_description', $seoDescription)
+@section('meta_keywords', $seoKeywords)
+@section('og_type', 'product')
+@section('og_title', $product->name . ' — S/ ' . number_format((float)$price, 2))
+@section('og_description', $seoDescription)
+@if($mainImageUrl)
+@section('og_image', $mainImageUrl)
+@endif
+
+@section('og_extra')
+    <meta property="product:price:amount" content="{{ number_format((float)$price, 2, '.', '') }}">
+    <meta property="product:price:currency" content="PEN">
+    <meta property="product:availability" content="{{ $product->stock > 0 ? 'in stock' : 'out of stock' }}">
+    @if($product->brand)
+    <meta property="product:brand" content="{{ $product->brand->name }}">
+    @endif
+    @if($product->category)
+    <meta property="product:category" content="{{ $product->category->name }}">
+    @endif
+@endsection
+
+@section('head')
+@php
+    $galleryUrls = $gallery->map(fn($img) => filter_var($img->image_path, FILTER_VALIDATE_URL) ? $img->image_path : asset('storage/' . $img->image_path))->values()->all();
+    if (empty($galleryUrls) && $mainImageUrl) {
+        $galleryUrls = [$mainImageUrl];
+    }
+@endphp
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org/",
+    "@@type": "Product",
+    "name": {{ json_encode($product->name) }},
+    "image": {{ json_encode($galleryUrls) }},
+    "description": {{ json_encode(Str::limit(strip_tags($product->description ?: $product->name), 500)) }},
+    "sku": {{ json_encode($product->code ?: (string)$product->id) }},
+    "mpn": {{ json_encode($product->code ?: (string)$product->id) }},
+    @if($product->brand)
+    "brand": {
+        "@@type": "Brand",
+        "name": {{ json_encode($product->brand->name) }}
+    },
+    @endif
+    @if($product->category)
+    "category": {{ json_encode($product->category->name) }},
+    @endif
+    "offers": {
+        "@@type": "Offer",
+        "url": "{{ route('product.show', $product->slug) }}",
+        "priceCurrency": "PEN",
+        "price": "{{ number_format((float)$price, 2, '.', '') }}",
+        "priceValidUntil": "{{ now()->addMonths(6)->toDateString() }}",
+        "itemCondition": "{{ $product->state === 'Usado' ? 'https://schema.org/UsedCondition' : ($product->state === 'Seminuevo' ? 'https://schema.org/RefurbishedCondition' : 'https://schema.org/NewCondition') }}",
+        "availability": "{{ $product->stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock' }}",
+        "seller": {
+            "@@type": "Organization",
+            "name": {{ json_encode($storeName) }}
+        }
+    }
+    @if($product->reviews_count > 0)
+    ,
+    "aggregateRating": {
+        "@@type": "AggregateRating",
+        "ratingValue": "{{ round((float)$product->reviews_avg_rating, 1) }}",
+        "reviewCount": "{{ $product->reviews_count }}",
+        "bestRating": "5",
+        "worstRating": "1"
+    }
+    @endif
+}
+</script>
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@@type": "BreadcrumbList",
+    "itemListElement": [
+        {
+            "@@type": "ListItem",
+            "position": 1,
+            "name": "Inicio",
+            "item": "{{ route('home') }}"
+        },
+        @if($product->category)
+        {
+            "@@type": "ListItem",
+            "position": 2,
+            "name": {{ json_encode($product->category->name) }},
+            "item": "{{ route('catalog', ['category' => $product->category->slug]) }}"
+        },
+        {
+            "@@type": "ListItem",
+            "position": 3,
+            "name": {{ json_encode($product->name) }},
+            "item": "{{ route('product.show', $product->slug) }}"
+        }
+        @else
+        {
+            "@@type": "ListItem",
+            "position": 2,
+            "name": {{ json_encode($product->name) }},
+            "item": "{{ route('product.show', $product->slug) }}"
+        }
+        @endif
+    ]
+}
+</script>
+@endsection
+
+@section('content')
 
 <div class="mx-auto max-w-[1440px] px-4 py-6 sm:px-7 sm:py-8">
     <!-- Breadcrumb -->

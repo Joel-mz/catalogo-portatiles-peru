@@ -1,7 +1,52 @@
 @extends('layouts.public')
 
-@section('title', 'Catálogo de equipos')
-@section('meta_description', 'Explora laptops y tecnología disponibles en MPC Antigravity. Filtra por categoría, marca y precio.')
+@php
+    $selectedCategory = request('category') ? $categories->firstWhere('slug', request('category')) : null;
+    $selectedBrand = request('brand') ? $brands->firstWhere('slug', request('brand')) : null;
+    
+    if ($selectedCategory && $selectedBrand) {
+        $pageTitle = $selectedCategory->name . ' ' . $selectedBrand->name . ' — Catálogo';
+        $pageDescription = 'Explora ' . $selectedCategory->name . ' de la marca ' . $selectedBrand->name . ' en Perú. Precios actualizados, garantía y envíos nacionales.';
+    } elseif ($selectedCategory) {
+        $pageTitle = 'Catálogo de ' . $selectedCategory->name;
+        $pageDescription = 'Encuentra las mejores ' . $selectedCategory->name . ' en Perú. Amplio stock, precios competitivos y garantía oficial.';
+    } elseif ($selectedBrand) {
+        $pageTitle = 'Productos ' . $selectedBrand->name . ' — Catálogo';
+        $pageDescription = 'Descubre toda la línea de productos ' . $selectedBrand->name . ' en Perú. Ofertas, fichas técnicas y atención directa por WhatsApp.';
+    } elseif (request('q')) {
+        $pageTitle = 'Buscar: ' . e(request('q')) . ' — Catálogo';
+        $pageDescription = 'Resultados de búsqueda para "' . e(request('q')) . '" en nuestro catálogo virtual de tecnología en Perú.';
+    } elseif (request('offers')) {
+        $pageTitle = 'Ofertas Especiales y Descuentos — Catálogo';
+        $pageDescription = 'Aprovecha las mejores ofertas, descuentos y promociones en laptops y equipos tecnológicos en Perú.';
+    } else {
+        $pageTitle = 'Catálogo Completo de Laptops y Tecnología';
+        $pageDescription = 'Explora nuestro catálogo virtual de laptops gamer, computadoras, cámaras de seguridad e impresoras en Perú. Filtra por categoría, marca y precio.';
+    }
+@endphp
+
+@section('title', $pageTitle)
+@section('meta_description', $pageDescription)
+@section('canonical_url', request()->url())
+
+@section('head')
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@@type": "ItemList",
+    "itemListElement": [
+        @foreach($products as $index => $prod)
+        {
+            "@@type": "ListItem",
+            "position": {{ $index + 1 }},
+            "url": "{{ route('product.show', $prod->slug) }}",
+            "name": {{ json_encode($prod->name) }}
+        }{{ $loop->last ? '' : ',' }}
+        @endforeach
+    ]
+}
+</script>
+@endsection
 
 @section('content')
 @php

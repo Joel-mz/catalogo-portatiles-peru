@@ -1,17 +1,21 @@
 @extends('layouts.public')
 
-@section('title', 'Tecnología para avanzar')
-@section('meta_description', 'Encuentra laptops y tecnología seleccionada por ' . ($settings['store_name'] ?? 'Portátiles Perú') . '. Compra y recibe asesoría directa por WhatsApp.')
-
-@section('content')
 @php
     $settings = \App\Models\Setting::pluck('value', 'key');
+    $storeName = $settings['store_name'] ?? 'PORTÁTILES PERÚ';
+    $customHomeTitle = $settings['seo_meta_title'] ?? 'Catálogo Virtual de Laptops y Tecnología en Perú';
+    $customHomeDesc = $settings['seo_meta_description'] ?? ('Catálogo virtual de laptops gamer, computadoras, cámaras de seguridad e impresoras en Perú. Encuentra los mejores precios con garantía y envíos nacionales.');
     $leadProduct = $featuredProducts->first() ?? $offerProducts->first();
     $leadImage = $leadProduct?->images->first()?->image_path;
     $whatsappNumber = preg_replace('/[^0-9]/', '', $settings['whatsapp_number'] ?? '');
     $leadPrice = $leadProduct?->is_offer && $leadProduct?->offer_price ? $leadProduct->offer_price : $leadProduct?->price;
     $discount = $leadProduct && $leadProduct->price > 0 && $leadProduct->offer_price ? round((1 - ($leadProduct->offer_price / $leadProduct->price)) * 100) : null;
 @endphp
+
+@section('title', $customHomeTitle)
+@section('meta_description', $customHomeDesc)
+
+@section('content')
 
 <div class="mx-auto max-w-[1440px] space-y-10 px-4 py-6 sm:space-y-12 sm:px-7 sm:py-8">
     

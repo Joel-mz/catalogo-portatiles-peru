@@ -3,16 +3,114 @@
 <head>
     @php
         $settings = \App\Models\Setting::pluck('value', 'key');
-        $storeName = $settings['store_name'] ?? 'MPC Antigravity';
+        $storeName = $settings['store_name'] ?? 'PORTÁTILES PERÚ';
         $primaryColor = $settings['primary_color'] ?? '#2855d9';
         $topBannerText = $settings['top_banner_text'] ?? '';
         $facebookUrl = $settings['facebook_url'] ?? '';
         $instagramUrl = $settings['instagram_url'] ?? '';
+        $tiktokUrl = $settings['tiktok_url'] ?? '';
+        $youtubeUrl = $settings['youtube_url'] ?? '';
+        $storePhone = $settings['whatsapp_number'] ?? '+51999999999';
+        $storeEmail = $settings['store_email'] ?? '';
+        $storeLogo = !empty($settings['store_logo']) ? (filter_var($settings['store_logo'], FILTER_VALIDATE_URL) ? $settings['store_logo'] : asset('storage/' . $settings['store_logo'])) : null;
+        
+        // SEO Defaults
+        $defaultSeoTitle = $settings['seo_meta_title'] ?? ($storeName . ' — Catálogo Virtual de Laptops y Tecnología en Perú');
+        $defaultSeoDesc = $settings['seo_meta_description'] ?? 'Descubre nuestro catálogo virtual de laptops gamer, computadoras, cámaras de seguridad e impresoras en Perú con los mejores precios, garantía y envíos a todo el país.';
+        $defaultSeoKeywords = $settings['seo_keywords'] ?? 'laptops peru, catalogo virtual, computadoras, camaras de seguridad, impresoras, portatiles peru, tecnologia lima peru';
+        $defaultOgImage = $storeLogo ?: url('/logo.png');
     @endphp
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="@yield('meta_description', 'Laptops y tecnología seleccionada por ' . $storeName . ' en Perú.')">
-    <title>@yield('title', 'Catálogo') — {{ $storeName }}</title>
+    
+    <!-- Primary SEO Meta Tags -->
+    <title>@yield('title', $defaultSeoTitle) — {{ $storeName }}</title>
+    <meta name="title" content="@yield('title', $defaultSeoTitle) — {{ $storeName }}">
+    <meta name="description" content="@yield('meta_description', $defaultSeoDesc)">
+    <meta name="keywords" content="@yield('meta_keywords', $defaultSeoKeywords)">
+    <meta name="robots" content="@yield('meta_robots', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1')">
+    <meta name="author" content="{{ $storeName }}">
+    <meta name="publisher" content="{{ $storeName }}">
+    <meta name="geo.region" content="PE">
+    <meta name="geo.placename" content="Perú">
+    <link rel="canonical" href="@yield('canonical_url', url()->current())">
+
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content="@yield('og_type', 'website')">
+    <meta property="og:locale" content="es_PE">
+    <meta property="og:site_name" content="{{ $storeName }}">
+    <meta property="og:url" content="@yield('og_url', url()->current())">
+    <meta property="og:title" content="@yield('og_title', trim($__env->yieldContent('title')) ? trim($__env->yieldContent('title')) . ' — ' . $storeName : $defaultSeoTitle)">
+    <meta property="og:description" content="@yield('og_description', trim($__env->yieldContent('meta_description')) ?: $defaultSeoDesc)">
+    <meta property="og:image" content="@yield('og_image', $defaultOgImage)">
+    <meta property="og:image:secure_url" content="@yield('og_image', $defaultOgImage)">
+    <meta property="og:image:alt" content="@yield('og_image_alt', $storeName)">
+    @yield('og_extra')
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="@yield('og_title', trim($__env->yieldContent('title')) ? trim($__env->yieldContent('title')) . ' — ' . $storeName : $defaultSeoTitle)">
+    <meta name="twitter:description" content="@yield('og_description', trim($__env->yieldContent('meta_description')) ?: $defaultSeoDesc)">
+    <meta name="twitter:image" content="@yield('og_image', $defaultOgImage)">
+
+    <!-- Google Site Verification & Search Console (if provided) -->
+    @if(!empty($settings['google_site_verification']))
+        <meta name="google-site-verification" content="{{ $settings['google_site_verification'] }}">
+    @endif
+
+    <!-- JSON-LD Structured Data for Google / Schema.org -->
+    <script type="application/ld+json">
+    {
+        "@@context": "https://schema.org",
+        "@@graph": [
+            {
+                "@@type": "WebSite",
+                "@@id": "{{ url('/') }}/#website",
+                "url": "{{ url('/') }}",
+                "name": "{{ $storeName }}",
+                "description": "{{ $defaultSeoDesc }}",
+                "inLanguage": "es-PE",
+                "potentialAction": {
+                    "@@type": "SearchAction",
+                    "target": {
+                        "@@type": "EntryPoint",
+                        "urlTemplate": "{{ route('catalog') }}?q={search_term_string}"
+                    },
+                    "query-input": "required name=search_term_string"
+                }
+            },
+            {
+                "@@type": "Store",
+                "@@id": "{{ url('/') }}/#organization",
+                "name": "{{ $storeName }}",
+                "url": "{{ url('/') }}",
+                @if($storeLogo)
+                "logo": "{{ $storeLogo }}",
+                "image": "{{ $storeLogo }}",
+                @endif
+                @if($storePhone)
+                "telephone": "{{ $storePhone }}",
+                @endif
+                @if($storeEmail)
+                "email": "{{ $storeEmail }}",
+                @endif
+                "priceRange": "S/.",
+                "address": {
+                    "@@type": "PostalAddress",
+                    "addressCountry": "PE"
+                },
+                "sameAs": [
+                    @php
+                        $socialLinks = array_values(array_filter([$facebookUrl, $instagramUrl, $tiktokUrl, $youtubeUrl]));
+                    @endphp
+                    @foreach($socialLinks as $idx => $link)
+                        "{{ $link }}"{{ $idx < count($socialLinks) - 1 ? ',' : '' }}
+                    @endforeach
+                ]
+            }
+        ]
+    }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">

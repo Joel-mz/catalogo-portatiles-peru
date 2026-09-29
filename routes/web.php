@@ -20,6 +20,8 @@ Route::get('/', [FrontController::class, 'home'])->name('home');
 Route::get('/catalogo', [FrontController::class, 'catalog'])->name('catalog');
 Route::get('/producto/{slug}', [FrontController::class, 'show'])->name('product.show');
 Route::get('/producto/{slug}/pdf', [FrontController::class, 'downloadPdf'])->name('product.pdf');
+Route::get('/sitemap.xml', [FrontController::class, 'sitemap'])->name('sitemap');
+Route::get('/robots.txt', [FrontController::class, 'robots'])->name('robots');
 Route::post('/api/checkout', [FrontController::class, 'checkout'])->middleware('throttle:10,1')->name('api.checkout');
 Route::post('/producto/{slug}/opiniones', [FrontController::class, 'review'])->middleware('throttle:5,1')->name('product.review');
 

@@ -361,6 +361,53 @@
                     </div>
                 </div>
 
+                <!-- Optimización SEO y Google -->
+                <div class="pt-4 pb-8 border-b border-slate-100/60">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-magnifying-glass-chart text-indigo-600"></i>
+                                Posicionamiento SEO y Google
+                            </h3>
+                            <p class="text-xs text-slate-500 mt-1">Configura los metadatos globales para que Google indexe tu catálogo virtual y los productos aparezcan en búsquedas.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <a href="{{ route('sitemap') }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-xl transition shadow-xs border border-indigo-200/50">
+                                <i class="fa-solid fa-sitemap text-indigo-500"></i> Ver Sitemap XML
+                            </a>
+                            <a href="{{ url('/robots.txt') }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition shadow-xs">
+                                <i class="fa-solid fa-robot text-slate-500"></i> Ver Robots.txt
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white/60 p-5 rounded-2xl border border-slate-200/60">
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Título SEO Principal (Meta Title para Google)</label>
+                            <input type="text" name="seo_meta_title" value="{{ $settings['seo_meta_title'] ?? 'PORTÁTILES PERÚ — Catálogo Virtual de Laptops, Computadoras y Tecnología' }}" class="block w-full rounded-xl border-slate-200 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs sm:text-sm px-4 py-2.5" placeholder="Ej: PORTÁTILES PERÚ — Catálogo Virtual de Laptops y Tecnología en Perú">
+                            <p class="mt-1 text-[11px] text-slate-500">Título que aparecerá en los resultados de Google cuando busquen tu tienda o catálogo (Recomendado: 50 a 60 caracteres).</p>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Descripción SEO para Motores de Búsqueda (Meta Description)</label>
+                            <textarea name="seo_meta_description" rows="2" class="block w-full rounded-xl border-slate-200 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs sm:text-sm px-4 py-2.5" placeholder="Ej: Catálogo virtual con el mejor stock de laptops gamer, computadoras, cámaras de seguridad e impresoras en Perú. Envíos a todo el país y garantía real.">{{ $settings['seo_meta_description'] ?? 'Catálogo virtual con el mejor stock de laptops gamer, computadoras de oficina, cámaras de seguridad e impresoras en Perú. Precios actualizados, garantía y envíos nacionales.' }}</textarea>
+                            <p class="mt-1 text-[11px] text-slate-500">Texto descriptivo que muestra Google debajo del título del sitio (Recomendado: 140 a 160 caracteres).</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Palabras Clave SEO (Keywords)</label>
+                            <input type="text" name="seo_keywords" value="{{ $settings['seo_keywords'] ?? 'laptops peru, computadoras lima, catalogo virtual, camaras de seguridad ezviz, tecnologia peru, comprar laptops, precios computadoras, portatiles peru' }}" class="block w-full rounded-xl border-slate-200 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs sm:text-sm px-4 py-2.5" placeholder="laptops peru, computadoras, catalogo virtual...">
+                            <p class="mt-1 text-[11px] text-slate-500">Palabras o frases separadas por comas que describen tus productos.</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Código de Verificación de Google (Search Console)</label>
+                            <input type="text" name="google_site_verification" value="{{ $settings['google_site_verification'] ?? '' }}" class="block w-full rounded-xl border-slate-200 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs sm:text-sm px-4 py-2.5 font-mono" placeholder="Ej: dGhpcyBpcyBhbiBleGFtcGxl">
+                            <p class="mt-1 text-[11px] text-slate-500">Código de la metaetiqueta que te da Google Search Console para verificar tu dominio.</p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Backup System -->
                 <div class="pt-4">
                     <h3 class="text-lg font-bold text-slate-800 mb-2">Copia de Seguridad (Backup)</h3>

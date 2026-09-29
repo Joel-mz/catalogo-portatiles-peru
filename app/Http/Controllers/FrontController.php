@@ -247,4 +247,29 @@ class FrontController extends Controller
 
         return redirect(route('product.show', $product->slug) . '#opiniones')->with('review_submitted', 'Gracias por compartir tu opinión.');
     }
+
+    public function sitemap()
+    {
+        $products = Product::with(['images', 'category', 'brand'])
+            ->where('status', true)
+            ->latest('updated_at')
+            ->get();
+
+        $categories = Category::where('status', true)->get();
+        $brands = Brand::where('status', true)->get();
+        $settings = Setting::pluck('value', 'key');
+        $storeName = $settings['store_name'] ?? 'Catálogo Virtual';
+
+        return response()->view('front.sitemap', compact('products', 'categories', 'brands', 'storeName'), 200)
+            ->header('Content-Type', 'application/xml; charset=utf-8');
+    }
+
+    public function robots()
+    {
+        $sitemapUrl = route('sitemap');
+        $content = "User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /dashboard\nDisallow: /login\nDisallow: /register\nDisallow: /password/\nDisallow: /api/\n\nSitemap: {$sitemapUrl}\n";
+
+        return response($content, 200)
+            ->header('Content-Type', 'text/plain; charset=utf-8');
+    }
 }
