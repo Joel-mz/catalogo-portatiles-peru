@@ -403,7 +403,13 @@
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1.5">Código de Verificación de Google (Search Console)</label>
                             <input type="text" name="google_site_verification" value="{{ $settings['google_site_verification'] ?? '' }}" class="block w-full rounded-xl border-slate-200 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs sm:text-sm px-4 py-2.5 font-mono" placeholder="Ej: dGhpcyBpcyBhbiBleGFtcGxl">
-                            <p class="mt-1 text-[11px] text-slate-500">Código de la metaetiqueta que te da Google Search Console para verificar tu dominio.</p>
+                            <p class="mt-1 text-[11px] text-slate-500">Código de la metaetiqueta que te da Google Search Console.</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Código de Verificación de Bing Webmaster</label>
+                            <input type="text" name="bing_site_verification" value="{{ $settings['bing_site_verification'] ?? '' }}" class="block w-full rounded-xl border-slate-200 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xs sm:text-sm px-4 py-2.5 font-mono" placeholder="Ej: 1234567890ABCDEF1234567890ABCDEF">
+                            <p class="mt-1 text-[11px] text-slate-500">Código de metaetiqueta para Bing & Yahoo Search Webmasters.</p>
                         </div>
                     </div>
                 </div>

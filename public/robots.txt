@@ -7,4 +7,6 @@ Disallow: /register
 Disallow: /password/
 Disallow: /api/
 
+# Sitemaps
+Sitemap: https://catalogo-portatiles-peru.onrender.com/sitemap.xml
 Sitemap: /sitemap.xml

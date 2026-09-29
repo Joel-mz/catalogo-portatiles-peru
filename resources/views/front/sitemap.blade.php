@@ -50,7 +50,7 @@
                     $imgUrl = filter_var($img->image_path, FILTER_VALIDATE_URL) ? $img->image_path : asset('storage/' . $img->image_path);
                 @endphp
                 <image:image>
-                    <image:loc>{{ $imgUrl }}</image:loc>
+                    <image:loc>{{ htmlspecialchars($imgUrl, ENT_XML1, 'UTF-8') }}</image:loc>
                     <image:title>{{ htmlspecialchars($product->name, ENT_XML1, 'UTF-8') }}</image:title>
                     <image:caption>{{ htmlspecialchars(Str::limit(strip_tags($product->description ?: $product->name), 150), ENT_XML1, 'UTF-8') }}</image:caption>
                 </image:image>

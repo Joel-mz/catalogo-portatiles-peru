@@ -198,7 +198,7 @@
                 <a href="{{ route('catalog', ['category' => $category->slug]) }}" class="group flex flex-col items-center gap-2.5 min-w-[76px] sm:min-w-[90px]">
                     <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white flex items-center justify-center shadow-sm border border-slate-200/80 transition duration-300 group-hover:border-indigo-400 group-hover:shadow-md p-3.5 group-hover:-translate-y-1">
                         @if($category->image)
-                            <img src="{{ filter_var($category->image, FILTER_VALIDATE_URL) ? $category->image : asset('storage/' . $category->image) }}" alt="{{ $category->name }}" class="w-full h-full object-contain transition group-hover:scale-110">
+                            <img src="{{ filter_var($category->image, FILTER_VALIDATE_URL) ? $category->image : asset('storage/' . $category->image) }}" alt="{{ $category->name }} — Categoría" width="60" height="60" loading="lazy" decoding="async" class="w-full h-full object-contain transition group-hover:scale-110">
                         @else
                             @php
                                 $categoryName = strtolower($category->name);
@@ -340,7 +340,7 @@
                     @endphp
                     <a href="{{ route('catalog', ['brand' => $brand->slug]) }}" class="focus-ring group flex min-h-[68px] items-center justify-center rounded-xl border border-slate-100 bg-slate-50/70 p-3 text-center transition duration-200 hover:border-indigo-300 hover:bg-indigo-50/50 hover:shadow-sm">
                         @if($brandLogoUrl)
-                            <img src="{{ $brandLogoUrl }}" alt="{{ $brand->name }}" class="max-h-8 max-w-[120px] object-contain transition group-hover:scale-105" title="{{ $brand->name }}">
+                            <img src="{{ $brandLogoUrl }}" alt="{{ $brand->name }} — Marca" width="120" height="32" loading="lazy" decoding="async" class="max-h-8 max-w-[120px] object-contain transition group-hover:scale-105" title="{{ $brand->name }}">
                         @else
                             <span class="text-xs font-black tracking-wide text-slate-700 group-hover:text-indigo-700">{{ $brand->name }}</span>
                         @endif

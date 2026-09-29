@@ -36,7 +36,7 @@
         <!-- Product Image -->
         <a href="{{ route('product.show', $product->slug) }}" class="focus-ring block aspect-square w-full overflow-hidden">
             @if($imagePath)
-                <img src="{{ filter_var($imagePath, FILTER_VALIDATE_URL) ? $imagePath : asset('storage/' . $imagePath) }}" alt="{{ $product->name }}" loading="lazy" class="h-full w-full object-contain p-2 transition-transform duration-500 group-hover:scale-105">
+                <img src="{{ filter_var($imagePath, FILTER_VALIDATE_URL) ? $imagePath : asset('storage/' . $imagePath) }}" alt="{{ $product->name }} — Catálogo" loading="lazy" decoding="async" width="300" height="300" class="h-full w-full object-contain p-2 transition-transform duration-500 group-hover:scale-105">
             @else
                 <div class="flex h-full w-full items-center justify-center rounded-xl bg-gradient-to-br from-slate-100 to-indigo-50/50 text-3xl text-indigo-400">
                     <i class="fa-solid fa-laptop"></i>

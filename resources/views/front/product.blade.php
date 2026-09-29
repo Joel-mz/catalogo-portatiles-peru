@@ -170,7 +170,10 @@
                 @if($mainImage)
                     <img id="main-product-image" 
                          src="{{ filter_var($mainImage, FILTER_VALIDATE_URL) ? $mainImage : asset('storage/' . $mainImage) }}" 
-                         alt="{{ $product->name }}" 
+                         alt="{{ $product->name }} — Vista Principal" 
+                         width="600"
+                         height="600"
+                         decoding="async"
                          class="relative z-10 h-full w-full object-contain transition-transform duration-150 ease-out select-none cursor-zoom-in"
                          loading="eager">
                 @else
@@ -194,7 +197,7 @@
                         <button type="button" 
                                 onclick="switchMainImage('{{ $imgUrl }}', this)" 
                                 class="thumbnail-btn relative aspect-square h-20 w-20 shrink-0 overflow-hidden rounded-2xl border-2 {{ $loop->first ? 'border-indigo-600 ring-2 ring-indigo-500/20' : 'border-slate-200 hover:border-indigo-300' }} bg-white p-2 transition-all duration-200">
-                            <img src="{{ $imgUrl }}" alt="{{ $product->name }} miniatura {{ $loop->iteration }}" class="h-full w-full object-contain">
+                            <img src="{{ $imgUrl }}" alt="{{ $product->name }} miniatura {{ $loop->iteration }}" width="80" height="80" loading="lazy" decoding="async" class="h-full w-full object-contain">
                         </button>
                     @endforeach
                 </div>

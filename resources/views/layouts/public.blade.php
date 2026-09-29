@@ -53,10 +53,24 @@
     <meta name="twitter:description" content="@yield('og_description', trim($__env->yieldContent('meta_description')) ?: $defaultSeoDesc)">
     <meta name="twitter:image" content="@yield('og_image', $defaultOgImage)">
 
-    <!-- Google Site Verification & Search Console (if provided) -->
+    <!-- Search Console Verifications (Google, Bing, Yahoo) -->
     @if(!empty($settings['google_site_verification']))
         <meta name="google-site-verification" content="{{ $settings['google_site_verification'] }}">
     @endif
+    @if(!empty($settings['bing_site_verification']))
+        <meta name="msvalidate.01" content="{{ $settings['bing_site_verification'] }}">
+    @endif
+    <meta name="theme-color" content="{{ $primaryColor }}">
+    <meta name="application-name" content="{{ $storeName }}">
+    <meta name="apple-mobile-web-app-title" content="{{ $storeName }}">
+
+    <!-- DNS Prefetch & Preconnect for Core Web Vitals (>90 Score) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
 
     <!-- JSON-LD Structured Data for Google / Schema.org -->
     <script type="application/ld+json">
@@ -111,8 +125,6 @@
         ]
     }
     </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script>
