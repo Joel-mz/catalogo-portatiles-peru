@@ -102,7 +102,7 @@
                     @disabled($product->stock < 1) 
                     class="focus-ring flex h-9 items-center justify-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50/70 px-2 text-[10px] font-bold text-indigo-700 transition hover:bg-indigo-100 hover:border-indigo-300 disabled:cursor-not-allowed disabled:opacity-40">
                 <i class="fa-solid fa-bag-shopping text-xs"></i>
-                <span class="hidden sm:inline">Carrito</span>
+                <span>Carrito</span>
             </button>
             <a href="https://wa.me/{{ $whatsappNumber }}?text={{ urlencode($message) }}" 
                target="_blank" 

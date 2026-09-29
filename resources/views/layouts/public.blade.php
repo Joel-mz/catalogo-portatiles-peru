@@ -232,10 +232,27 @@
             <!-- Top Row: Brand & Actions (Mobile) -->
             <div class="flex items-center justify-between gap-4 lg:hidden">
                 <div class="flex items-center gap-3">
-                    <a href="{{ auth()->check() ? route('dashboard') : route('login') }}" class="focus-ring flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[{{ $primaryColor }}] to-[#713ee7] text-lg font-black italic text-white shadow-lg">{{ substr($storeName, 0, 1) }}</a>
-                    <a href="{{ route('home') }}" class="focus-ring leading-tight"><span class="block font-display text-sm font-extrabold tracking-tight text-[#111c36] uppercase">{{ $storeName }}</span></a>
+                    <a href="{{ route('home') }}" class="focus-ring flex items-center gap-2.5">
+                        @if($storeLogo)
+                            <img src="{{ $storeLogo }}" alt="{{ $storeName }}" class="h-9 w-auto max-w-[120px] object-contain">
+                        @else
+                            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[{{ $primaryColor }}] to-[#713ee7] text-lg font-black italic text-white shadow-lg">{{ substr($storeName, 0, 1) }}</span>
+                        @endif
+                        <span class="block font-display text-sm font-extrabold tracking-tight text-[#111c36] uppercase">{{ $storeName }}</span>
+                    </a>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1.5">
+                    @auth
+                        <a href="{{ route('dashboard') }}" class="focus-ring flex h-10 items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50 px-2.5 text-xs font-bold text-indigo-700 shadow-xs" title="Panel de Administración">
+                            <i class="fa-solid fa-gauge-high text-xs"></i>
+                            <span class="text-[11px]">Admin</span>
+                        </a>
+                    @else
+                        <a href="{{ route('login') }}" class="focus-ring flex h-10 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2.5 text-xs font-bold text-slate-700 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 shadow-xs" title="Iniciar sesión de administrador">
+                            <i class="fa-solid fa-arrow-right-to-bracket text-xs text-indigo-600"></i>
+                            <span class="text-[11px]">Ingresar</span>
+                        </a>
+                    @endauth
                     <button type="button" data-open-wishlist class="focus-ring relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600" aria-label="Abrir favoritos" title="Mis Favoritos">
                         <i class="fa-regular fa-heart text-base text-rose-500"></i>
                         <span id="wishlist-count-mobile" style="display: none;" class="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-extrabold text-white shadow-sm">0</span>
@@ -249,17 +266,29 @@
             <!-- Search Bar (Mobile & Desktop) & Desktop Layout -->
             <div class="mt-3 flex flex-col gap-3 lg:mt-0 lg:flex-row lg:items-center lg:justify-between">
                 
-                <!-- Desktop Brand (Hidden on Mobile) -->
+                <!-- Desktop Brand (Links to Home) -->
                 <div class="hidden lg:flex shrink-0 items-center gap-3">
-                    <a href="{{ auth()->check() ? route('dashboard') : route('login') }}" class="focus-ring flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[{{ $primaryColor }}] to-[#713ee7] text-xl font-black italic text-white shadow-lg">{{ substr($storeName, 0, 1) }}</a>
-                    <a href="{{ route('home') }}" class="focus-ring leading-tight"><span class="block font-display text-base font-extrabold tracking-tight text-[#111c36] uppercase">{{ $storeName }}</span></a>
+                    <a href="{{ route('home') }}" class="focus-ring flex items-center gap-3 group">
+                        @if($storeLogo)
+                            <img src="{{ $storeLogo }}" alt="{{ $storeName }}" class="h-10 w-auto max-w-[150px] object-contain transition group-hover:scale-105">
+                        @else
+                            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[{{ $primaryColor }}] to-[#713ee7] text-xl font-black italic text-white shadow-lg transition group-hover:scale-105">{{ substr($storeName, 0, 1) }}</div>
+                        @endif
+                        <div class="leading-tight">
+                            <span class="block font-display text-base font-extrabold tracking-tight text-[#111c36] uppercase group-hover:text-indigo-600 transition">{{ $storeName }}</span>
+                            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">Catálogo Oficial</span>
+                        </div>
+                    </a>
                 </div>
 
-                <!-- Search Bar -->
-                <form action="{{ route('catalog') }}" method="GET" role="search" class="flex h-11 flex-1 min-w-0 max-w-xl lg:mx-4 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 focus-within:border-[#536be2] focus-within:bg-white focus-within:ring-2 focus-within:ring-indigo-100 transition-all">
+                <!-- Search Bar (Styled Form) -->
+                <form action="{{ route('catalog') }}" method="GET" role="search" class="flex h-11 flex-1 min-w-0 max-w-xl lg:mx-4 overflow-hidden rounded-2xl border border-slate-200/90 bg-slate-50 shadow-xs focus-within:border-indigo-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-indigo-100 transition-all">
                     <label for="site-search" class="sr-only">Buscar productos</label>
-                    <input id="site-search" type="search" name="q" value="{{ request('q') }}" placeholder="Busca productos, marcas y modelos..." class="min-w-0 flex-1 bg-transparent px-4 text-xs sm:text-sm text-slate-800 outline-none placeholder:text-slate-400">
-                    <button type="submit" aria-label="Buscar" style="background-color: {{ $primaryColor }}" class="focus-ring flex w-12 shrink-0 items-center justify-center text-white transition hover:opacity-90"><i class="fa-solid fa-magnifying-glass text-sm" aria-hidden="true"></i></button>
+                    <div class="flex items-center pl-3.5 text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    </div>
+                    <input id="site-search" type="search" name="q" value="{{ request('q') }}" placeholder="Busca productos, marcas y modelos..." class="min-w-0 flex-1 bg-transparent px-3 text-xs sm:text-sm text-slate-800 outline-none placeholder:text-slate-400 font-medium">
+                    <button type="submit" aria-label="Buscar" style="background-color: {{ $primaryColor }}" class="focus-ring flex w-12 shrink-0 items-center justify-center text-white transition hover:opacity-90"><i class="fa-solid fa-arrow-right text-xs" aria-hidden="true"></i></button>
                 </form>
 
                 <!-- Actions (Desktop & Extra Mobile buttons) -->
@@ -268,8 +297,18 @@
                         <i class="fa-solid fa-moon dark:hidden text-sm"></i>
                         <i class="fa-solid fa-sun hidden dark:inline text-sm"></i>
                     </button>
+
+                    <!-- Login / Admin Dashboard Button (Desktop) -->
                     @auth
-                        <a href="{{ route('dashboard') }}" class="focus-ring flex h-10 shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-blue-700 shadow-xs"><i class="fa-regular fa-user text-sm"></i><span class="hidden sm:inline">Mi cuenta</span></a>
+                        <a href="{{ route('dashboard') }}" class="focus-ring hidden lg:inline-flex h-10 shrink-0 items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50/80 px-3.5 text-xs font-bold text-indigo-700 shadow-xs transition hover:bg-indigo-100 hover:border-indigo-300" title="Panel de Administración">
+                            <i class="fa-solid fa-gauge-high text-sm text-indigo-600"></i>
+                            <span>Panel Admin</span>
+                        </a>
+                    @else
+                        <a href="{{ route('login') }}" class="focus-ring hidden lg:inline-flex h-10 shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-700 shadow-xs transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700" title="Acceso al panel administrativo">
+                            <i class="fa-solid fa-arrow-right-to-bracket text-sm text-indigo-600"></i>
+                            <span>Iniciar Sesión</span>
+                        </a>
                     @endauth
 
                     <!-- Desktop Wishlist Button -->
@@ -289,13 +328,20 @@
             </div>
         </div>
         <nav aria-label="Navegación principal" class="border-t border-slate-100">
-            <div class="hide-scrollbar mx-auto flex max-w-[1440px] items-center gap-2 overflow-x-auto px-4 py-2.5 sm:px-7">
+            <div class="hide-scrollbar mx-auto flex max-w-[1440px] items-center gap-2 overflow-x-auto px-4 py-2 sm:px-7">
                 <a href="{{ route('catalog') }}" onclick="if(window.location.pathname.includes('/catalogo') && typeof toggleFilterDrawer === 'function' && window.innerWidth < 1024) { toggleFilterDrawer(true); return false; }" style="background-color: {{ $primaryColor }}" class="focus-ring flex shrink-0 items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold text-white"><i class="fa-solid fa-bars" aria-hidden="true"></i>Todo el catálogo</a>
-                <a href="{{ route('home') }}" class="focus-ring shrink-0 rounded-lg px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-700">Inicio</a>
-                <a href="{{ route('catalog') }}" class="focus-ring shrink-0 rounded-lg px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-700">Equipos</a>
-                <a href="{{ route('catalog', ['offers' => 1]) }}" class="focus-ring shrink-0 rounded-lg px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-700"><i class="fa-solid fa-bolt mr-1 text-amber-500" aria-hidden="true"></i>Ofertas</a>
-                <a href="{{ route('home') }}#marcas" class="focus-ring shrink-0 rounded-lg px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-700">Marcas</a>
-                <span class="ml-auto hidden shrink-0 items-center gap-2 text-[10px] font-semibold text-slate-500 lg:flex"><i class="fa-solid fa-headset text-[#6042d7]" aria-hidden="true"></i>Te ayudamos a elegir</span>
+                <a href="{{ route('home') }}" class="focus-ring shrink-0 rounded-lg px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-700">Inicio</a>
+                <a href="{{ route('catalog') }}" class="focus-ring shrink-0 rounded-lg px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-700">Equipos</a>
+                <a href="{{ route('catalog', ['offers' => 1]) }}" class="focus-ring shrink-0 rounded-lg px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-700"><i class="fa-solid fa-bolt mr-1 text-amber-500" aria-hidden="true"></i>Ofertas</a>
+                <a href="{{ route('home') }}#marcas" class="focus-ring shrink-0 rounded-lg px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-700">Marcas</a>
+                
+                <!-- Quick link to Admin Panel or Login in navigation -->
+                <div class="ml-auto flex items-center gap-2 shrink-0">
+                    <a href="{{ auth()->check() ? route('dashboard') : route('login') }}" class="focus-ring flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700 transition shadow-xs">
+                        <i class="fa-solid fa-shield-halved text-[11px] text-indigo-500"></i>
+                        <span>{{ auth()->check() ? 'Panel Admin' : 'Acceso Admin' }}</span>
+                    </a>
+                </div>
             </div>
         </nav>
     </header>
@@ -385,24 +431,89 @@
             <div id="cart-items" class="space-y-3"></div>
             <p id="cart-empty" class="hidden rounded-2xl bg-slate-50 px-4 py-10 text-center text-sm text-slate-500">Tu carrito está vacío. Agrega un equipo para continuar.</p>
             <div id="cart-checkout" class="mt-5 hidden">
-                <div class="flex items-center justify-between border-t border-slate-100 py-4"><span class="text-sm font-semibold text-slate-500">Total estimado</span><strong id="cart-total" class="font-display text-2xl font-extrabold text-[#142143]">S/ 0.00</strong></div>
+                <div class="flex items-center justify-between border-t border-slate-100 py-4">
+                    <div>
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total a pagar</span>
+                        <p class="text-[11px] text-slate-400">Sin comisiones adicionales</p>
+                    </div>
+                    <strong id="cart-total" class="font-display text-2xl font-black text-slate-900">S/ 0.00</strong>
+                </div>
+
                 <form id="cart-checkout-form" class="space-y-4" action="{{ route('api.checkout') }}" method="POST">
                     <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                    
                     <div class="grid gap-3 sm:grid-cols-2">
-                        <div><label for="checkout-name" class="mb-1.5 block text-xs font-bold text-slate-600">Nombre completo</label><input id="checkout-name" name="client_name" required maxlength="255" autocomplete="name" class="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-indigo-400 focus:bg-white focus:ring-4 focus:ring-indigo-100"></div>
-                        <div><label for="checkout-phone" class="mb-1.5 block text-xs font-bold text-slate-600">Número celular</label><input id="checkout-phone" name="client_phone" required inputmode="tel" autocomplete="tel" pattern="[0-9+ ().-]{7,20}" class="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-indigo-400 focus:bg-white focus:ring-4 focus:ring-indigo-100"></div>
+                        <!-- Nombre -->
+                        <div>
+                            <label for="checkout-name" class="mb-1.5 block text-xs font-bold text-slate-700">Nombre completo</label>
+                            <div class="flex h-11 items-center rounded-xl border border-slate-200 bg-slate-50 focus-within:border-indigo-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-indigo-100 transition shadow-xs overflow-hidden">
+                                <span class="flex h-full w-10 shrink-0 items-center justify-center text-slate-400 border-r border-slate-100 bg-slate-50/50">
+                                    <i class="fa-solid fa-user text-xs"></i>
+                                </span>
+                                <input id="checkout-name" name="client_name" required maxlength="255" autocomplete="name" placeholder="Ej: Carlos Mendoza" class="min-w-0 flex-1 bg-transparent px-3 text-xs sm:text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400">
+                            </div>
+                        </div>
+
+                        <!-- Celular -->
+                        <div>
+                            <label for="checkout-phone" class="mb-1.5 block text-xs font-bold text-slate-700">Número celular (WhatsApp)</label>
+                            <div class="flex h-11 items-center rounded-xl border border-slate-200 bg-slate-50 focus-within:border-indigo-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-indigo-100 transition shadow-xs overflow-hidden">
+                                <span class="flex h-full items-center gap-1.5 px-3 text-xs font-bold text-slate-600 border-r border-slate-100 bg-slate-50/50 shrink-0">
+                                    <span>🇵🇪</span> +51
+                                </span>
+                                <input id="checkout-phone" name="client_phone" required inputmode="tel" autocomplete="tel" pattern="[0-9+ ().-]{7,20}" placeholder="987 654 321" class="min-w-0 flex-1 bg-transparent px-3 text-xs sm:text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400">
+                            </div>
+                        </div>
                     </div>
+
                     <div class="grid gap-3 sm:grid-cols-2">
-                        <div><label for="receipt-type" class="mb-1.5 block text-xs font-bold text-slate-600">Comprobante</label><select id="receipt-type" name="receipt_type" required class="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-indigo-400"><option value="boleta">Boleta</option><option value="factura">Factura</option></select></div>
-                        <div id="tax-id-wrap" class="hidden"><label for="checkout-tax-id" class="mb-1.5 block text-xs font-bold text-slate-600">RUC para la factura</label><input id="checkout-tax-id" name="tax_id" inputmode="numeric" maxlength="11" pattern="[0-9]{11}" class="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-indigo-400"></div>
+                        <!-- Comprobante -->
+                        <div>
+                            <label for="receipt-type" class="mb-1.5 block text-xs font-bold text-slate-700">Tipo de comprobante</label>
+                            <div class="relative flex h-11 items-center rounded-xl border border-slate-200 bg-slate-50 focus-within:border-indigo-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-indigo-100 transition shadow-xs overflow-hidden">
+                                <span class="flex h-full w-10 shrink-0 items-center justify-center text-indigo-500 border-r border-slate-100 bg-slate-50/50">
+                                    <i class="fa-solid fa-receipt text-xs"></i>
+                                </span>
+                                <select id="receipt-type" name="receipt_type" required class="min-w-0 flex-1 bg-transparent px-3 text-xs sm:text-sm font-medium text-slate-800 outline-none cursor-pointer">
+                                    <option value="boleta">Boleta de Venta</option>
+                                    <option value="factura">Factura Comercial</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- RUC -->
+                        <div id="tax-id-wrap" class="hidden">
+                            <label for="checkout-tax-id" class="mb-1.5 block text-xs font-bold text-slate-700">RUC para la factura</label>
+                            <div class="flex h-11 items-center rounded-xl border border-slate-200 bg-slate-50 focus-within:border-indigo-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-indigo-100 transition shadow-xs overflow-hidden">
+                                <span class="flex h-full w-10 shrink-0 items-center justify-center text-amber-500 border-r border-slate-100 bg-slate-50/50">
+                                    <i class="fa-solid fa-building text-xs"></i>
+                                </span>
+                                <input id="checkout-tax-id" name="tax_id" inputmode="numeric" maxlength="11" pattern="[0-9]{11}" placeholder="11 dígitos (20...)" class="min-w-0 flex-1 bg-transparent px-3 text-xs sm:text-sm font-mono text-slate-800 outline-none placeholder:text-slate-400">
+                            </div>
+                        </div>
                     </div>
-                    <details class="group rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-                        <summary class="focus-ring flex cursor-pointer list-none items-center justify-between text-xs font-bold text-slate-600"><span><i class="fa-regular fa-note-sticky mr-2 text-indigo-600"></i>Agregar nota de venta</span><i class="fa-solid fa-chevron-down text-[10px] transition group-open:rotate-180"></i></summary>
-                        <label for="sale-note" class="sr-only">Nota de venta</label><textarea id="sale-note" name="sale_note" rows="3" maxlength="1000" placeholder="Indicaciones para preparar tu pedido (opcional)" class="mt-3 w-full rounded-lg border border-slate-200 bg-white p-3 text-xs outline-none focus:border-indigo-400"></textarea>
+
+                    <!-- Nota de venta -->
+                    <details class="group rounded-2xl border border-slate-200 bg-slate-50/80 p-3.5 transition open:bg-white open:shadow-xs">
+                        <summary class="focus-ring flex cursor-pointer list-none items-center justify-between text-xs font-bold text-slate-700">
+                            <span class="flex items-center gap-2">
+                                <i class="fa-regular fa-note-sticky text-indigo-600"></i>
+                                ¿Deseas agregar una nota o detalle a tu pedido?
+                            </span>
+                            <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 transition group-open:rotate-180"></i>
+                        </summary>
+                        <textarea id="sale-note" name="sale_note" rows="2" maxlength="1000" placeholder="Ej: Entregar por la tarde, coordinar envío a provincia..." class="mt-3 w-full rounded-xl border border-slate-200 bg-white p-3 text-xs text-slate-800 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition resize-y"></textarea>
                     </details>
-                    <p id="cart-error" class="hidden rounded-xl bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-700" role="alert"></p>
-                    <button id="checkout-submit" type="submit" class="focus-ring flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#25d366] px-4 text-sm font-extrabold text-white shadow-lg shadow-emerald-600/15 transition hover:bg-emerald-600"><i class="fa-brands fa-whatsapp text-lg"></i>Confirmar y enviar por WhatsApp</button>
-                    <p class="text-center text-[10px] text-slate-400">Guardaremos tu pedido para que nuestro equipo pueda atenderte.</p>
+
+                    <p id="cart-error" class="hidden rounded-xl bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-700 border border-rose-200" role="alert"></p>
+
+                    <button id="checkout-submit" type="submit" class="focus-ring flex min-h-12 w-full items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-[#20ba5a] to-[#25d366] hover:from-[#1ca44e] hover:to-[#20ba5a] px-5 py-3 text-sm font-black text-white shadow-lg shadow-emerald-600/25 transition active:scale-[0.98] cursor-pointer">
+                        <i class="fa-brands fa-whatsapp text-xl"></i>
+                        <span>Confirmar y Enviar por WhatsApp</span>
+                    </button>
+                    <p class="text-center text-[11px] text-slate-400 font-medium">
+                        <i class="fa-solid fa-lock text-[10px] text-slate-300 mr-1"></i> Pedido 100% seguro sin pago previo online
+                    </p>
                 </form>
             </div>
         </div>
@@ -437,6 +548,22 @@
             </div>
         </div>
     </dialog>
+
+    <!-- Cart Added Toast Notification (Smooth & Non-blocking) -->
+    <div id="cart-toast" class="fixed bottom-6 right-6 z-50 flex items-center gap-3.5 rounded-2xl bg-slate-900/95 text-white px-4 py-3 shadow-2xl backdrop-blur transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none border border-white/10">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400 shrink-0 text-lg">
+            <i class="fa-solid fa-cart-shopping"></i>
+        </div>
+        <div class="pr-1 min-w-0 max-w-[220px]">
+            <p class="text-xs font-black leading-tight text-white flex items-center gap-1.5">
+                ¡Agregado al Carrito! <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            </p>
+            <p id="cart-toast-name" class="text-[11px] text-slate-300 truncate mt-0.5 font-medium"></p>
+        </div>
+        <button type="button" data-open-cart class="shrink-0 ml-1 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-extrabold shadow-sm transition active:scale-95 cursor-pointer">
+            Ver Carrito
+        </button>
+    </div>
 
     <!-- Wishlist Toast Notification -->
     <div id="wishlist-toast" class="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl bg-slate-900/95 text-white px-4 py-3 shadow-2xl backdrop-blur transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none border border-white/10">
@@ -531,6 +658,23 @@
                     toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
                     toast.classList.remove('translate-y-0', 'opacity-100');
                 }, 2800);
+            };
+
+            const showCartToast = (productName) => {
+                const toast = document.getElementById('cart-toast');
+                const toastName = document.getElementById('cart-toast-name');
+                if (!toast) return;
+
+                if (toastName) toastName.textContent = productName || 'Producto añadido al carrito';
+
+                toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+                toast.classList.add('translate-y-0', 'opacity-100');
+
+                clearTimeout(window.cartToastTimeout);
+                window.cartToastTimeout = setTimeout(() => {
+                    toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+                    toast.classList.remove('translate-y-0', 'opacity-100');
+                }, 3200);
             };
 
             const updateWishlistUI = () => {
@@ -670,7 +814,28 @@
                     const requestedQuantity = Number(addButton.closest('[data-product-quantity]')?.querySelector('input')?.value || 1);
                     if (existing) existing.quantity = Math.min(product.stock, existing.quantity + requestedQuantity);
                     else cart.push({ ...product, quantity: Math.min(product.stock, requestedQuantity) });
-                    saveCart(); renderCart(); dialog.showModal();
+                    saveCart(); 
+                    renderCart();
+
+                    // Visual feedback on the button
+                    const origHtml = addButton.innerHTML;
+                    addButton.classList.add('!bg-emerald-600', '!text-white', '!border-emerald-600');
+                    addButton.innerHTML = '<i class="fa-solid fa-check text-xs"></i> <span class="font-bold">¡Agregado!</span>';
+                    setTimeout(() => {
+                        addButton.innerHTML = origHtml;
+                        addButton.classList.remove('!bg-emerald-600', '!text-white', '!border-emerald-600');
+                    }, 1400);
+
+                    // Pulse/Scale animation on header cart badges
+                    countBadges.forEach(badge => {
+                        badge.classList.remove('scale-125', 'bg-emerald-500');
+                        void badge.offsetWidth;
+                        badge.classList.add('scale-125', 'bg-emerald-500', 'transition-transform');
+                        setTimeout(() => badge.classList.remove('scale-125', 'bg-emerald-500'), 500);
+                    });
+
+                    // Toast notification to avoid interrupting shopping
+                    showCartToast(product.name);
                 }
 
                 const action = event.target.closest('[data-cart-action]');
