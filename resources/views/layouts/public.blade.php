@@ -240,17 +240,6 @@
                     </a>
                 </div>
                 <div class="flex items-center gap-1.5">
-                    @auth
-                        <a href="{{ route('dashboard') }}" class="focus-ring flex h-10 items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50 px-2.5 text-xs font-bold text-indigo-700 shadow-xs" title="Panel de Administración">
-                            <i class="fa-solid fa-gauge-high text-xs"></i>
-                            <span class="text-[11px]">Admin</span>
-                        </a>
-                    @else
-                        <a href="{{ route('login') }}" class="focus-ring flex h-10 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2.5 text-xs font-bold text-slate-700 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 shadow-xs" title="Iniciar sesión de administrador">
-                            <i class="fa-solid fa-arrow-right-to-bracket text-xs text-indigo-600"></i>
-                            <span class="text-[11px]">Ingresar</span>
-                        </a>
-                    @endauth
                     <button type="button" data-open-wishlist class="focus-ring relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600" aria-label="Abrir favoritos" title="Mis Favoritos">
                         <i class="fa-regular fa-heart text-base text-rose-500"></i>
                         <span id="wishlist-count-mobile" style="display: none;" class="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-extrabold text-white shadow-sm">0</span>
@@ -296,19 +285,6 @@
                         <i class="fa-solid fa-sun hidden dark:inline text-sm"></i>
                     </button>
 
-                    <!-- Login / Admin Dashboard Button (Desktop) -->
-                    @auth
-                        <a href="{{ route('dashboard') }}" class="focus-ring hidden lg:inline-flex h-10 shrink-0 items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50/80 px-3.5 text-xs font-bold text-indigo-700 shadow-xs transition hover:bg-indigo-100 hover:border-indigo-300" title="Panel de Administración">
-                            <i class="fa-solid fa-gauge-high text-sm text-indigo-600"></i>
-                            <span>Panel Admin</span>
-                        </a>
-                    @else
-                        <a href="{{ route('login') }}" class="focus-ring hidden lg:inline-flex h-10 shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-700 shadow-xs transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700" title="Acceso al panel administrativo">
-                            <i class="fa-solid fa-arrow-right-to-bracket text-sm text-indigo-600"></i>
-                            <span>Iniciar Sesión</span>
-                        </a>
-                    @endauth
-
                     <!-- Desktop Wishlist Button -->
                     <button type="button" data-open-wishlist class="focus-ring relative hidden h-10 shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 lg:inline-flex shadow-xs" aria-label="Abrir favoritos" title="Mis Favoritos">
                         <i class="fa-regular fa-heart text-base text-rose-500"></i>
@@ -332,14 +308,6 @@
                 <a href="{{ route('catalog') }}" class="focus-ring shrink-0 rounded-lg px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-700">Equipos</a>
                 <a href="{{ route('catalog', ['offers' => 1]) }}" class="focus-ring shrink-0 rounded-lg px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-700"><i class="fa-solid fa-bolt mr-1 text-amber-500" aria-hidden="true"></i>Ofertas</a>
                 <a href="{{ route('home') }}#marcas" class="focus-ring shrink-0 rounded-lg px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-700">Marcas</a>
-                
-                <!-- Quick link to Admin Panel or Login in navigation -->
-                <div class="ml-auto flex items-center gap-2 shrink-0">
-                    <a href="{{ auth()->check() ? route('dashboard') : route('login') }}" class="focus-ring flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700 transition shadow-xs">
-                        <i class="fa-solid fa-shield-halved text-[11px] text-indigo-500"></i>
-                        <span>{{ auth()->check() ? 'Panel Admin' : 'Acceso Admin' }}</span>
-                    </a>
-                </div>
             </div>
         </nav>
     </header>
