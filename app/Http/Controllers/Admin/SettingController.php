@@ -23,6 +23,20 @@ class SettingController extends Controller
             Setting::updateOrCreate(['key' => 'store_logo'], ['value' => $logoPath, 'type' => 'string']);
         }
 
+        if (!empty($data['google_site_verification'])) {
+            if (preg_match('/content=["\']([^"\']+)["\']/i', $data['google_site_verification'], $matches)) {
+                $data['google_site_verification'] = $matches[1];
+            }
+            $data['google_site_verification'] = trim(strip_tags($data['google_site_verification']));
+        }
+
+        if (!empty($data['bing_site_verification'])) {
+            if (preg_match('/content=["\']([^"\']+)["\']/i', $data['bing_site_verification'], $matches)) {
+                $data['bing_site_verification'] = $matches[1];
+            }
+            $data['bing_site_verification'] = trim(strip_tags($data['bing_site_verification']));
+        }
+
         foreach ($data as $key => $value) {
             Setting::updateOrCreate(
                 ['key' => $key],
