@@ -23,7 +23,7 @@ class AdvertisementController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'image' => 'required|file|mimes:jpeg,png,jpg,webp,gif,svg,mp4,webm,mov,ogg,m4v|max:30720',
+            'image' => 'required|file|mimes:jpeg,png,jpg,webp,gif,mp4,webm,mov,ogg,m4v|max:30720',
             'title' => 'nullable|string|max:255',
             'link' => 'nullable|string|max:255',
             'location' => 'required|string',
@@ -57,7 +57,7 @@ class AdvertisementController extends Controller
     public function update(Request $request, Advertisement $publicidad)
     {
         $validated = $request->validate([
-            'image' => 'nullable|file|mimes:jpeg,png,jpg,webp,gif,svg,mp4,webm,mov,ogg,m4v|max:30720',
+            'image' => 'nullable|file|mimes:jpeg,png,jpg,webp,gif,mp4,webm,mov,ogg,m4v|max:30720',
             'title' => 'nullable|string|max:255',
             'link' => 'nullable|string|max:255',
             'location' => 'required|string',

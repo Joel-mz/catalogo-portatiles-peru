@@ -932,19 +932,19 @@
 
     function productForm() {
         return {
-            name: `{!! addslashes($product->name) !!}`,
-            description: {!! json_encode(old('description', $product->description ?? '')) !!},
+            name: {{ Illuminate\Support\Js::from($product->name) }},
+            description: {{ Illuminate\Support\Js::from(old('description', $product->description ?? '')) }},
             categoryId: `{{ $product->category_id }}`,
             brandId: `{{ $product->brand_id }}`,
-            brandName: `{!! $product->brand ? addslashes($product->brand->name) : '' !!}`,
-            categoryName: `{!! $product->category ? addslashes($product->category->name) : '' !!}`,
+            brandName: {{ Illuminate\Support\Js::from($product->brand?->name ?? '') }},
+            categoryName: {{ Illuminate\Support\Js::from($product->category?->name ?? '') }},
             price: `{{ $product->price }}`,
             offerPrice: `{{ $product->offer_price }}`,
             isActive: {{ $product->status ? 'true' : 'false' }},
             isNew: {{ $product->is_new ? 'true' : 'false' }},
             isOffer: {{ $product->is_offer ? 'true' : 'false' }},
             isFeatured: {{ $product->is_featured ? 'true' : 'false' }},
-            specs: @json($formattedSpecs),
+            specs: {{ Illuminate\Support\Js::from($formattedSpecs) }},
 
             // AI Modal state
             aiModalOpen: false,
@@ -954,7 +954,7 @@
 
             openAiModal(target) {
                 this.aiTargetField = target;
-                const pName = (this.name || `{!! addslashes($product->name) !!}`).trim();
+                const pName = (this.name || {{ Illuminate\Support\Js::from($product->name) }}).trim();
                 this.aiPrompt = pName;
                 this.aiModalOpen = true;
             },
@@ -969,7 +969,7 @@
 
             processAiGeneration() {
                 this.isAiLoading = true;
-                const promptText = (this.aiPrompt || this.name || `{!! addslashes($product->name) !!}`).trim();
+                const promptText = (this.aiPrompt || this.name || {{ Illuminate\Support\Js::from($product->name) }}).trim();
 
                 setTimeout(() => {
                     const generated = runSmartAiEngine(promptText, this.aiTargetField, this.categoryName, this.brandName);

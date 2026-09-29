@@ -36,6 +36,7 @@ Route::middleware('guest')->group(function () {
         ->name('two-factor.login');
 
     Route::post('two-factor-challenge', [TwoFactorChallengeController::class, 'store'])
+        ->middleware('throttle:5,1')
         ->name('two-factor.login.store');
 });
 
@@ -70,7 +71,7 @@ Route::middleware('auth')->group(function () {
 
     Route::put('password', [PasswordController::class, 'update'])->name('password.update');
 
-    Route::match(['get', 'post'], 'logout', [AuthenticatedSessionController::class, 'destroy'])
+    Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
 });
 

@@ -55,6 +55,7 @@ class BackupController extends Controller
 
     public function download($fileName)
     {
+        $this->validateBackupFileName($fileName);
         $file = 'backups/' . $fileName;
         if (Storage::disk('local')->exists($file)) {
             return Storage::disk('local')->download($file);
@@ -64,6 +65,7 @@ class BackupController extends Controller
 
     public function restore(Request $request, $fileName)
     {
+        $this->validateBackupFileName($fileName);
         // Placeholder for restoring logic.
         return back()->with('success', 'Base de datos restaurada correctamente desde: ' . $fileName . ' (Lógica de restauración requiere configuración del servidor mysql).');
     }
@@ -71,7 +73,7 @@ class BackupController extends Controller
     public function upload(Request $request)
     {
         $request->validate([
-            'backup_file' => 'required|file|mimes:sql,zip'
+            'backup_file' => 'required|file|mimes:sql,zip|max:51200'
         ]);
 
         $file = $request->file('backup_file');
@@ -83,11 +85,20 @@ class BackupController extends Controller
     
     public function delete($fileName)
     {
+        $this->validateBackupFileName($fileName);
         $file = 'backups/' . $fileName;
         if (Storage::disk('local')->exists($file)) {
             Storage::disk('local')->delete($file);
             return back()->with('success', 'Backup eliminado exitosamente.');
         }
         return back()->with('error', 'El archivo no existe.');
+    }
+
+    private function validateBackupFileName(string $fileName): void
+    {
+        abort_unless(
+            basename($fileName) === $fileName && preg_match('/\A[A-Za-z0-9_.-]+\.(?:sql|zip)\z/i', $fileName) === 1,
+            404,
+        );
     }
 }

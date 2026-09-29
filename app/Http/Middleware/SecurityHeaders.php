@@ -51,7 +51,10 @@ class SecurityHeaders
         $response->headers->set('Permissions-Policy', 'camera=*, microphone=(), geolocation=(), payment=(), usb=()');
 
         // 7. HTTP Strict Transport Security (HSTS)
-        $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+        if (app()->isProduction() && $request->isSecure()) {
+            $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+        }
+
 
         // 8. Robust Content Security Policy (CSP) with XSS defense and auto HTTPS upgrade
         $csp = implode('; ', [

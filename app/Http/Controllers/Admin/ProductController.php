@@ -54,6 +54,14 @@ class ProductController extends Controller
             'stock' => 'required|integer|min:0',
             'warranty' => 'nullable|string|max:255',
             'state' => 'nullable|string|max:255',
+            'image_files' => 'nullable|array|max:10',
+            'image_files.*' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120',
+            'images_files' => 'nullable|array|max:10',
+            'images_files.*' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120',
+            'image_urls' => 'nullable|array|max:10',
+            'image_urls.*' => ['nullable', 'url', 'max:2048', 'regex:/^https?:\/\//i'],
+            'images_urls' => 'nullable|array|max:10',
+            'images_urls.*' => ['nullable', 'url', 'max:2048', 'regex:/^https?:\/\//i'],
         ]);
 
         $validated['slug'] = Str::slug($validated['name']) . '-' . Str::random(5);
@@ -147,6 +155,14 @@ class ProductController extends Controller
             'stock' => 'required|integer|min:0',
             'warranty' => 'nullable|string|max:255',
             'state' => 'nullable|string|max:255',
+            'image_files' => 'nullable|array|max:10',
+            'image_files.*' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120',
+            'images_files' => 'nullable|array|max:10',
+            'images_files.*' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120',
+            'image_urls' => 'nullable|array|max:10',
+            'image_urls.*' => ['nullable', 'url', 'max:2048', 'regex:/^https?:\/\//i'],
+            'images_urls' => 'nullable|array|max:10',
+            'images_urls.*' => ['nullable', 'url', 'max:2048', 'regex:/^https?:\/\//i'],
         ]);
 
         $validated['slug'] = Str::slug($validated['name']) . '-' . Str::random(5);

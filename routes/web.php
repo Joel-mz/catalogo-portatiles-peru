@@ -27,17 +27,40 @@ Route::post('/producto/{slug}/opiniones', [FrontController::class, 'review'])->m
 
 // Fallback directo para servir archivos de storage en servidores locales (evita bloqueos 403 de Apache/symlinks)
 Route::get('/storage/{path}', function (string $path) {
-    $fullPath = storage_path('app/public/' . $path);
-    if (!file_exists($fullPath) || !is_file($fullPath)) {
-        // Check public/storage directly
-        $publicPath = public_path('storage/' . $path);
-        if (file_exists($publicPath) && is_file($publicPath)) {
-            $fullPath = $publicPath;
-        } else {
-            abort(404);
+    $normalizedPath = str_replace('\\', '/', $path);
+    $segments = explode('/', $normalizedPath);
+
+    if (in_array('..', $segments, true) || str_contains($normalizedPath, "\0")) {
+        abort(404);
+    }
+
+    $storageRoots = array_values(array_filter([
+        realpath(storage_path('app/public')),
+        realpath(public_path('storage')),
+    ]));
+    $candidates = [
+        realpath(storage_path('app/public/' . $normalizedPath)),
+        realpath(public_path('storage/' . $normalizedPath)),
+    ];
+    $fullPath = null;
+
+    foreach ($candidates as $candidate) {
+        if ($candidate === false || !is_file($candidate)) {
+            continue;
+        }
+
+        foreach ($storageRoots as $storageRoot) {
+            if (str_starts_with($candidate, $storageRoot . DIRECTORY_SEPARATOR)) {
+                $fullPath = $candidate;
+                break 2;
+            }
         }
     }
-    
+
+    if ($fullPath === null) {
+        abort(404);
+    }
+
     return response()->file($fullPath);
 })->where('path', '.*')->name('storage.local');
 

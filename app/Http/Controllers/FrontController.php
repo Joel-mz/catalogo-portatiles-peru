@@ -133,7 +133,10 @@ class FrontController extends Controller
 
     public function downloadPdf($slug)
     {
-        $product = Product::with(['brand', 'category', 'deviceModel'])->where('slug', $slug)->firstOrFail();
+        $product = Product::with(['brand', 'category', 'deviceModel'])
+            ->where('slug', $slug)
+            ->where('status', true)
+            ->firstOrFail();
         $settings = Setting::pluck('value', 'key');
         
         $pdf = Pdf::loadView('front.pdf.product', compact('product', 'settings'));
