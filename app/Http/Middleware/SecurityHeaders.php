@@ -16,11 +16,60 @@ class SecurityHeaders
     public function handle(Request $request, Closure $next): Response
     {
         // 1. Force HTTPS 301 Redirect in Production if accessed via insecure HTTP
-        if ((app()->isProduction() || config('app.env') === 'production') && 
-            !$request->isSecure() && 
-            $request->header('X-Forwarded-Proto') !== 'https' &&
-            $request->header('X-Forwarded-SSL') !== 'on') {
+        if (app()->isProduction() && !$request->isSecure()) {
             return redirect()->secure($request->getRequestUri(), 301);
+        }
+
+        // 2. IP Blocklist Enforcement
+        try {
+            $blockedIps = array_filter(array_map('trim', explode(',', \App\Models\Setting::where('key', 'security_blocked_ips')->value('value') ?? '')));
+            if (!empty($blockedIps) && in_array($request->ip(), $blockedIps, true)) {
+                abort(403, 'Acceso restringido por el cortafuegos de seguridad del sistema.');
+            }
+        } catch (\Throwable $e) {
+            // Silently continue if database is migrating
+        }
+
+        // 3. Active WAF SQL Injection & Malicious Payload Inspection Filter
+        try {
+            $firewallEnabled = (\App\Models\Setting::where('key', 'security_firewall_enabled')->value('value') ?? '1') === '1';
+            if ($firewallEnabled && !$request->is('admin/*') && !$request->is('api/checkout')) {
+                $queryString = urldecode($request->getQueryString() ?? '');
+                $rawPayload = json_encode($request->except(['_token', 'password', 'password_confirmation', 'image', 'images', 'pdf', 'excel_file', 'sale_note']));
+                $contentToInspect = $queryString . ' ' . $rawPayload;
+
+                $sqlPatterns = [
+                    '/\bunion\b\s+(all\s+)?\bselect\b/i',
+                    '/\bselect\b.+\bfrom\b.+\binformation_schema\b/i',
+                    '/\b(drop|truncate|alter)\s+(table|database)\b/i',
+                    '/\bexec(\s|\+)+(s|x)p\w+/i',
+                    '/(\'|")\s*or\s*(\'|")?1(\'|")?\s*=\s*(\'|")?1/i',
+                    '/(\'|")\s*or\s*1\s*=\s*1/i',
+                    '/\b(benchmark|sleep)\s*\(\s*\d+\s*\)/i',
+                ];
+
+                foreach ($sqlPatterns as $pattern) {
+                    if (preg_match($pattern, $contentToInspect)) {
+                        \App\Models\AuditLog::create([
+                            'user_id' => auth()->id(),
+                            'action' => 'Ataque Bloqueado: Inyección SQL sospechosa',
+                            'model' => 'WAF_Firewall',
+                            'model_id' => null,
+                            'details' => [
+                                'ip' => $request->ip(),
+                                'url' => $request->fullUrl(),
+                                'user_agent' => substr($request->userAgent() ?? '', 0, 255),
+                                'method' => $request->method(),
+                            ],
+                            'ip_address' => $request->ip(),
+                        ]);
+
+                        abort(403, 'Petición bloqueada por el Cortafuegos de Seguridad (WAF). Actividad sospechosa detectada.');
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            // Keep request flowing if database is not reachable during setup
         }
 
         // Remove identifying PHP engine headers

@@ -101,6 +101,11 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
     Route::put('settings', [SettingController::class, 'update'])->name('settings.update');
 
+    Route::get('security', [\App\Http\Controllers\Admin\SecurityController::class, 'index'])->name('security.index');
+    Route::put('security', [\App\Http\Controllers\Admin\SecurityController::class, 'update'])->name('security.update');
+    Route::post('security/scan', [\App\Http\Controllers\Admin\SecurityController::class, 'scan'])->name('security.scan');
+    Route::post('security/clear-sessions', [\App\Http\Controllers\Admin\SecurityController::class, 'clearSessions'])->name('security.clear_sessions');
+
     Route::get('imports', [ImportController::class, 'index'])->name('imports.index');
     Route::post('imports', [ImportController::class, 'store'])->name('imports.store');
     Route::get('imports/template', [ImportController::class, 'template'])->name('imports.template');

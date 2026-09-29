@@ -667,6 +667,13 @@
                     <span>Configuración</span>
                 </a>
 
+                <a href="{{ route('admin.security.index') }}"
+                   class="nav-item {{ request()->routeIs('admin.security.*') ? 'active' : '' }}" @click="mobileSidebarOpen = false">
+                    <i class="fa-solid fa-shield-halved nav-icon" style="{{ request()->routeIs('admin.security.*') ? '' : 'color:#10b981' }}"></i>
+                    <span>Seguridad del Sistema</span>
+                    <span class="ml-auto text-[9px] font-black bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-full border border-emerald-500/30">WAF</span>
+                </a>
+
                 <a href="{{ route('admin.backups.index') }}"
                    class="nav-item {{ request()->routeIs('admin.backups.*') ? 'active' : '' }}" @click="mobileSidebarOpen = false">
                     <i class="fa-solid fa-database nav-icon" style="{{ request()->routeIs('admin.backups.*') ? '' : 'color:#f59e0b' }}"></i>
@@ -826,6 +833,13 @@
                class="nav-item {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}" :class="!sidebarOpen ? 'justify-center px-0' : ''" title="Configuración">
                 <i class="fa-solid fa-gear nav-icon"></i>
                 <span x-show="sidebarOpen" class="whitespace-nowrap">Configuración</span>
+            </a>
+
+            <a href="{{ route('admin.security.index') }}"
+               class="nav-item {{ request()->routeIs('admin.security.*') ? 'active' : '' }}" :class="!sidebarOpen ? 'justify-center px-0' : ''" title="Seguridad del Sistema">
+                <i class="fa-solid fa-shield-halved nav-icon" style="{{ request()->routeIs('admin.security.*') ? '' : 'color:#10b981' }}"></i>
+                <span x-show="sidebarOpen" class="whitespace-nowrap">Seguridad</span>
+                <span x-show="sidebarOpen" class="ml-auto text-[9px] font-black bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-full border border-emerald-500/30">WAF</span>
             </a>
 
             <a href="{{ route('admin.backups.index') }}"

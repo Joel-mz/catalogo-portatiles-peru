@@ -174,7 +174,7 @@
                             </div>
                             <div>
                                 <h3 class="text-base font-bold text-slate-900 dark:text-white">Configurar Autenticación 2FA</h3>
-                                <p class="text-xs text-slate-500 dark:text-slate-400">Escanea el código QR con tu aplicación autenticadora</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Configura tu aplicación de autenticación con una clave secreta</p>
                             </div>
                         </div>
                         <button type="button" @click="showSetupModal = false" class="text-slate-400 hover:text-slate-500 dark:hover:text-slate-300">
@@ -186,17 +186,13 @@
 
                     <div class="mt-5 space-y-5">
                         <div class="text-xs text-slate-600 dark:text-slate-300 space-y-2">
-                            <p><strong>Paso 1:</strong> Abre tu aplicación de autenticación (<span class="font-semibold text-indigo-600 dark:text-indigo-400">Google Authenticator, Microsoft Authenticator o Authy</span>) y escanea este código QR:</p>
+                            <p><strong>Paso 1:</strong> Abre tu aplicación de autenticación (<span class="font-semibold text-indigo-600 dark:text-indigo-400">Google Authenticator, Microsoft Authenticator o Authy</span>) y elige agregar una cuenta con clave de configuración manual:</p>
                         </div>
 
-                        {{-- QR Code Display --}}
                         <div class="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800">
-                            <template x-if="qrUrl">
-                                <img :src="qrUrl" alt="Código QR 2FA" class="w-48 h-48 rounded-xl shadow-md bg-white p-2 border border-slate-200">
-                            </template>
-                            
+                            <p class="text-sm text-slate-600 dark:text-slate-300 text-center">Ingresa la clave manualmente en tu aplicación de autenticación. El secreto se muestra solo aquí y no se envía a servicios externos.</p>
                             <div class="mt-3 text-center">
-                                <p class="text-[11px] text-slate-500 uppercase tracking-wider font-semibold">¿No puedes escanear el QR?</p>
+                                <p class="text-[11px] text-slate-500 uppercase tracking-wider font-semibold">Clave de configuración manual</p>
                                 <p class="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400 mt-1 select-all bg-indigo-50 dark:bg-indigo-950/40 px-3 py-1 rounded-lg border border-indigo-100 dark:border-indigo-900" x-text="secretFormatted"></p>
                             </div>
                         </div>
@@ -326,7 +322,6 @@
             confirming: false,
             showSetupModal: false,
             showDisableModal: false,
-            qrUrl: '',
             secret: '',
             secretFormatted: '',
             confirmCode: '',
@@ -349,7 +344,6 @@
                 .then(res => res.json())
                 .then(data => {
                     this.loading = false;
-                    this.qrUrl = data.qr_url;
                     this.secret = data.secret;
                     this.secretFormatted = data.formatted_secret;
                     this.showSetupModal = true;

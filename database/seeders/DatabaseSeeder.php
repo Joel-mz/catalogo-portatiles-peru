@@ -27,14 +27,16 @@ class DatabaseSeeder extends Seeder
             ['description' => 'Regular customer']
         );
 
-        User::firstOrCreate(
-            ['email' => 'admin@moyotech.com'],
-            [
-                'name' => 'MOYO TECH Admin',
-                'password' => bcrypt('password'),
-                'role_id' => $adminRole->id,
-            ]
-        );
+        if (config('admin.email') && config('admin.password')) {
+            User::firstOrCreate(
+                ['email' => config('admin.email')],
+                [
+                    'name' => config('admin.name', 'Administrador'),
+                    'password' => config('admin.password'),
+                    'role_id' => $adminRole->id,
+                ]
+            );
+        }
 
         $catLaptops = Category::firstOrCreate(['slug' => 'laptops'], ['name' => 'Laptops']);
         $catAcc = Category::firstOrCreate(['slug' => 'accesorios'], ['name' => 'Accesorios']);

@@ -18,8 +18,6 @@ class TwoFactorAuthenticationController extends Controller
      */
     public function enable(Request $request)
     {
-        $user = $request->user();
-
         // Generate temporary secret if not already confirmed
         $secret = $this->twoFactorService->generateSecretKey();
         $recoveryCodes = $this->twoFactorService->generateRecoveryCodes();
@@ -29,14 +27,9 @@ class TwoFactorAuthenticationController extends Controller
             'recovery_codes' => $recoveryCodes,
         ]);
 
-        $storeName = config('app.name', 'Portatiles Peru');
-        $otpauthUrl = $this->twoFactorService->getOtpAuthUrl($storeName, $user->email, $secret);
-
         return response()->json([
             'secret' => $secret,
             'formatted_secret' => chunk_split($secret, 4, ' '),
-            'otpauth_url' => $otpauthUrl,
-            'qr_url' => 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' . urlencode($otpauthUrl),
             'recovery_codes' => $recoveryCodes,
         ]);
     }
@@ -92,6 +85,12 @@ class TwoFactorAuthenticationController extends Controller
         ]);
 
         $user = $request->user();
+
+        if ($user->role?->name === 'Admin') {
+            return back()->withErrors([
+                'current_password' => 'Las cuentas administradoras deben mantener activa la autenticación en dos pasos.',
+            ], 'twoFactorDisable');
+        }
 
         if (!Hash::check($request->current_password, $user->password)) {
             throw ValidationException::withMessages([

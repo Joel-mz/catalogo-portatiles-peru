@@ -15,8 +15,14 @@ class EnsureAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->user()?->role?->name !== 'Admin') {
+        $user = $request->user();
+
+        if ($user?->role?->name !== 'Admin') {
             abort(403);
+        }
+
+        if (!$user->hasEnabledTwoFactorAuthentication()) {
+            return redirect()->route('profile.edit')->with('status', 'admin-two-factor-required');
         }
 
         return $next($request);
