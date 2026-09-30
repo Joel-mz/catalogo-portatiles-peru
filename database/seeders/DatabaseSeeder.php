@@ -27,16 +27,26 @@ class DatabaseSeeder extends Seeder
             ['description' => 'Regular customer']
         );
 
-        if (config('admin.email') && config('admin.password')) {
-            User::firstOrCreate(
-                ['email' => config('admin.email')],
-                [
-                    'name' => config('admin.name', 'Administrador'),
-                    'password' => config('admin.password'),
-                    'role_id' => $adminRole->id,
-                ]
-            );
-        }
+        $adminEmail = config('admin.email') ?: 'admin@moyotech.com';
+        $adminPassword = config('admin.password') ?: 'admin123';
+        $adminName = config('admin.name') ?: 'Administrador';
+
+        $adminUser = User::firstOrNew(['email' => $adminEmail]);
+        $adminUser->name = $adminName;
+        $adminUser->role_id = $adminRole->id;
+        $adminUser->email_verified_at = now();
+        $adminUser->two_factor_secret = null;
+        $adminUser->two_factor_recovery_codes = null;
+        $adminUser->two_factor_confirmed_at = null;
+        $adminUser->save();
+
+        \Illuminate\Support\Facades\DB::table('users')->where('id', $adminUser->id)->update([
+            'password' => \Illuminate\Support\Facades\Hash::make($adminPassword),
+            'two_factor_secret' => null,
+            'two_factor_recovery_codes' => null,
+            'two_factor_confirmed_at' => null,
+            'email_verified_at' => now(),
+        ]);
 
         $catLaptops = Category::firstOrCreate(['slug' => 'laptops'], ['name' => 'Laptops']);
         $catAcc = Category::firstOrCreate(['slug' => 'accesorios'], ['name' => 'Accesorios']);
