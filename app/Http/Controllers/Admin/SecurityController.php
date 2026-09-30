@@ -206,8 +206,57 @@ class SecurityController extends Controller
     {
         $settings = Setting::all()->pluck('value', 'key');
         $dbConnection = config('database.default');
-        $pdoVersion = DB::connection()->getPdo()->getAttribute(\PDO::ATTR_SERVER_VERSION);
-        $tables = DB::select('SHOW TABLE STATUS');
+
+        try {
+            $pdoVersion = DB::connection()->getPdo()->getAttribute(\PDO::ATTR_SERVER_VERSION);
+        } catch (\Throwable $e) {
+            $pdoVersion = 'N/A';
+        }
+
+        $tables = [];
+        try {
+            $driver = DB::connection()->getDriverName();
+            if ($driver === 'mysql') {
+                $tables = DB::select('SHOW TABLE STATUS');
+            } elseif ($driver === 'sqlite') {
+                $sqliteTables = DB::select("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'");
+                foreach ($sqliteTables as $table) {
+                    $tableName = $table->name;
+                    $rowCount = 0;
+                    try {
+                        $rowCount = DB::table($tableName)->count();
+                    } catch (\Throwable $e) {
+                        $rowCount = 0;
+                    }
+
+                    $tables[] = (object) [
+                        'Name' => $tableName,
+                        'Engine' => 'SQLite3',
+                        'Rows' => $rowCount,
+                        'Collation' => 'BINARY',
+                    ];
+                }
+            } else {
+                $tableList = \Illuminate\Support\Facades\Schema::getTableListing();
+                foreach ($tableList as $tableName) {
+                    $rowCount = 0;
+                    try {
+                        $rowCount = DB::table($tableName)->count();
+                    } catch (\Throwable $e) {
+                        $rowCount = 0;
+                    }
+
+                    $tables[] = (object) [
+                        'Name' => $tableName,
+                        'Engine' => ucfirst((string) $driver),
+                        'Rows' => $rowCount,
+                        'Collation' => 'UTF-8',
+                    ];
+                }
+            }
+        } catch (\Throwable $e) {
+            $tables = [];
+        }
 
         return view('admin.security.database', compact('settings', 'dbConnection', 'pdoVersion', 'tables'));
     }
