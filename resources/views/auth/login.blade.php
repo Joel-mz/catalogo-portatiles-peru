@@ -34,6 +34,7 @@
         };
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="relative min-h-screen font-sans text-slate-700 antialiased flex items-center justify-center p-4 sm:p-6 lg:p-8">
     
@@ -200,15 +201,22 @@
                                     </a>
                                 @endif
                             </div>
-                            <div class="flex h-12 items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 transition focus-within:border-indigo-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-indigo-100">
+                            <div class="flex h-12 items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 transition focus-within:border-indigo-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-indigo-100" x-data="{ showPassword: false }">
                                 <i class="fa-solid fa-lock text-sm text-slate-400"></i>
                                 <input id="password" 
-                                       type="password" 
+                                       :type="showPassword ? 'text' : 'password'" 
+                                       type="password"
                                        name="password" 
                                        required 
                                        autocomplete="current-password" 
                                        placeholder="••••••••••••" 
                                        class="min-w-0 flex-1 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400">
+                                <button type="button" 
+                                        @click="showPassword = !showPassword" 
+                                        class="text-slate-400 hover:text-slate-600 focus:outline-none p-1 transition"
+                                        title="Mostrar/Ocultar contraseña">
+                                    <i class="fa-regular text-xs" :class="showPassword ? 'fa-eye-slash text-indigo-600' : 'fa-eye'"></i>
+                                </button>
                             </div>
                         </div>
 

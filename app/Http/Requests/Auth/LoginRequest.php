@@ -25,6 +25,13 @@ class LoginRequest extends FormRequest
      *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'email' => strtolower(trim((string) $this->input('email', ''))),
+        ]);
+    }
+
     public function rules(): array
     {
         return [
