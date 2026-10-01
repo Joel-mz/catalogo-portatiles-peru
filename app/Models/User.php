@@ -22,11 +22,16 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'phone',
+        'status',
         'password',
+        'must_change_password',
         'role_id',
         'two_factor_secret',
         'two_factor_recovery_codes',
         'two_factor_confirmed_at',
+        'last_login_at',
+        'last_login_ip',
     ];
 
     /**
@@ -53,12 +58,64 @@ class User extends Authenticatable
             'two_factor_confirmed_at' => 'datetime',
             'two_factor_recovery_codes' => 'array',
             'password' => 'hashed',
+            'must_change_password' => 'boolean',
+            'last_login_at' => 'datetime',
         ];
     }
 
     public function hasEnabledTwoFactorAuthentication(): bool
     {
         return !is_null($this->two_factor_confirmed_at) && !empty($this->two_factor_secret);
+    }
+
+    public function isAdministradorGeneral(): bool
+    {
+        return $this->role?->name === 'Administrador General';
+    }
+
+    public function isAdministrador(): bool
+    {
+        return in_array($this->role?->name, ['Administrador General', 'Administrador', 'Admin']);
+    }
+
+    public function isVendedor(): bool
+    {
+        return $this->role?->name === 'Vendedor';
+    }
+
+    public function isPersonal(): bool
+    {
+        return $this->role?->name === 'Personal';
+    }
+
+    public function isSoporte(): bool
+    {
+        return $this->role?->name === 'Soporte Técnico';
+    }
+
+    public function hasElevatedPrivileges(): bool
+    {
+        return $this->isAdministradorGeneral() || in_array($this->role?->name, ['Administrador', 'Admin']);
+    }
+
+    public function requiresTwoFactor(): bool
+    {
+        return $this->hasElevatedPrivileges();
+    }
+
+    public function isActive(): bool
+    {
+        return in_array($this->status, ['activo', null, 'active']);
+    }
+
+    public function isSuspended(): bool
+    {
+        return $this->status === 'suspendido';
+    }
+
+    public function isBlocked(): bool
+    {
+        return $this->status === 'bloqueado';
     }
 
     public function role(): BelongsTo
@@ -69,5 +126,10 @@ class User extends Authenticatable
     public function auditLogs(): HasMany
     {
         return $this->hasMany(AuditLog::class);
+    }
+
+    public function securityOtps(): HasMany
+    {
+        return $this->hasMany(SecurityOtp::class);
     }
 }

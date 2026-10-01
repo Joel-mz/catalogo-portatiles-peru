@@ -97,6 +97,7 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::put('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
     Route::get('orders/{order}/pdf', [OrderController::class, 'downloadPdf'])->name('orders.pdf');
     Route::resource('users', UserController::class);
+    Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.resetPassword');
 
     Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
     Route::put('settings', [SettingController::class, 'update'])->name('settings.update');
@@ -120,6 +121,12 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
         Route::put('/update', [\App\Http\Controllers\Admin\SecurityController::class, 'update'])->name('update');
         Route::post('/scan', [\App\Http\Controllers\Admin\SecurityController::class, 'scan'])->name('scan');
         Route::post('/clear-sessions', [\App\Http\Controllers\Admin\SecurityController::class, 'clearSessions'])->name('clear_sessions');
+
+        // OTP Verifications
+        Route::get('/otp/verify', [\App\Http\Controllers\Admin\OtpVerificationController::class, 'show'])->name('otp.verify');
+        Route::post('/otp/verify', [\App\Http\Controllers\Admin\OtpVerificationController::class, 'verify'])->name('otp.verify.submit');
+        Route::post('/otp/resend', [\App\Http\Controllers\Admin\OtpVerificationController::class, 'resend'])->name('otp.resend');
+        Route::post('/otp/cancel', [\App\Http\Controllers\Admin\OtpVerificationController::class, 'cancel'])->name('otp.cancel');
     });
 
     Route::get('imports', [ImportController::class, 'index'])->name('imports.index');

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditLog;
+use App\Services\OtpSecurityService;
 use App\Services\TwoFactorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -10,7 +12,8 @@ use Illuminate\Validation\ValidationException;
 class TwoFactorAuthenticationController extends Controller
 {
     public function __construct(
-        protected TwoFactorService $twoFactorService
+        protected TwoFactorService $twoFactorService,
+        protected OtpSecurityService $otpService
     ) {}
 
     /**
@@ -18,6 +21,34 @@ class TwoFactorAuthenticationController extends Controller
      */
     public function enable(Request $request)
     {
+        $user = $request->user();
+
+        // If user already has 2FA and is Administrador General, require OTP to change authenticator
+        if ($user && $user->hasEnabledTwoFactorAuthentication() && $user->isAdministradorGeneral()) {
+            $action = '2fa_reset';
+            if (!session()->has('otp_verified_' . $action)) {
+                $this->otpService->generateOtp($user, $action);
+
+                session()->put('pending_otp_action', [
+                    'action' => $action,
+                    'action_name' => 'Cambio de autenticador (Google Authenticator u otro)',
+                    'description' => 'Reconfigurar la aplicación autenticadora de la cuenta de Administrador General.',
+                    'url' => route('profile.edit'),
+                    'method' => 'GET',
+                    'data' => [],
+                    'redirect_back' => route('profile.edit'),
+                ]);
+
+                return response()->json([
+                    'otp_required' => true,
+                    'redirect' => route('admin.security.otp.verify'),
+                    'message' => 'Por seguridad, debes verificar tu identidad con el código enviado a tu correo antes de reconfigurar el autenticador.',
+                ], 403);
+            }
+
+            session()->forget('otp_verified_' . $action);
+        }
+
         // Generate temporary secret if not already confirmed
         $secret = $this->twoFactorService->generateSecretKey();
         $recoveryCodes = $this->twoFactorService->generateRecoveryCodes();
@@ -60,6 +91,8 @@ class TwoFactorAuthenticationController extends Controller
         }
 
         $user = $request->user();
+        $isReconfiguring = !is_null($user->two_factor_confirmed_at);
+
         $user->forceFill([
             'two_factor_secret' => encrypt($pending['secret']),
             'two_factor_recovery_codes' => $pending['recovery_codes'],
@@ -67,6 +100,22 @@ class TwoFactorAuthenticationController extends Controller
         ])->save();
 
         $request->session()->forget('two_factor_pending');
+
+        AuditLog::create([
+            'user_id' => $user->id,
+            'action' => $isReconfiguring ? 'Reconfiguración de autenticador 2FA' : 'Activación de 2FA',
+            'status' => 'success',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        if ($user->isAdministradorGeneral()) {
+            $this->otpService->notifyCriticalChangeCompleted(
+                $user,
+                '2fa_reset',
+                $isReconfiguring ? 'Se ha reconfigurado exitosamente la aplicación autenticadora 2FA.' : 'Se ha activado exitosamente el 2FA.'
+            );
+        }
 
         return response()->json([
             'success' => true,
@@ -86,16 +135,32 @@ class TwoFactorAuthenticationController extends Controller
 
         $user = $request->user();
 
-        if ($user->role?->name === 'Admin') {
-            return back()->withErrors([
-                'current_password' => 'Las cuentas administradoras deben mantener activa la autenticación en dos pasos.',
-            ], 'twoFactorDisable');
-        }
-
         if (!Hash::check($request->current_password, $user->password)) {
             throw ValidationException::withMessages([
                 'current_password' => 'La contraseña actual es incorrecta.',
             ]);
+        }
+
+        if ($user->isAdministradorGeneral()) {
+            $action = '2fa_disable';
+            if (!session()->has('otp_verified_' . $action)) {
+                $this->otpService->generateOtp($user, $action);
+
+                session()->put('pending_otp_action', [
+                    'action' => $action,
+                    'action_name' => 'Desactivación de autenticación en dos factores (2FA)',
+                    'description' => 'Desactivar la protección 2FA de la cuenta de Administrador General.',
+                    'url' => route('two-factor.disable'),
+                    'method' => 'DELETE',
+                    'data' => [],
+                    'redirect_back' => route('profile.edit'),
+                ]);
+
+                return redirect()->route('admin.security.otp.verify')
+                    ->with('info', 'Por favor ingresa el código de 6 dígitos enviado a tu correo para autorizar la desactivación del 2FA.');
+            }
+
+            session()->forget('otp_verified_' . $action);
         }
 
         $user->forceFill([
@@ -103,6 +168,22 @@ class TwoFactorAuthenticationController extends Controller
             'two_factor_recovery_codes' => null,
             'two_factor_confirmed_at' => null,
         ])->save();
+
+        AuditLog::create([
+            'user_id' => $user->id,
+            'action' => 'Desactivación de autenticación en dos factores (2FA)',
+            'status' => 'success',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        if ($user->isAdministradorGeneral()) {
+            $this->otpService->notifyCriticalChangeCompleted(
+                $user,
+                '2fa_disable',
+                'La autenticación en dos factores (2FA) ha sido desactivada en tu cuenta de Administrador General.'
+            );
+        }
 
         return back()->with('status', 'two-factor-authentication-disabled');
     }
@@ -122,6 +203,14 @@ class TwoFactorAuthenticationController extends Controller
         $user->forceFill([
             'two_factor_recovery_codes' => $newCodes,
         ])->save();
+
+        AuditLog::create([
+            'user_id' => $user->id,
+            'action' => 'Regeneración de códigos de recuperación 2FA',
+            'status' => 'success',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
 
         return back()->with('status', 'recovery-codes-regenerated');
     }

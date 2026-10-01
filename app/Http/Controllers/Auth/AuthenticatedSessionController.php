@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\AuditLog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -28,6 +29,34 @@ class AuthenticatedSessionController extends Controller
 
         $user = $request->user();
 
+        // Check if user is suspended or blocked
+        if ($user && ($user->isSuspended() || $user->isBlocked())) {
+            $statusName = $user->isSuspended() ? 'suspendida' : 'bloqueada';
+            AuditLog::create([
+                'user_id' => $user->id,
+                'action' => "Intento de acceso con cuenta {$statusName}",
+                'status' => 'bloqueado',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')->withErrors([
+                'email' => "Tu cuenta se encuentra {$statusName}. Contacta al Administrador General.",
+            ]);
+        }
+
+        // Record last login
+        if ($user) {
+            $user->forceFill([
+                'last_login_at' => now(),
+                'last_login_ip' => $request->ip(),
+            ])->save();
+        }
+
         if ($user && $user->hasEnabledTwoFactorAuthentication()) {
             $userId = $user->id;
             $remember = $request->boolean('remember');
@@ -42,6 +71,15 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('two-factor.login');
         }
 
+        // If not 2FA, log successful login
+        AuditLog::create([
+            'user_id' => $user->id,
+            'action' => 'Inicio de sesión',
+            'status' => 'success',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
         $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard', absolute: false));
@@ -52,6 +90,18 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        $user = $request->user();
+
+        if ($user) {
+            AuditLog::create([
+                'user_id' => $user->id,
+                'action' => 'Cierre de sesión',
+                'status' => 'success',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+        }
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();

@@ -53,6 +53,14 @@ class TwoFactorChallengeController extends Controller
                 return $this->finishLogin($request, $user);
             }
 
+            \App\Models\AuditLog::create([
+                'user_id' => $user->id,
+                'action' => 'Intento fallido de verificación 2FA (Código TOTP incorrecto)',
+                'status' => 'fallo',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
             throw ValidationException::withMessages([
                 'code' => 'El código de 6 dígitos ingresado es incorrecto o ha expirado.',
             ]);
@@ -73,6 +81,14 @@ class TwoFactorChallengeController extends Controller
                 return $this->finishLogin($request, $user);
             }
 
+            \App\Models\AuditLog::create([
+                'user_id' => $user->id,
+                'action' => 'Intento fallido de verificación 2FA (Código de recuperación inválido)',
+                'status' => 'fallo',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
             throw ValidationException::withMessages([
                 'recovery_code' => 'El código de recuperación ingresado no es válido.',
             ]);
@@ -90,6 +106,19 @@ class TwoFactorChallengeController extends Controller
     {
         $remember = $request->session()->get('login.remember', false);
         $request->session()->forget(['login.id', 'login.remember']);
+
+        $user->forceFill([
+            'last_login_at' => now(),
+            'last_login_ip' => $request->ip(),
+        ])->save();
+
+        \App\Models\AuditLog::create([
+            'user_id' => $user->id,
+            'action' => 'Inicio de sesión exitoso (2FA Verificado)',
+            'status' => 'success',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
 
         Auth::login($user, $remember);
         $request->session()->regenerate();

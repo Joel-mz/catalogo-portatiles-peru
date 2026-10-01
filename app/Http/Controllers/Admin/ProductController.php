@@ -298,7 +298,7 @@ class ProductController extends Controller
         $code = trim($request->query('code', ''));
         
         if (!$code) {
-            return response()->json(['error' => 'Código no proporcionado'], 400);
+            return response()->json(['found' => false, 'message' => 'Código no proporcionado'], 400);
         }
 
         // If a full URL was scanned (e.g. QR code pointing to website URL)
@@ -311,7 +311,7 @@ class ProductController extends Controller
             }
         }
 
-        $product = Product::with(['category', 'brand'])
+        $product = Product::with(['category', 'brand', 'images'])
             ->where('code', $code)
             ->orWhere('sku', $code)
             ->orWhere('serial_number', $code)
@@ -319,16 +319,110 @@ class ProductController extends Controller
             ->orWhere('id', is_numeric($code) ? (int) $code : 0)
             ->first();
 
+        if (!$product) {
+            $product = Product::with(['category', 'brand', 'images'])
+                ->where('code', 'like', "%{$code}%")
+                ->orWhere('serial_number', 'like', "%{$code}%")
+                ->first();
+        }
+
         if ($product) {
+            $isLaptop = $product->isLaptop();
+            $laptopGen = $product->getLaptopGeneration();
+
+            $price = (float) $product->price;
+            $offerPrice = (float) ($product->offer_price ?? 0);
+            $minPrice = (float) ($product->min_price ?? 0);
+
+            $hasOffer = ($product->is_offer && $offerPrice > 0 && $offerPrice < $price);
+            $discountAmount = $hasOffer ? ($price - $offerPrice) : 0;
+            $discountPercent = ($hasOffer && $price > 0) ? round(($discountAmount / $price) * 100) : 0;
+
+            $hasMinPrice = ($minPrice > 0 && $minPrice <= $price);
+            $maxDiscountAmount = $hasMinPrice ? ($price - $minPrice) : 0;
+            $maxDiscountPercent = ($hasMinPrice && $price > 0) ? round(($maxDiscountAmount / $price) * 100) : 0;
+
+            // Formatted specs
+            $normalizedSpecs = [];
+            if (is_array($product->technical_specs)) {
+                foreach ($product->technical_specs as $k => $v) {
+                    if (is_array($v)) {
+                        $normalizedSpecs[] = [
+                            'name' => $v['name'] ?? (is_string($k) ? $k : 'Detalle'),
+                            'value' => (string) ($v['value'] ?? ''),
+                        ];
+                    } else {
+                        $normalizedSpecs[] = [
+                            'name' => is_string($k) ? $k : 'Detalle',
+                            'value' => (string) $v,
+                        ];
+                    }
+                }
+            }
+
+            // Images with full URL
+            $images = [];
+            $mainImageUrl = null;
+            foreach ($product->images as $img) {
+                $url = str_starts_with($img->image_path, 'http') ? $img->image_path : asset('storage/' . $img->image_path);
+                $images[] = [
+                    'url' => $url,
+                    'is_main' => (bool) $img->is_main,
+                ];
+                if ($img->is_main && !$mainImageUrl) {
+                    $mainImageUrl = $url;
+                }
+            }
+            if (!$mainImageUrl && count($images) > 0) {
+                $mainImageUrl = $images[0]['url'];
+            }
+
             return response()->json([
                 'found' => true,
-                'product' => $product
+                'product' => [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'code' => $product->code,
+                    'sku' => $product->sku,
+                    'serial_number' => $product->serial_number,
+                    'slug' => $product->slug,
+                    'description' => $product->description,
+                    'category_name' => $product->category?->name ?? 'General',
+                    'brand_name' => $product->brand?->name ?? 'Genérica',
+                    'stock' => (int) $product->stock,
+                    'status' => (bool) $product->status,
+                    'state' => $product->state ?? 'disponible',
+                    'warranty' => $product->warranty,
+                    'specs' => $normalizedSpecs,
+                    'is_laptop' => $isLaptop,
+                    'laptop_generation' => $laptopGen,
+                    // Precios y Descuentos
+                    'price' => $price,
+                    'formatted_price' => 'S/ ' . number_format($price, 2, '.', ','),
+                    'offer_price' => $offerPrice,
+                    'formatted_offer_price' => $offerPrice > 0 ? ('S/ ' . number_format($offerPrice, 2, '.', ',')) : null,
+                    'has_offer' => $hasOffer,
+                    'discount_amount' => $discountAmount,
+                    'formatted_discount_amount' => $discountAmount > 0 ? ('S/ ' . number_format($discountAmount, 2, '.', ',')) : null,
+                    'discount_percentage' => $discountPercent,
+                    'min_price' => $minPrice,
+                    'formatted_min_price' => $minPrice > 0 ? ('S/ ' . number_format($minPrice, 2, '.', ',')) : null,
+                    'has_min_price' => $hasMinPrice,
+                    'max_discount_amount' => $maxDiscountAmount,
+                    'formatted_max_discount_amount' => $maxDiscountAmount > 0 ? ('S/ ' . number_format($maxDiscountAmount, 2, '.', ',')) : null,
+                    'max_discount_percentage' => $maxDiscountPercent,
+                    // Media & Links
+                    'main_image' => $mainImageUrl,
+                    'images' => $images,
+                    'edit_url' => route('admin.products.edit', $product),
+                    'show_url' => route('product.show', $product->slug),
+                ]
             ]);
         }
 
         return response()->json([
             'found' => false,
-            'message' => 'No se encontró ningún producto con ese código.'
+            'message' => 'No se encontró ningún producto con el código: ' . $code
         ]);
     }
 

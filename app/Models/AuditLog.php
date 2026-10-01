@@ -10,7 +10,7 @@ class AuditLog extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'action', 'model', 'model_id', 'details', 'ip_address'];
+    protected $fillable = ['user_id', 'action', 'model', 'model_id', 'details', 'ip_address', 'user_agent', 'status'];
 
     protected $casts = [
         'details' => 'array',

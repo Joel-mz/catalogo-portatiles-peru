@@ -52,6 +52,15 @@ class LoginRequest extends FormRequest
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
+            \App\Models\AuditLog::create([
+                'user_id' => \App\Models\User::where('email', $this->input('email'))->value('id'),
+                'action' => 'Intento fallido de inicio de sesión',
+                'status' => 'fallo',
+                'details' => ['email' => $this->input('email')],
+                'ip_address' => $this->ip(),
+                'user_agent' => $this->userAgent(),
+            ]);
+
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),
             ]);
@@ -74,6 +83,15 @@ class LoginRequest extends FormRequest
         event(new Lockout($this));
 
         $seconds = RateLimiter::availableIn($this->throttleKey());
+
+        \App\Models\AuditLog::create([
+            'user_id' => \App\Models\User::where('email', $this->input('email'))->value('id'),
+            'action' => 'Bloqueo temporal por intentos fallidos de login',
+            'status' => 'bloqueado',
+            'details' => ['email' => $this->input('email'), 'lockout_seconds' => $seconds],
+            'ip_address' => $this->ip(),
+            'user_agent' => $this->userAgent(),
+        ]);
 
         throw ValidationException::withMessages([
             'email' => trans('auth.throttle', [

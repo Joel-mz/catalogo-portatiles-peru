@@ -1471,25 +1471,204 @@
                         const data = await response.json();
 
                         if (data.found && data.product) {
+                            const p = data.product;
+
+                            // Image HTML
+                            const imgUrl = p.main_image || '';
+                            const imageHtml = imgUrl 
+                                ? `<div class="relative w-full h-44 sm:h-52 bg-white rounded-2xl border border-slate-200 flex items-center justify-center p-3 shadow-inner overflow-hidden">
+                                     <img src="${imgUrl}" alt="${p.name}" class="max-h-full max-w-full object-contain hover:scale-105 transition-transform duration-300">
+                                   </div>`
+                                : `<div class="w-full h-44 sm:h-52 bg-slate-100 rounded-2xl border border-slate-200 flex items-center justify-center text-slate-400 text-4xl shadow-inner">
+                                     <i class="fa-solid ${p.is_laptop ? 'fa-laptop' : 'fa-box'}"></i>
+                                   </div>`;
+
+                            // Laptop Generation Badge (ONLY on laptops)
+                            let laptopGenHtml = '';
+                            if (p.is_laptop) {
+                                if (p.laptop_generation) {
+                                    laptopGenHtml = `
+                                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white font-extrabold text-xs shadow-md shadow-indigo-500/20">
+                                            <i class="fa-solid fa-microchip"></i>
+                                            <span>${p.laptop_generation}</span>
+                                        </div>
+                                    `;
+                                } else {
+                                    laptopGenHtml = `
+                                        <div class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 font-bold text-xs">
+                                            <i class="fa-solid fa-laptop"></i>
+                                            <span>Laptop / Portátil</span>
+                                        </div>
+                                    `;
+                                }
+                            }
+
+                            // Stock status badge
+                            let stockBadgeHtml = '';
+                            if (p.stock > 5) {
+                                stockBadgeHtml = `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold text-xs"><i class="fa-solid fa-boxes-stacked"></i> Stock: ${p.stock} un.</span>`;
+                            } else if (p.stock > 0) {
+                                stockBadgeHtml = `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-200 font-bold text-xs"><i class="fa-solid fa-triangle-exclamation"></i> Últimas ${p.stock} un.</span>`;
+                            } else {
+                                stockBadgeHtml = `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-100 text-rose-800 border border-rose-200 font-bold text-xs"><i class="fa-solid fa-ban"></i> Sin Stock</span>`;
+                            }
+
+                            // Technical Specs HTML
+                            let specsHtml = '';
+                            if (p.specs && p.specs.length > 0) {
+                                specsHtml = `
+                                    <div class="mt-3 bg-white p-3.5 rounded-xl border border-slate-200">
+                                        <div class="flex items-center gap-1.5 text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5">
+                                            <i class="fa-solid fa-list-check text-blue-600"></i> Características Técnicas
+                                        </div>
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                                            ${p.specs.map(s => `
+                                                <div class="p-2 rounded-lg bg-slate-50 border border-slate-100">
+                                                    <span class="font-bold text-slate-600 block text-[11px] uppercase">${s.name}:</span>
+                                                    <span class="text-slate-800 font-medium">${s.value}</span>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                `;
+                            }
+
+                            // Description HTML
+                            let descHtml = '';
+                            if (p.description) {
+                                descHtml = `
+                                    <div class="mt-3 bg-white p-3.5 rounded-xl border border-slate-200 text-left">
+                                        <div class="flex items-center gap-1.5 text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                                            <i class="fa-solid fa-align-left text-blue-600"></i> Descripción
+                                        </div>
+                                        <p class="text-xs text-slate-600 leading-relaxed max-h-24 overflow-y-auto pr-1">${p.description}</p>
+                                    </div>
+                                `;
+                            }
+
+                            // Modal Content Template
                             Swal.fire({
-                                icon: 'success',
-                                title: 'Producto Encontrado',
+                                width: '680px',
+                                padding: '1.25rem',
+                                showCloseButton: true,
+                                title: '<span class="text-xl font-display font-extrabold text-slate-900 flex items-center justify-center gap-2"><i class="fa-solid fa-barcode text-blue-600"></i> Producto Escaneado</span>',
                                 html: `
-                                    <div class="text-left mt-4 text-sm space-y-1">
-                                        <p><strong>Nombre:</strong> ${data.product.name}</p>
-                                        <p><strong>Código:</strong> ${data.product.code}</p>
-                                        <p><strong>Precio Normal:</strong> <span class="${data.product.is_offer ? 'line-through text-red-500' : ''}">S/ ${parseFloat(data.product.price).toFixed(2)}</span></p>
-                                        ${data.product.is_offer ? `<p><strong>Precio Oferta:</strong> <span class="font-bold text-green-600">S/ ${parseFloat(data.product.offer_price).toFixed(2)}</span></p>` : ''}
-                                        <p><strong>Stock:</strong> ${data.product.stock} un.</p>
+                                    <div class="text-left space-y-3.5">
+                                        
+                                        <!-- Top Info Bar: Category, Brand, Code, Serial -->
+                                        <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-200 text-xs">
+                                            <div class="flex items-center gap-2">
+                                                <span class="px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-700 font-bold border border-slate-200">
+                                                    ${p.category_name}
+                                                </span>
+                                                <span class="px-2.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 font-bold border border-indigo-200">
+                                                    ${p.brand_name}
+                                                </span>
+                                            </div>
+                                            <div class="text-slate-500 font-mono text-[11px]">
+                                                CÓD: <strong class="text-slate-800">${p.code}</strong>
+                                                ${p.serial_number ? ` · S/N: <strong class="text-slate-800">${p.serial_number}</strong>` : ''}
+                                            </div>
+                                        </div>
+
+                                        <!-- Image & Generation Banner -->
+                                        <div class="space-y-2">
+                                            ${imageHtml}
+                                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                                <div class="flex items-center gap-2">
+                                                    ${laptopGenHtml}
+                                                </div>
+                                                <div>
+                                                    ${stockBadgeHtml}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Product Title -->
+                                        <div>
+                                            <h3 class="text-lg font-extrabold text-slate-900 leading-snug">${p.name}</h3>
+                                        </div>
+
+                                        <!-- PRICING CARDS: Precio Venta Total, Descuento / Oferta, Precio Tope -->
+                                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+                                            
+                                            <!-- Card 1: Precio Venta Total -->
+                                            <div class="bg-blue-50/70 border border-blue-200 rounded-xl p-3 flex flex-col justify-between">
+                                                <div class="text-[10px] font-extrabold text-blue-700 uppercase tracking-wider mb-1">
+                                                    Precio Venta Total
+                                                </div>
+                                                <div class="text-xl font-black text-slate-900">
+                                                    ${p.formatted_price}
+                                                </div>
+                                                <div class="text-[10px] text-slate-500 mt-1">
+                                                    Precio regular
+                                                </div>
+                                            </div>
+
+                                            <!-- Card 2: Precio Oferta & Descuento -->
+                                            <div class="bg-emerald-50/70 border border-emerald-200 rounded-xl p-3 flex flex-col justify-between">
+                                                <div class="text-[10px] font-extrabold text-emerald-700 uppercase tracking-wider mb-1">
+                                                    Precio Oferta
+                                                </div>
+                                                <div class="text-xl font-black ${p.has_offer ? 'text-emerald-600' : 'text-slate-400'}">
+                                                    ${p.has_offer ? p.formatted_offer_price : 'Sin oferta'}
+                                                </div>
+                                                <div class="text-[10px] mt-1">
+                                                    ${p.has_offer 
+                                                        ? `<span class="font-bold text-emerald-700">Ahorro: ${p.formatted_discount_amount} (-${p.discount_percentage}%)</span>` 
+                                                        : `<span class="text-slate-400">Sin descuento activo</span>`}
+                                                </div>
+                                            </div>
+
+                                            <!-- Card 3: Precio Tope (Límite Mínimo) -->
+                                            <div class="bg-amber-50/70 border border-amber-300 rounded-xl p-3 flex flex-col justify-between">
+                                                <div class="text-[10px] font-extrabold text-amber-800 uppercase tracking-wider mb-1">
+                                                    Precio Tope (Mínimo)
+                                                </div>
+                                                <div class="text-xl font-black ${p.has_min_price ? 'text-amber-700' : 'text-slate-400'}">
+                                                    ${p.has_min_price ? p.formatted_min_price : 'No asignado'}
+                                                </div>
+                                                <div class="text-[10px] mt-1">
+                                                    ${p.has_min_price 
+                                                        ? `<span class="font-bold text-amber-800">Desc. tope: ${p.formatted_max_discount_amount} (hasta ${p.max_discount_percentage}%)</span>` 
+                                                        : `<span class="text-slate-400">Tope no configurado</span>`}
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <!-- Description -->
+                                        ${descHtml}
+
+                                        <!-- Technical Specs -->
+                                        ${specsHtml}
+
+                                        <!-- Action & Redirection Buttons -->
+                                        <div class="pt-3 border-t border-slate-200 flex flex-wrap gap-2 justify-end">
+                                            <a href="${p.edit_url}" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs transition shadow-sm">
+                                                <i class="fa-solid fa-pen-to-square"></i>
+                                                <span>Editar Producto</span>
+                                            </a>
+                                            <a href="${p.show_url}" target="_blank" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition shadow-sm">
+                                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                                <span>Ver en Catálogo</span>
+                                            </a>
+                                        </div>
+
                                     </div>
                                 `,
-                                confirmButtonText: 'Ver Catálogo',
+                                confirmButtonText: '<i class="fa-solid fa-barcode mr-1.5"></i> Escanear Otro Código',
                                 confirmButtonColor: '#2563eb',
                                 showCancelButton: true,
-                                cancelButtonText: 'Cerrar'
+                                cancelButtonText: 'Cerrar',
+                                customClass: {
+                                    popup: 'rounded-3xl shadow-2xl border border-slate-200',
+                                    confirmButton: 'rounded-xl shadow-md font-bold text-xs px-4 py-2.5',
+                                    cancelButton: 'rounded-xl font-bold text-xs px-4 py-2.5 border border-slate-300 text-slate-700 hover:bg-slate-100'
+                                }
                             }).then((result) => {
                                 if (result.isConfirmed) {
-                                    window.location.href = "{{ route('admin.products.index') }}";
+                                    this.startScanner();
                                 }
                             });
                         } else {
@@ -1499,7 +1678,6 @@
                                 text: 'No existe ningún producto con el código: ' + code,
                                 confirmButtonColor: '#2563eb'
                             });
-                        }
                     } catch (error) {
                         Swal.fire({
                             icon: 'error',
