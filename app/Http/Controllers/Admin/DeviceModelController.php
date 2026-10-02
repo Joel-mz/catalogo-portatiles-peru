@@ -64,4 +64,26 @@ class DeviceModelController extends Controller
         $model->delete();
         return redirect()->route('admin.models.index')->with('success', 'Modelo eliminado exitosamente.');
     }
+
+    public function quickStore(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'brand_id' => 'nullable|exists:brands,id',
+        ]);
+        if (empty($validated['brand_id'])) {
+            $validated['brand_id'] = Brand::first()?->id ?? 1;
+        }
+        $validated['slug'] = Str::slug($validated['name']);
+        $validated['status'] = true;
+
+        $model = DeviceModel::create($validated);
+
+        return response()->json([
+            'success' => true,
+            'id' => $model->id,
+            'name' => $model->name,
+            'brand_id' => $model->brand_id,
+        ]);
+    }
 }

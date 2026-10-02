@@ -68,4 +68,26 @@ class SubcategoryController extends Controller
         $subcategory->delete();
         return redirect()->route('admin.subcategories.index')->with('success', 'Subcategoría eliminada exitosamente.');
     }
+
+    public function quickStore(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'category_id' => 'nullable|exists:categories,id',
+        ]);
+        if (empty($validated['category_id'])) {
+            $validated['category_id'] = Category::first()?->id ?? 1;
+        }
+        $validated['slug'] = Str::slug($validated['name']);
+        $validated['status'] = true;
+
+        $subcategory = Subcategory::create($validated);
+
+        return response()->json([
+            'success' => true,
+            'id' => $subcategory->id,
+            'name' => $subcategory->name,
+            'category_id' => $subcategory->category_id,
+        ]);
+    }
 }

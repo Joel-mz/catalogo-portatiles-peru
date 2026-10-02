@@ -78,6 +78,10 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::post('categories/quick', [CategoryController::class, 'quickStore'])->name('categories.quick');
+    Route::post('subcategories/quick', [SubcategoryController::class, 'quickStore'])->name('subcategories.quick');
+    Route::post('brands/quick', [BrandController::class, 'quickStore'])->name('brands.quick');
+    Route::post('models/quick', [DeviceModelController::class, 'quickStore'])->name('models.quick');
     Route::resource('categories', CategoryController::class);
     Route::resource('subcategories', SubcategoryController::class);
     Route::resource('brands', BrandController::class);

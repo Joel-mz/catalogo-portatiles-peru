@@ -37,12 +37,26 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
+        if (empty($request->code)) {
+            do {
+                $candidateCode = '775' . str_pad((string)mt_rand(1000000000, 9999999999), 10, '0', STR_PAD_LEFT);
+            } while (Product::where('code', $candidateCode)->exists());
+            $request->merge(['code' => $candidateCode]);
+        }
+
+        if (empty($request->sku)) {
+            do {
+                $candidateSku = 'SKU-' . strtoupper(Str::random(6));
+            } while (Product::where('sku', $candidateSku)->exists());
+            $request->merge(['sku' => $candidateSku]);
+        }
+
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
             'subcategory_id' => 'nullable|exists:subcategories,id',
             'brand_id' => 'required|exists:brands,id',
             'device_model_id' => 'nullable|exists:device_models,id',
-            'code' => 'required|string|unique:products,code|max:255',
+            'code' => 'required|string|max:255|unique:products,code',
             'sku' => 'nullable|string|max:255|unique:products,sku',
             'serial_number' => 'nullable|string|max:255|unique:products,serial_number',
             'control_type' => 'nullable|string|max:255',

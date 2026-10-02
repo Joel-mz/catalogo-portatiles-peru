@@ -85,4 +85,21 @@ class BrandController extends Controller
         $brand->delete();
         return redirect()->route('admin.brands.index')->with('success', 'Marca eliminada exitosamente.');
     }
+
+    public function quickStore(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+        $validated['slug'] = Str::slug($validated['name']);
+        $validated['status'] = true;
+
+        $brand = Brand::create($validated);
+
+        return response()->json([
+            'success' => true,
+            'id' => $brand->id,
+            'name' => $brand->name,
+        ]);
+    }
 }
