@@ -75,6 +75,9 @@ class PdfService
                         if ($converted) {
                             return 'data:image/jpeg;base64,' . base64_encode($converted);
                         }
+                        // If WebP conversion failed (e.g., missing GD WebP support), do NOT return the WebP
+                        // as DomPDF will crash trying to process it if the server lacks imagecreatefromwebp().
+                        return null;
                     }
 
                     if (!in_array($mime, ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/svg+xml'])) {
@@ -121,6 +124,8 @@ class PdfService
                     if ($converted) {
                         return 'data:image/jpeg;base64,' . base64_encode($converted);
                     }
+                    // If WebP conversion failed, do NOT return the WebP
+                    return null;
                 }
 
                 return 'data:' . $mime . ';base64,' . base64_encode($content);
