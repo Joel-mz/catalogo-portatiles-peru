@@ -12,7 +12,8 @@ class PdfController extends Controller
 {
     public function index()
     {
-        return view('admin.pdf.index');
+        $previewProducts = Product::with('images')->latest()->take(2)->get();
+        return view('admin.pdf.index', compact('previewProducts'));
     }
 
     public function generate(Request $request)

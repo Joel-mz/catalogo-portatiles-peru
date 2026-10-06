@@ -248,74 +248,73 @@
                 <!-- Productos de muestra -->
                 <div class="p-4 space-y-3 bg-slate-50">
 
-                    <!-- Producto 1 -->
-                    <div class="bg-white border border-slate-200 rounded flex overflow-hidden" style="min-height:90px;">
-                        <div class="w-20 flex-shrink-0 bg-slate-100 flex items-center justify-center border-r border-slate-200">
-                            <i class="fa-solid fa-laptop text-slate-300 text-2xl"></i>
+                    @foreach($previewProducts as $index => $product)
+                    <div class="bg-white border border-slate-200 rounded flex overflow-hidden" style="min-height:90px;" {!! $index > 0 ? 'x-show="!pdfOnlyOffers"' : '' !!}>
+                        <div class="w-20 flex-shrink-0 bg-slate-100 flex items-center justify-center border-r border-slate-200 overflow-hidden">
+                            @php
+                                $mainImg = $product->images->firstWhere('is_main', true) ?? $product->images->first();
+                            @endphp
+                            @if($mainImg && !empty($mainImg->image_path))
+                                <img src="{{ filter_var($mainImg->image_path, FILTER_VALIDATE_URL) ? $mainImg->image_path : asset('storage/' . $mainImg->image_path) }}" class="w-full h-full object-cover">
+                            @else
+                                <i class="fa-solid fa-box text-slate-300 text-2xl"></i>
+                            @endif
                         </div>
                         <div class="p-3 flex-1 relative">
-                            <div class="text-[11px] font-bold text-slate-800 leading-snug mb-1">Laptop Lenovo IdeaPad 15" Intel i5</div>
-                            <div class="text-[9px] text-slate-400 mb-1.5">LENOVO &nbsp;|&nbsp; P/N: 82YU00X5LM</div>
+                            <div class="text-[11px] font-bold text-slate-800 leading-snug mb-1 line-clamp-2">{{ $product->name }}</div>
+                            <div class="text-[9px] text-slate-400 mb-1.5">
+                                {{ $product->brand->name ?? 'Variados' }} &nbsp;|&nbsp; P/N: {{ $product->code }}
+                            </div>
 
                             <!-- Precio -->
-                            <div x-show="pdfShowPrice" class="mb-1">
-                                <span class="text-xs font-black" :style="'color:' + colors[pdfColor].price">S/ 1,499.00</span>
-                                <span class="text-[9px] text-slate-400 line-through ml-1">S/ 1,799.00</span>
+                            <div x-show="pdfShowPrice" class="mb-1 flex items-center gap-1">
+                                @if($product->is_offer && $product->offer_price)
+                                    <span class="text-xs font-black" :style="'color:' + colors[pdfColor].price">S/ {{ number_format((float)$product->offer_price, 2) }}</span>
+                                    <span class="text-[9px] text-slate-400 line-through">S/ {{ number_format((float)$product->price, 2) }}</span>
+                                @else
+                                    <span class="text-xs font-black" :style="'color:' + colors[pdfColor].price">S/ {{ number_format((float)$product->price, 2) }}</span>
+                                @endif
                             </div>
 
                             <!-- Precio mínimo -->
+                            @if($product->min_price)
                             <div x-show="pdfShowMinPrice" class="mb-1">
-                                <span class="text-[9px] text-emerald-600 font-bold">Precio min: S/ 1,320.00</span>
+                                <span class="text-[9px] text-emerald-600 font-bold">Precio min: S/ {{ number_format((float)$product->min_price, 2) }}</span>
                             </div>
+                            @endif
 
                             <!-- Descripción -->
-                            <div x-show="pdfShowDescription" class="text-[9px] text-slate-500 leading-relaxed mb-1">
-                                Intel Core i5-1235U, 8GB RAM, 512GB SSD, 15.6 FHD, FreeDOS
+                            @if($product->description)
+                            <div x-show="pdfShowDescription" class="text-[9px] text-slate-500 leading-relaxed mb-1 line-clamp-2">
+                                {{ $product->description }}
                             </div>
+                            @endif
 
                             <!-- Especificaciones -->
+                            @if(is_array($product->technical_specs) && count($product->technical_specs) > 0)
                             <div x-show="pdfShowSpecs" class="text-[9px] text-slate-500 space-y-0.5 mb-1">
-                                <div>• <b>RAM:</b> 8 GB DDR4</div>
-                                <div>• <b>SSD:</b> 512 GB NVMe</div>
-                                <div>• <b>Pantalla:</b> 15.6" FHD IPS</div>
+                                @foreach(array_slice($product->technical_specs, 0, 3) as $k => $v)
+                                    <div>• <b>{{ $k }}:</b> {{ $v }}</div>
+                                @endforeach
                             </div>
+                            @endif
 
                             <!-- Stock -->
                             <div x-show="pdfShowStock">
-                                <span class="inline-block text-[9px] font-bold px-1.5 py-0.5 rounded" style="background:#dcfce7;color:#166534;">✓ En Stock · 5 unid.</span>
+                                @php
+                                    $stockClass = $product->stock > 5 ? 'background:#dcfce7;color:#166534;' : ($product->stock > 0 ? 'background:#fef9c3;color:#713f12;' : 'background:#fee2e2;color:#991b1b;');
+                                    $stockLabel = $product->stock > 5 ? '✓ En Stock' : ($product->stock > 0 ? '⚠ Stock bajo' : '✕ A Pedido');
+                                @endphp
+                                <span class="inline-block text-[9px] font-bold px-1.5 py-0.5 rounded" style="{{ $stockClass }}">{{ $stockLabel }}</span>
                             </div>
 
                             <!-- Oferta badge -->
+                            @if($product->is_offer)
                             <div class="absolute top-0 right-0 text-[8px] font-bold px-2 py-0.5 rounded-bl" style="background:#fde047;color:#78350f;">OFERTA</div>
+                            @endif
                         </div>
                     </div>
-
-                    <!-- Producto 2 -->
-                    <div class="bg-white border border-slate-200 rounded flex overflow-hidden" style="min-height:80px;" x-show="!pdfOnlyOffers">
-                        <div class="w-20 flex-shrink-0 bg-slate-100 flex items-center justify-center border-r border-slate-200">
-                            <i class="fa-solid fa-tv text-slate-300 text-2xl"></i>
-                        </div>
-                        <div class="p-3 flex-1">
-                            <div class="text-[11px] font-bold text-slate-800 leading-snug mb-1">HP 250 G10 — Intel Core i3</div>
-                            <div class="text-[9px] text-slate-400 mb-1.5">HP &nbsp;|&nbsp; P/N: B5U09AT</div>
-                            <div x-show="pdfShowPrice" class="mb-1">
-                                <span class="text-xs font-black" :style="'color:' + colors[pdfColor].price">S/ 1,599.00</span>
-                            </div>
-                            <div x-show="pdfShowMinPrice" class="mb-1">
-                                <span class="text-[9px] text-emerald-600 font-bold">Precio min: S/ 1,430.00</span>
-                            </div>
-                            <div x-show="pdfShowDescription" class="text-[9px] text-slate-500 leading-relaxed mb-1">
-                                Intel Core i3, 8GB RAM, 512GB SSD, 15.6 FHD
-                            </div>
-                            <div x-show="pdfShowSpecs" class="text-[9px] text-slate-500 space-y-0.5 mb-1">
-                                <div>• <b>RAM:</b> 8 GB DDR4</div>
-                                <div>• <b>SSD:</b> 512 GB</div>
-                            </div>
-                            <div x-show="pdfShowStock">
-                                <span class="inline-block text-[9px] font-bold px-1.5 py-0.5 rounded" style="background:#fef9c3;color:#713f12;">A Pedido</span>
-                            </div>
-                        </div>
-                    </div>
+                    @endforeach
 
                 </div>
 
