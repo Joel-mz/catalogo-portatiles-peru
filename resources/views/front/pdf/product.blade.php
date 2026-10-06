@@ -36,10 +36,9 @@
 </head>
 <body>
     @php
-        $storeName = $settings['store_name'] ?? 'PORTÁTILES PERÚ / MOYO TECH';
+        $storeName = $settings['store_name'] ?? 'PORTÁTILES PERÚ';
         $price = $product->is_offer && $product->offer_price ? $product->offer_price : $product->price;
-        $mainImage = $product->images->sortByDesc('is_main')->first()?->image_path;
-        $imgSrc = $mainImage ? (filter_var($mainImage, FILTER_VALIDATE_URL) ? $mainImage : public_path('storage/' . $mainImage)) : null;
+        $imgSrc = \App\Services\PdfService::getProductMainImageBase64($product);
     @endphp
 
     <div class="header">
@@ -51,9 +50,9 @@
         <tr>
             <td class="image-col">
                 @if($imgSrc)
-                    <img src="{{ $imgSrc }}" alt="{{ $product->name }}">
+                    <img src="{{ $imgSrc }}" style="max-width: 230px; max-height: 230px; border-radius: 8px; border: 1px solid #e5e7eb; padding: 4px; background: #ffffff;">
                 @else
-                    <div style="width:100%; height:200px; background:#f3f4f6; text-align:center; line-height:200px; color:#9ca3af; border-radius:8px;">Sin Imagen</div>
+                    <div style="width:100%; height:180px; background:#f8fafc; text-align:center; line-height:180px; color:#94a3b8; border: 1px dashed #cbd5e1; border-radius:8px; font-size: 13px; font-weight: bold;">Sin Imagen</div>
                 @endif
             </td>
             <td class="info-col">

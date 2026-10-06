@@ -133,13 +133,19 @@ class FrontController extends Controller
 
     public function downloadPdf($slug)
     {
-        $product = Product::with(['brand', 'category', 'deviceModel'])
+        $product = Product::with(['brand', 'category', 'deviceModel', 'images'])
             ->where('slug', $slug)
             ->where('status', true)
             ->firstOrFail();
         $settings = Setting::pluck('value', 'key');
         
-        $pdf = Pdf::loadView('front.pdf.product', compact('product', 'settings'));
+        $pdf = Pdf::loadView('front.pdf.product', compact('product', 'settings'))
+            ->setPaper('a4', 'portrait')
+            ->setOptions([
+                'isRemoteEnabled' => true,
+                'isHtml5ParserEnabled' => true,
+                'chroot' => [base_path(), storage_path(), public_path()],
+            ]);
         
         return $pdf->download('Ficha_Tecnica_' . $product->slug . '.pdf');
     }

@@ -17,7 +17,7 @@ class PdfController extends Controller
 
     public function generate(Request $request)
     {
-        $query = Product::with(['brand', 'category'])->where('status', true);
+        $query = Product::with(['brand', 'category', 'images'])->where('status', true);
         
         if ($request->has('only_offers')) {
             $query->where('is_offer', true);
@@ -32,16 +32,26 @@ class PdfController extends Controller
         $settings = Setting::pluck('value', 'key');
         
         $options = [
-            'show_specs' => $request->has('show_specs'),
-            'show_price' => $request->has('show_price'),
-            'custom_title' => $request->input('custom_title'),
-            'bank_accounts' => $request->input('bank_accounts'),
-            'yape_plin' => $request->input('yape_plin'),
-            'store_address' => $request->input('store_address')
+            'show_description' => $request->boolean('show_description', false),
+            'show_specs'       => $request->boolean('show_specs', false),
+            'show_price'       => $request->boolean('show_price', false),
+            'show_min_price'   => $request->boolean('show_min_price', false),
+            'show_stock'       => $request->boolean('show_stock', false),
+            'color_theme'      => $request->input('color_theme', 'red'),
+            'custom_title'     => $request->input('custom_title'),
+            'bank_accounts'    => $request->input('bank_accounts'),
+            'yape_plin'        => $request->input('yape_plin'),
+            'store_address'    => $request->input('store_address'),
         ];
         
-        $pdf = Pdf::loadView('admin.pdf.template', compact('products', 'settings', 'options'));
+        $pdf = Pdf::loadView('admin.pdf.template', compact('products', 'settings', 'options'))
+            ->setPaper('a4', 'portrait')
+            ->setOptions([
+                'isRemoteEnabled' => true,
+                'isHtml5ParserEnabled' => true,
+                'chroot' => [base_path(), storage_path(), public_path()],
+            ]);
         
-        return $pdf->download('catalogo_moyotech_' . date('Y-m-d') . '.pdf');
+        return $pdf->download('catalogo_' . date('Y-m-d') . '.pdf');
     }
 }
