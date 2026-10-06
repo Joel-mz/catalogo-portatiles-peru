@@ -75,6 +75,18 @@ class PdfService
                         if ($converted) {
                             return 'data:image/jpeg;base64,' . base64_encode($converted);
                         }
+
+                        // Plan C: If local conversion failed, use wsrv.nl to proxy and convert the image
+                        try {
+                            $proxyUrl = 'https://wsrv.nl/?url=' . urlencode($url) . '&output=jpg';
+                            $proxyResponse = Http::withoutVerifying()->timeout(8)->get($proxyUrl);
+                            if ($proxyResponse->successful() && !empty($proxyResponse->body())) {
+                                return 'data:image/jpeg;base64,' . base64_encode($proxyResponse->body());
+                            }
+                        } catch (\Throwable $e) {
+                            Log::warning('wsrv.nl proxy failed for: ' . $url . ' - ' . $e->getMessage());
+                        }
+
                         // If WebP conversion failed (e.g., missing GD WebP support), do NOT return the WebP
                         // as DomPDF will crash trying to process it if the server lacks imagecreatefromwebp().
                         return null;
