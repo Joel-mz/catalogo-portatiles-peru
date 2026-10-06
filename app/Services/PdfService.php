@@ -135,11 +135,25 @@ class PdfService
         return null;
     }
 
-    /**
-     * Convert WebP binary data to JPEG binary data if GD supports it.
-     */
     protected static function convertWebpToJpeg(string $binaryData): ?string
     {
+        // Try Imagick first (often supports WebP even when GD does not on some servers like Render)
+        if (extension_loaded('imagick') && class_exists('Imagick')) {
+            try {
+                $imagick = new \Imagick();
+                $imagick->readImageBlob($binaryData);
+                $imagick->setImageFormat('jpeg');
+                $imagick->setImageCompressionQuality(90);
+                $jpegData = $imagick->getImageBlob();
+                $imagick->clear();
+                $imagick->destroy();
+                return $jpegData ?: null;
+            } catch (\Throwable $e) {
+                Log::warning('Imagick failed to convert WebP: ' . $e->getMessage());
+            }
+        }
+
+        // Fallback to GD
         if (function_exists('imagecreatefromstring')) {
             $im = @imagecreatefromstring($binaryData);
             if ($im !== false) {
